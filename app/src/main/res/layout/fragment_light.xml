@@ -25,8 +25,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:weightSum="10">
 
             <TextView
@@ -52,8 +54,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:background="@color/redBg"
             android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:weightSum="10">
 
             <TextView
@@ -77,8 +82,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:background="@color/greenBg"
             android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:weightSum="10">
 
             <TextView
@@ -104,8 +112,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:background="@color/blueBg"
             android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:weightSum="10">
 
             <TextView
@@ -131,8 +142,10 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:weightSum="10">
 
             <TextView
@@ -152,7 +165,36 @@
                 android:layout_marginTop="0dp"
                 android:layout_weight="8"
                 android:max="15"
-                android:progress="1" />
+                android:progress="0" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:weightSum="10">
+
+            <TextView
+                android:id="@+id/tv_zoom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="2"
+                android:text="@string/zoom" />
+
+            <SeekBar
+                android:id="@+id/zoom_seekbar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="0dp"
+                android:layout_weight="8"
+                android:max="15"
+                android:progress="0" />
 
         </LinearLayout>
 

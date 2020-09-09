@@ -1,6 +1,7 @@
 package com.swaylight;
 
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,11 +26,14 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
-import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ControlActivity extends AppCompatActivity {
 
     MqttAndroidClient client;
+    public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
+    private final static int MAX_LOG_SIZE = 8000;
     private final String MQTT_TAG   = "mqtt";
     private int qos                 = 0;
     private String broker           = "tcp://172.20.10.4";//replace to your broker ip.
@@ -40,6 +44,7 @@ public class ControlActivity extends AppCompatActivity {
 
     private TextView tvMqttIp;
     private TextView tvConnectStatus;
+    private TextView tvLog;
     private Switch swPower;
     private Spinner spMode;
 
@@ -66,6 +71,16 @@ public class ControlActivity extends AppCompatActivity {
             fragmentManager.beginTransaction().add(R.id.fragment_container, lightFragment).commit();
         }
 
+        tvLog = findViewById(R.id.tv_log);
+        tvLog.setMovementMethod(new ScrollingMovementMethod());
+        tvLog.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                tvLog.scrollTo(0,0);
+                tvLog.setText("");
+                return false;
+            }
+        });
         swPower = findViewById(R.id.sw_power);
         swPower.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -112,18 +127,27 @@ public class ControlActivity extends AppCompatActivity {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
                 tvConnectStatus.setText(getString(R.string.connected));
+                appendLog("connectComplete");
+                try {
+                    final String topic = Topic.ROOT + deviceName + "/#";
+                    client.subscribe(topic, 0);
+                    appendLog("subscribe: " + topic);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
                 Log.d(MQTT_TAG, "Connected to " + broker);
             }
 
             @Override
             public void connectionLost(Throwable cause) {
                 tvConnectStatus.setText(getString(R.string.disconnected));
+                appendLog("connectionLost");
                 Log.d(MQTT_TAG, "Disconnect to " + broker);
             }
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-
+                appendLog(topic + ":" + message.toString());
             }
 
             @Override
@@ -140,13 +164,15 @@ public class ControlActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     tvConnectStatus.setText(getString(R.string.connected));
+                    appendLog("Connect to " + broker + " success");
                     Log.d(MQTT_TAG, "Connect to " + broker + " success");
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Log.d(MQTT_TAG, "Connect to " + broker + " fail");
                     tvConnectStatus.setText(getString(R.string.disconnected));
+                    appendLog("Connect to " + broker + " fail");
+                    Log.d(MQTT_TAG, "Connect to " + broker + " fail");
                 }
             });
         } catch (MqttException ex){
@@ -171,7 +197,8 @@ public class ControlActivity extends AppCompatActivity {
         MqttMessage msg = new MqttMessage(jsonObject.toString().getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + jsonObject.toString());
+//                appendLog("publish->" + topic + ":" + jsonObject.toString());
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + jsonObject.toString());
                 client.publish(topic, msg);
             }else {
                 return;
@@ -185,7 +212,8 @@ public class ControlActivity extends AppCompatActivity {
         MqttMessage msg = new MqttMessage(payload.getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + payload);
+//                appendLog("publish->" + topic + ":" + payload);
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + payload);
                 client.publish(topic, msg);
             }else {
                 return;
@@ -193,6 +221,24 @@ public class ControlActivity extends AppCompatActivity {
         } catch (MqttException e) {
             e.printStackTrace();
         }
+    }
+
+    public synchronized void appendLog(final String str) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                String strFull = DATE_FORMAT.format(new Date()) + " " + str + "\n" + tvLog.getText().toString();
+                if(strFull.length() > MAX_LOG_SIZE) {
+                    strFull = strFull.substring(0, MAX_LOG_SIZE);
+                }
+                tvLog.setText(strFull);
+                while(tvLog.canScrollVertically(-1)) {
+                    tvLog.scrollBy(0,-1);
+                }
+            }
+        });
     }
 
     public MqttAndroidClient getClient() {

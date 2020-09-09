@@ -36,12 +36,14 @@ public class LightFragment extends Fragment {
     private SeekBar sbGreen;
     private SeekBar sbBlue;
     private SeekBar sbOffset;
+    private SeekBar sbZoom;
 
     private TextView tvBrightness;
     private TextView tvRed;
     private TextView tvGreen;
     private TextView tvBlue;
     private TextView tvOffset;
+    private TextView tvZoom;
 
     private JSONObject mJsonObj;
     private Map<String, Integer> map;
@@ -77,12 +79,14 @@ public class LightFragment extends Fragment {
         sbGreen = v.findViewById(R.id.green_seekbar);
         sbBlue = v.findViewById(R.id.blue_seekbar);
         sbOffset = v.findViewById(R.id.offset_seekbar);
+        sbZoom = v.findViewById(R.id.zoom_seekbar);
 
         tvBrightness = v.findViewById(R.id.tv_brightness);
         tvRed = v.findViewById(R.id.tv_red);
         tvGreen = v.findViewById(R.id.tv_green);
         tvBlue = v.findViewById(R.id.tv_blue);
         tvOffset = v.findViewById(R.id.tv_offset);
+        tvZoom = v.findViewById(R.id.tv_zoom);
 
         sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -164,12 +168,30 @@ public class LightFragment extends Fragment {
             }
         });
 
-
         sbOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvOffset.setText(getString(R.string.offset) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_OFFSET;
+                publishMsg(topic, Integer.toString(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        sbZoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tvZoom.setText(getString(R.string.zoom) + ": " + progress);
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_ZOOM;
                 publishMsg(topic, Integer.toString(progress));
             }
 
@@ -202,7 +224,8 @@ public class LightFragment extends Fragment {
         MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + jsonObj.toString());
+//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + jsonObj.toString());
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + jsonObj.toString());
                 client.publish(topic, msg);
             }else {
                 return;
@@ -216,7 +239,8 @@ public class LightFragment extends Fragment {
         MqttMessage msg = new MqttMessage(payload.getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + payload);
+//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + payload);
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + payload);
                 client.publish(topic, msg);
             }else {
                 return;

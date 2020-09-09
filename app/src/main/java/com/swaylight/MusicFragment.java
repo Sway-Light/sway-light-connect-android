@@ -198,7 +198,8 @@ public class MusicFragment extends Fragment {
         MqttMessage msg = new MqttMessage(jsonObject.toString().getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + jsonObject.toString());
+//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + jsonObject.toString());
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + jsonObject.toString());
                 client.publish(topic, msg);
             }else {
                 return;
@@ -212,7 +213,8 @@ public class MusicFragment extends Fragment {
         MqttMessage msg = new MqttMessage(payload.getBytes());
         try {
             if(client.isConnected()){
-                Log.d(MQTT_TAG, "publish to topic: " + topic + ":" + payload);
+//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + payload);
+                Log.d(MQTT_TAG, "publish->" + topic + ":" + payload);
                 client.publish(topic, msg);
             }else {
                 return;

@@ -23,6 +23,7 @@
     <string name="lvl">level</string>
     <string name="brightness">brightness</string>
     <string name="offset">offset</string>
+    <string name="zoom">zoom</string>
 
     <!--  Modes  -->
     <string name="musicMode">Music Mode</string>
