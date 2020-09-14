@@ -52,12 +52,12 @@ public class ControlActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
-        broker = "tcp://" + this.getIntent().getExtras().getString(getString(R.string.MQTT_BROKER)) + ":1883";
-        deviceName = this.getIntent().getExtras().getString(getString(R.string.DEVICE_NAME));
+        broker = "tcp://" + this.getIntent().getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883";
+        deviceName = this.getIntent().getStringExtra(getString(R.string.DEVICE_NAME));
         tvMqttIp = findViewById(R.id.tv_mqtt_ip);
         tvMqttIp.setText(broker);
         tvConnectStatus = findViewById(R.id.tv_connect_status);
-        tvConnectStatus.setText(getString(R.string.disconnected));
+        tvConnectStatus.setText(R.string.disconnected);
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final MusicFragment musicFragment = new MusicFragment();
@@ -126,7 +126,7 @@ public class ControlActivity extends AppCompatActivity {
         client.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
-                tvConnectStatus.setText(getString(R.string.connected));
+                tvConnectStatus.setText(R.string.connected);
                 appendLog("connectComplete");
                 try {
                     final String topic = Topic.ROOT + deviceName + "/#";
@@ -140,7 +140,7 @@ public class ControlActivity extends AppCompatActivity {
 
             @Override
             public void connectionLost(Throwable cause) {
-                tvConnectStatus.setText(getString(R.string.disconnected));
+                tvConnectStatus.setText(R.string.disconnected);
                 appendLog("connectionLost");
                 Log.d(MQTT_TAG, "Disconnect to " + broker);
             }
@@ -163,14 +163,14 @@ public class ControlActivity extends AppCompatActivity {
             client.connect(mqttConnectOptions, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    tvConnectStatus.setText(getString(R.string.connected));
+                    tvConnectStatus.setText(R.string.connected);
                     appendLog("Connect to " + broker + " success");
                     Log.d(MQTT_TAG, "Connect to " + broker + " success");
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    tvConnectStatus.setText(getString(R.string.disconnected));
+                    tvConnectStatus.setText(R.string.disconnected);
                     appendLog("Connect to " + broker + " fail");
                     Log.d(MQTT_TAG, "Connect to " + broker + " fail");
                 }

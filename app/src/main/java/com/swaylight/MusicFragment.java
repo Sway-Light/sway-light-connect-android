@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -46,8 +47,9 @@ public class MusicFragment extends Fragment {
     private TextView tvGreen;
     private TextView tvBlue;
     private TextView tvOffset;
+    private CheckBox cbReleasePublish;
 
-    private JSONObject mJsonObj;
+    private JSONObject colorJsonObj;
     private Map<String, Integer> map;
 
     public MusicFragment() {
@@ -68,7 +70,7 @@ public class MusicFragment extends Fragment {
         map.put(getContext().getString(R.string.g), 0);
         map.put(getContext().getString(R.string.b), 0);
         map.put(getContext().getString(R.string.lvl), 1);
-        this.mJsonObj = new JSONObject(map);
+        this.colorJsonObj = new JSONObject(map);
 
         this.client = ((ControlActivity) getActivity()).getClient();
         this.deviceName = ((ControlActivity) getActivity()).getDeviceName();
@@ -84,6 +86,7 @@ public class MusicFragment extends Fragment {
         tvGreen = v.findViewById(R.id.tv_green);
         tvBlue = v.findViewById(R.id.tv_blue);
         tvOffset = v.findViewById(R.id.tv_offset);
+        cbReleasePublish = v.findViewById(R.id.release_publish_checkbox);
 
         spLevel = v.findViewById(R.id.level_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getContext(), R.array.level, R.layout.support_simple_spinner_dropdown_item);
@@ -108,7 +111,9 @@ public class MusicFragment extends Fragment {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -118,7 +123,8 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -128,7 +134,9 @@ public class MusicFragment extends Fragment {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -138,7 +146,8 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -148,7 +157,9 @@ public class MusicFragment extends Fragment {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -158,7 +169,8 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -167,7 +179,9 @@ public class MusicFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvOffset.setText(getString(R.string.offset) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_OFFSET;
-                publishMsg(topic, Integer.toString(progress));
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, Integer.toString(progress));
+                }
             }
 
             @Override
@@ -177,7 +191,8 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.MUSIC_MODE_OFFSET;
+                publishMsg(topic, Integer.toString(seekBar.getProgress()));
             }
         });
         return v;
@@ -185,10 +200,10 @@ public class MusicFragment extends Fragment {
 
     private void updateJsonObj() {
         try {
-            mJsonObj.put(getString(R.string.r), sbRed.getProgress());
-            mJsonObj.put(getString(R.string.g), sbGreen.getProgress());
-            mJsonObj.put(getString(R.string.b), sbBlue.getProgress());
-            mJsonObj.put(getString(R.string.lvl), level);
+            colorJsonObj.put(getString(R.string.r), sbRed.getProgress());
+            colorJsonObj.put(getString(R.string.g), sbGreen.getProgress());
+            colorJsonObj.put(getString(R.string.b), sbBlue.getProgress());
+            colorJsonObj.put(getString(R.string.lvl), level);
         } catch (JSONException e) {
             e.printStackTrace();
         }

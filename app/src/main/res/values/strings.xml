@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Sway Light test</string>
 
+    <string name="connect">Connect</string>
+    <string name="config">Configuration</string>
+
     <string-array name="modes">
         <item>Music</item>
         <item>Light</item>
@@ -13,6 +16,7 @@
     </string-array>
 
     <string-array name="brokers">
+        <item>172.20.10.6</item>
         <item>172.20.10.4</item>
         <item>192.168.0.103</item>
     </string-array>

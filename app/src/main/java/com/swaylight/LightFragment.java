@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -44,8 +45,9 @@ public class LightFragment extends Fragment {
     private TextView tvBlue;
     private TextView tvOffset;
     private TextView tvZoom;
+    private CheckBox cbReleasePublish;
 
-    private JSONObject mJsonObj;
+    private JSONObject colorJsonObj;
     private Map<String, Integer> map;
 
     public LightFragment() {
@@ -68,7 +70,7 @@ public class LightFragment extends Fragment {
         map.put(getContext().getString(R.string.g), 0);
         map.put(getContext().getString(R.string.b), 0);
         map.put(getContext().getString(R.string.lvl), 1);
-        this.mJsonObj = new JSONObject(map);
+        this.colorJsonObj = new JSONObject(map);
         this.client = ((ControlActivity) getActivity()).getClient();
         this.deviceName = ((ControlActivity) getActivity()).getDeviceName();
 
@@ -87,6 +89,7 @@ public class LightFragment extends Fragment {
         tvBlue = v.findViewById(R.id.tv_blue);
         tvOffset = v.findViewById(R.id.tv_offset);
         tvZoom = v.findViewById(R.id.tv_zoom);
+        cbReleasePublish = v.findViewById(R.id.release_publish_checkbox);
 
         sbBrightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -94,7 +97,9 @@ public class LightFragment extends Fragment {
                 tvBrightness.setText(getString(R.string.brightness) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -104,7 +109,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -114,7 +120,9 @@ public class LightFragment extends Fragment {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -124,7 +132,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -134,7 +143,9 @@ public class LightFragment extends Fragment {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -144,7 +155,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -154,7 +166,9 @@ public class LightFragment extends Fragment {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
-                publishMsg(topic, mJsonObj);
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, colorJsonObj);
+                }
             }
 
             @Override
@@ -164,7 +178,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
+                publishMsg(topic, colorJsonObj);
             }
         });
 
@@ -173,7 +188,9 @@ public class LightFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvOffset.setText(getString(R.string.offset) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_OFFSET;
-                publishMsg(topic, Integer.toString(progress));
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, Integer.toString(progress));
+                }
             }
 
             @Override
@@ -183,7 +200,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_OFFSET;
+                publishMsg(topic, Integer.toString(seekBar.getProgress()));
             }
         });
 
@@ -192,7 +210,9 @@ public class LightFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvZoom.setText(getString(R.string.zoom) + ": " + progress);
                 final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_ZOOM;
-                publishMsg(topic, Integer.toString(progress));
+                if(!cbReleasePublish.isChecked()) {
+                    publishMsg(topic, Integer.toString(progress));
+                }
             }
 
             @Override
@@ -202,7 +222,8 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_ZOOM;
+                publishMsg(topic, Integer.toString(seekBar.getProgress()));
             }
         });
 
@@ -211,10 +232,10 @@ public class LightFragment extends Fragment {
 
     private void updateJsonObj() {
         try {
-            mJsonObj.put(getString(R.string.r), sbRed.getProgress());
-            mJsonObj.put(getString(R.string.g), sbGreen.getProgress());
-            mJsonObj.put(getString(R.string.b), sbBlue.getProgress());
-            mJsonObj.put(getString(R.string.brightness), sbBrightness.getProgress());
+            colorJsonObj.put(getString(R.string.r), sbRed.getProgress());
+            colorJsonObj.put(getString(R.string.g), sbGreen.getProgress());
+            colorJsonObj.put(getString(R.string.b), sbBlue.getProgress());
+            colorJsonObj.put(getString(R.string.brightness), sbBrightness.getProgress());
         } catch (JSONException e) {
             e.printStackTrace();
         }

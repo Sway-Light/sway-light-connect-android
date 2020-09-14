@@ -163,6 +163,13 @@
                 android:progress="0" />
 
         </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/release_publish_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="release to publish" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
