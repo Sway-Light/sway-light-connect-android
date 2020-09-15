@@ -14,24 +14,25 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.swaylight.mqtt.Topic;
+import com.swaylight.mqtt.SLMode;
+import com.swaylight.mqtt.SLMqttClient;
+import com.swaylight.mqtt.SLMqttManager;
+import com.swaylight.mqtt.SLTopic;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ControlActivity extends AppCompatActivity {
 
-    MqttAndroidClient client;
+    SLMqttManager manager;
+    SLMqttClient client;
     public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     private final static int MAX_LOG_SIZE = 8000;
     private final String MQTT_TAG   = "mqtt";
@@ -58,6 +59,62 @@ public class ControlActivity extends AppCompatActivity {
         tvMqttIp.setText(broker);
         tvConnectStatus = findViewById(R.id.tv_connect_status);
         tvConnectStatus.setText(R.string.disconnected);
+
+        manager = new SLMqttManager(getApplicationContext(), broker, deviceName, clientId);
+        client = SLMqttManager.getInstance();
+        client.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+                tvConnectStatus.setText(R.string.connected);
+                appendLog("connectComplete");
+                try {
+                    final String topic = SLTopic.ROOT + deviceName + "/#";
+                    client.subscribe(topic, 0);
+                    appendLog("subscribe: " + topic);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+                Log.d(MQTT_TAG, "Connected to " + broker);
+            }
+
+            @Override
+            public void connectionLost(Throwable cause) {
+                tvConnectStatus.setText(R.string.disconnected);
+                appendLog("connectionLost");
+                Log.d(MQTT_TAG, "Disconnect to " + broker);
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                appendLog(topic + ":" + message.toString());
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
+            }
+        });
+        manager.setMqttActionListener(new IMqttActionListener() {
+            @Override
+            public void onSuccess(IMqttToken asyncActionToken) {
+                tvConnectStatus.setText(R.string.connected);
+                appendLog("Connect to " + broker + " success");
+                Log.d(MQTT_TAG, "Connect to " + broker + " success");
+            }
+
+            @Override
+            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                tvConnectStatus.setText(R.string.disconnected);
+                appendLog("Connect to " + broker + " fail");
+                Log.d(MQTT_TAG, "Connect to " + broker + " fail");
+            }
+        });
+
+        try {
+            manager.connect();
+        } catch (MqttException ex){
+            ex.printStackTrace();
+        }
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final MusicFragment musicFragment = new MusicFragment();
@@ -91,11 +148,10 @@ public class ControlActivity extends AppCompatActivity {
         swPower.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                final String topic = Topic.ROOT + deviceName + Topic.POWER;
                 if(isChecked){
-                    publishMsg(topic, String.valueOf(1));
+                    client.publish(SLTopic.POWER, deviceName, 1);
                 }else {
-                    publishMsg(topic, String.valueOf(0));
+                    client.publish(SLTopic.POWER, deviceName, 0);
                 }
             }
         });
@@ -107,19 +163,18 @@ public class ControlActivity extends AppCompatActivity {
         spMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                final String topic = Topic.ROOT + deviceName + Topic.CURR_MODE;
                 String modeName = (String) parent.getItemAtPosition(position);
                 Log.d(tag, "select: " + parent.getItemAtPosition(position));
                 if(modeName.equals("Light")) {
                     fragmentManager.beginTransaction().hide(clockSettingFragment).commit();
                     fragmentManager.beginTransaction().hide(musicFragment).commit();
                     fragmentManager.beginTransaction().show(lightFragment).commit();
-                    publishMsg(topic, String.valueOf(2));
+                    client.publish(SLTopic.CURR_MODE, deviceName, SLMode.LIGHT);
                 }else if(modeName.equals("Music")) {
                     fragmentManager.beginTransaction().hide(clockSettingFragment).commit();
                     fragmentManager.beginTransaction().hide(lightFragment).commit();
                     fragmentManager.beginTransaction().show(musicFragment).commit();
-                    publishMsg(topic, String.valueOf(3));
+                    client.publish(SLTopic.CURR_MODE, deviceName, SLMode.MUSIC);
                 }else if(modeName.equals("ClockSetting")) {
                     fragmentManager.beginTransaction().show(clockSettingFragment).commit();
                     fragmentManager.beginTransaction().hide(lightFragment).commit();
@@ -132,64 +187,6 @@ public class ControlActivity extends AppCompatActivity {
 
             }
         });
-
-        client = new MqttAndroidClient(getApplicationContext(), broker, clientId);
-        client.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-                tvConnectStatus.setText(R.string.connected);
-                appendLog("connectComplete");
-                try {
-                    final String topic = Topic.ROOT + deviceName + "/#";
-                    client.subscribe(topic, 0);
-                    appendLog("subscribe: " + topic);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-                Log.d(MQTT_TAG, "Connected to " + broker);
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-                tvConnectStatus.setText(R.string.disconnected);
-                appendLog("connectionLost");
-                Log.d(MQTT_TAG, "Disconnect to " + broker);
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                appendLog(topic + ":" + message.toString());
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-        mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setCleanSession(false);
-
-        try {
-            client.connect(mqttConnectOptions, null, new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    tvConnectStatus.setText(R.string.connected);
-                    appendLog("Connect to " + broker + " success");
-                    Log.d(MQTT_TAG, "Connect to " + broker + " success");
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    tvConnectStatus.setText(R.string.disconnected);
-                    appendLog("Connect to " + broker + " fail");
-                    Log.d(MQTT_TAG, "Connect to " + broker + " fail");
-                }
-            });
-        } catch (MqttException ex){
-            ex.printStackTrace();
-        }
-
     }
 
     @Override
@@ -201,36 +198,6 @@ public class ControlActivity extends AppCompatActivity {
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private void publishMsg(String topic, JSONObject jsonObject) {
-        MqttMessage msg = new MqttMessage(jsonObject.toString().getBytes());
-        try {
-            if(client.isConnected()){
-//                appendLog("publish->" + topic + ":" + jsonObject.toString());
-                Log.d(MQTT_TAG, "publish->" + topic + ":" + jsonObject.toString());
-                client.publish(topic, msg);
-            }else {
-                return;
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void publishMsg(String topic, String payload) {
-        MqttMessage msg = new MqttMessage(payload.getBytes());
-        try {
-            if(client.isConnected()){
-//                appendLog("publish->" + topic + ":" + payload);
-                Log.d(MQTT_TAG, "publish->" + topic + ":" + payload);
-                client.publish(topic, msg);
-            }else {
-                return;
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
         }
     }
 
@@ -250,13 +217,5 @@ public class ControlActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    public MqttAndroidClient getClient() {
-        return client;
-    }
-
-    public String getDeviceName() {
-        return deviceName;
     }
 }
