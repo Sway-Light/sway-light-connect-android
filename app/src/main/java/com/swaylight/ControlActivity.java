@@ -62,6 +62,7 @@ public class ControlActivity extends AppCompatActivity {
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final MusicFragment musicFragment = new MusicFragment();
         final LightFragment lightFragment = new LightFragment();
+        final ClockSettingFragment clockSettingFragment = new ClockSettingFragment();
         if(!musicFragment.isAdded()) {
             Log.d(tag, "add musicFragment");
             fragmentManager.beginTransaction().add(R.id.fragment_container, musicFragment).commit();
@@ -69,6 +70,11 @@ public class ControlActivity extends AppCompatActivity {
         if(!lightFragment.isAdded()) {
             Log.d(tag, "add lightFragment");
             fragmentManager.beginTransaction().add(R.id.fragment_container, lightFragment).commit();
+        }
+
+        if(!clockSettingFragment.isAdded()) {
+            Log.d(tag, "add lightFragment");
+            fragmentManager.beginTransaction().add(R.id.fragment_container, clockSettingFragment).commit();
         }
 
         tvLog = findViewById(R.id.tv_log);
@@ -103,16 +109,21 @@ public class ControlActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 final String topic = Topic.ROOT + deviceName + Topic.CURR_MODE;
                 String modeName = (String) parent.getItemAtPosition(position);
+                Log.d(tag, "select: " + parent.getItemAtPosition(position));
                 if(modeName.equals("Light")) {
-                    Log.d(tag, "select: " + parent.getItemAtPosition(position));
+                    fragmentManager.beginTransaction().hide(clockSettingFragment).commit();
                     fragmentManager.beginTransaction().hide(musicFragment).commit();
                     fragmentManager.beginTransaction().show(lightFragment).commit();
                     publishMsg(topic, String.valueOf(2));
                 }else if(modeName.equals("Music")) {
-                    Log.d(tag, "select: " + parent.getItemAtPosition(position));
+                    fragmentManager.beginTransaction().hide(clockSettingFragment).commit();
                     fragmentManager.beginTransaction().hide(lightFragment).commit();
                     fragmentManager.beginTransaction().show(musicFragment).commit();
                     publishMsg(topic, String.valueOf(3));
+                }else if(modeName.equals("ClockSetting")) {
+                    fragmentManager.beginTransaction().show(clockSettingFragment).commit();
+                    fragmentManager.beginTransaction().hide(lightFragment).commit();
+                    fragmentManager.beginTransaction().hide(musicFragment).commit();
                 }
             }
 
