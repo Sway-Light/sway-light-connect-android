@@ -40,6 +40,12 @@
     <string name="connecting">Connecting</string>
     <string name="reconnect">Reconnected</string>
 
+    <!--  time  -->
+    <string name="hour">hour</string>
+    <string name="min">min</string>
+    <string name="sec">sec</string>
+    <string name="enable">enable</string>
+
     <!-- EXTRA STRING -->
     <string name="DEVICE_NAME">DEVICE_NAME</string>
     <string name="MQTT_BROKER">MQTT_BROKER</string>

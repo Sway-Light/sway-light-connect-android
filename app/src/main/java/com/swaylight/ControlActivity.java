@@ -149,9 +149,9 @@ public class ControlActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    client.publish(SLTopic.POWER, deviceName, 1);
+                    client.publish(SLTopic.POWER, deviceName, SLMode.POWER_ON);
                 }else {
-                    client.publish(SLTopic.POWER, deviceName, 0);
+                    client.publish(SLTopic.POWER, deviceName, SLMode.POWER_OFF);
                 }
             }
         });
