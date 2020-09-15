@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.swaylight.mqtt.Topic;
+import com.swaylight.mqtt.SLMqttClient;
+import com.swaylight.mqtt.SLMqttManager;
+import com.swaylight.mqtt.SLTopic;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -29,7 +31,7 @@ public class LightFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private TextView tvModeName;
 
-    private MqttAndroidClient client;
+    private SLMqttClient client;
     private String deviceName;
 
     private SeekBar sbBrightness;
@@ -71,8 +73,8 @@ public class LightFragment extends Fragment {
         map.put(getContext().getString(R.string.b), 0);
         map.put(getContext().getString(R.string.lvl), 1);
         this.colorJsonObj = new JSONObject(map);
-        this.client = ((ControlActivity) getActivity()).getClient();
-        this.deviceName = ((ControlActivity) getActivity()).getDeviceName();
+        this.client = SLMqttManager.getInstance();
+        this.deviceName = SLMqttManager.getDeviceName();
 
         tvModeName.setText(getString(R.string.lightMode));
 
@@ -95,10 +97,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBrightness.setText(getString(R.string.brightness) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
                 }
             }
 
@@ -109,8 +110,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
-                publishMsg(topic, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
             }
         });
 
@@ -118,10 +118,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
                 }
             }
 
@@ -132,8 +131,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
-                publishMsg(topic, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
             }
         });
 
@@ -141,10 +139,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
                 }
             }
 
@@ -155,8 +152,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
-                publishMsg(topic, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
             }
         });
 
@@ -164,10 +160,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
                 updateJsonObj();
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
                 }
             }
 
@@ -178,8 +173,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_COLOR;
-                publishMsg(topic, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
             }
         });
 
@@ -187,9 +181,8 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvOffset.setText(getString(R.string.offset) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_OFFSET;
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, Integer.toString(progress));
+                    client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, progress);
                 }
             }
 
@@ -200,8 +193,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_OFFSET;
-                publishMsg(topic, Integer.toString(seekBar.getProgress()));
+                client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, seekBar.getProgress());
             }
         });
 
@@ -209,9 +201,8 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvZoom.setText(getString(R.string.zoom) + ": " + progress);
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_ZOOM;
                 if(!cbReleasePublish.isChecked()) {
-                    publishMsg(topic, Integer.toString(progress));
+                    client.publish(SLTopic.LIGHT_MODE_ZOOM, deviceName, progress);
                 }
             }
 
@@ -222,8 +213,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                final String topic = Topic.ROOT + deviceName + Topic.LIGHT_MODE_ZOOM;
-                publishMsg(topic, Integer.toString(seekBar.getProgress()));
+                client.publish(SLTopic.LIGHT_MODE_ZOOM, deviceName, seekBar.getProgress());
             }
         });
 
@@ -237,36 +227,6 @@ public class LightFragment extends Fragment {
             colorJsonObj.put(getString(R.string.b), sbBlue.getProgress());
             colorJsonObj.put(getString(R.string.brightness), sbBrightness.getProgress());
         } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void publishMsg(String topic, JSONObject jsonObj) {
-        MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
-        try {
-            if(client.isConnected()){
-//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + jsonObj.toString());
-                Log.d(MQTT_TAG, "publish->" + topic + ":" + jsonObj.toString());
-                client.publish(topic, msg);
-            }else {
-                return;
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void publishMsg(String topic, String payload) {
-        MqttMessage msg = new MqttMessage(payload.getBytes());
-        try {
-            if(client.isConnected()){
-//                ((ControlActivity) getActivity()).appendLog("publish->" + topic + ":" + payload);
-                Log.d(MQTT_TAG, "publish->" + topic + ":" + payload);
-                client.publish(topic, msg);
-            }else {
-                return;
-            }
-        } catch (MqttException e) {
             e.printStackTrace();
         }
     }

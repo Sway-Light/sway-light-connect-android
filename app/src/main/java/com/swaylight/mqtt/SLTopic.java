@@ -16,11 +16,15 @@ public enum SLTopic {
     MUSIC_MODE_STYLE("/mode/music/style"),
     ;
 
-    public final String ROOT = "feeds/";
+    static public final String ROOT = "feeds/";
 
     String topic;
 
     SLTopic(String topic) {
         this.topic = topic;
+    }
+
+    public String getTopic() {
+        return topic;
     }
 }
