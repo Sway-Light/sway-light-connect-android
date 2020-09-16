@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.swaylight.mqtt.SLMqttClient
 import com.swaylight.mqtt.SLMqttManager
 import com.swaylight.mqtt.SLTopic
+import kotlinx.android.synthetic.main.activity_control.*
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONStringer
@@ -28,12 +29,12 @@ class ClockSettingFragment : Fragment() {
     private var map: Map<String, Int>? = null
 
     var on = true
-    val options = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    val enable = arrayOf(0, 0, 0, 0, 0, 0, 0)
-    var onHour = 0
-    var onMin = 0
-    var offHour = 0
-    var offMin = 0
+    private val options = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    private val enable: Array<Int> = arrayOf(0, 0, 0, 0, 0, 0, 0)
+    private var onHour = 0
+    private var onMin = 0
+    private var offHour = 0
+    private var offMin = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
