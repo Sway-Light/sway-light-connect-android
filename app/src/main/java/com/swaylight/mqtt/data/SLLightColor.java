@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 public class SLLightColor extends SLColor{
     public static final String BRIGHTNESS = "brightness";
-    private byte brightness;
+    private int brightness;
 
     public SLLightColor() {
         super();
@@ -16,19 +16,19 @@ public class SLLightColor extends SLColor{
         }
     }
 
-    public SLLightColor(byte red, byte green, byte blue) {
+    public SLLightColor(int red, int green, int blue) {
         super(red, green, blue);
         this.brightness = 0;
         setColor(red, green, blue, brightness);
     }
 
-    public SLLightColor(byte red, byte green, byte blue, byte brightness) {
+    public SLLightColor(int red, int green, int blue, int brightness) {
         super(red, green, blue);
         this.brightness = brightness;
         setColor(red, green, blue, brightness);
     }
 
-    public void setColor(byte red, byte green, byte blue, byte brightness) {
+    public void setColor(int red, int green, int blue, int brightness) {
         super.setColor(red, green, blue);
         try {
             this.jsonObj.put(BRIGHTNESS, brightness);
@@ -37,11 +37,11 @@ public class SLLightColor extends SLColor{
         }
     }
 
-    public byte getBrightness() {
+    public int getBrightness() {
         return brightness;
     }
 
-    public void setBrightness(byte brightness) {
+    public void setBrightness(int brightness) {
         this.brightness = brightness;
         setColor(red, green, blue, brightness);
     }

@@ -8,9 +8,9 @@ public class SLColor {
     public static final String GREEN = "green";
     public static final String BLUE = "blue";
 
-    protected byte red;
-    protected byte green;
-    protected byte blue;
+    protected int red;
+    protected int green;
+    protected int blue;
 
     protected JSONObject jsonObj;
 
@@ -25,12 +25,12 @@ public class SLColor {
         }
     }
 
-    public SLColor(byte red, byte green, byte blue) {
+    public SLColor(int red, int green, int blue) {
         jsonObj = new JSONObject();
         setColor(red, green, blue);
     }
 
-    public void setColor(byte red, byte green, byte blue) {
+    public void setColor(int red, int green, int blue) {
         try {
             jsonObj.put(RED, red);
             jsonObj.put(GREEN, green);
@@ -44,29 +44,29 @@ public class SLColor {
         return jsonObj;
     }
 
-    public byte getRed() {
+    public int getRed() {
         return red;
     }
 
-    public byte getGreen() {
+    public int getGreen() {
         return green;
     }
 
-    public byte getBlue() {
+    public int getBlue() {
         return blue;
     }
 
-    public void setRed(byte red) {
+    public void setRed(int red) {
         this.red = red;
         setColor(red, green, blue);
     }
 
-    public void setGreen(byte green) {
+    public void setGreen(int green) {
         this.green = green;
         setColor(red, green, blue);
     }
 
-    public void setBlue(byte blue) {
+    public void setBlue(int blue) {
         this.blue = blue;
         setColor(red, green, blue);
     }

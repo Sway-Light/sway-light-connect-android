@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.swaylight.mqtt.SLMqttClient
 import com.swaylight.mqtt.SLMqttManager
 import com.swaylight.mqtt.SLTopic
+import com.swaylight.mqtt.data.SLClockSetting
 import kotlinx.android.synthetic.main.activity_control.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -24,17 +25,12 @@ class ClockSettingFragment : Fragment() {
     private val TAG = this::class.simpleName.toString()
     private var client: SLMqttClient? = null
     private var deviceName: String? = null
-    private var onTimeJsonObj: JSONObject? = null
-    private var offTimeJsonObj: JSONObject? = null
-    private var map: Map<String, Int>? = null
+    private var onTimeObj = SLClockSetting()
+    private var offTimeObj = SLClockSetting()
 
     var on = true
     private val options = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    private val enable: Array<Int> = arrayOf(0, 0, 0, 0, 0, 0, 0)
-    private var onHour = 0
-    private var onMin = 0
-    private var offHour = 0
-    private var offMin = 0
+    private val enable =  BooleanArray(7)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,36 +48,29 @@ class ClockSettingFragment : Fragment() {
         val enableGroup = v.findViewById<LinearLayout>(R.id.enable_container)
         val btSetting = v.findViewById<Button>(R.id.setting_button)
 
-        initJson()
-
         for(i in options) {
             val cb = CheckBox(v.context)
             cb.setOnCheckedChangeListener { buttonView, isChecked ->
-                if(isChecked) {
-                    enable[options.indexOf(i)] = 1
-                }else {
-                    enable[options.indexOf(i)] = 0
-                }
-                updateJsonObj()
+                enable[options.indexOf(i)] = isChecked
                 Log.d(TAG, "enable" + Arrays.toString(enable))
+                onTimeObj.setEnable(enable)
+                offTimeObj.setEnable(enable)
             }
             cb.text = i
             enableGroup.addView(cb)
         }
+        onTimeObj.setEnable(enable)
+        offTimeObj.setEnable(enable)
 
         val timePickerDialog = TimePickerDialog(v.context, TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
             if(on) {
-                onHour = hourOfDay
-                onMin = minute
-                tvOnTime.text = "On time: $onHour:$onMin"
-                updateJsonObj()
+                onTimeObj.setClock(hourOfDay, minute, 0)
+                tvOnTime.text = "On time: ${onTimeObj.hour}:${onTimeObj.min}"
             }else {
-                offHour = hourOfDay
-                offMin = minute
-                tvOffTime.text = "Off time: $offHour:$offMin"
-                updateJsonObj()
+                offTimeObj.setClock(hourOfDay, minute, 0)
+                tvOffTime.text = "Off time: ${offTimeObj.hour}:${offTimeObj.min}"
             }
-        }, onHour, onMin, true)
+        }, 0, 0, true)
 
         tvOnTime.setOnClickListener {
             on = true
@@ -94,31 +83,10 @@ class ClockSettingFragment : Fragment() {
         }
 
         btSetting.setOnClickListener {
-            client!!.publish(SLTopic.POWER_START_TIME, deviceName, onTimeJsonObj)
-            client!!.publish(SLTopic.POWER_END_TIME, deviceName, offTimeJsonObj)
+            client!!.publish(SLTopic.POWER_START_TIME, deviceName, onTimeObj.instance)
+            client!!.publish(SLTopic.POWER_END_TIME, deviceName, offTimeObj.instance)
         }
 
         return v
-    }
-
-    private fun initJson() {
-        map = HashMap()
-        (map as HashMap<String, Int>)[context!!.getString(R.string.hour)] = 0
-        (map as HashMap<String, Int>)[context!!.getString(R.string.min)] = 0
-        (map as HashMap<String, Int>)[context!!.getString(R.string.sec)] = 0
-        (map as HashMap<String, Array<Int>>)[context!!.getString(R.string.enable)] = enable
-        onTimeJsonObj = JSONObject(map)
-        offTimeJsonObj = JSONObject(map)
-    }
-
-    private fun updateJsonObj() {
-        onTimeJsonObj!!.put(context!!.getString(R.string.hour), onHour)
-        onTimeJsonObj!!.put(context!!.getString(R.string.min), onMin)
-        onTimeJsonObj!!.put(context!!.getString(R.string.enable), JSONArray(enable))
-        offTimeJsonObj!!.put(context!!.getString(R.string.hour), offHour)
-        offTimeJsonObj!!.put(context!!.getString(R.string.min), offMin)
-        offTimeJsonObj!!.put(context!!.getString(R.string.enable), JSONArray(enable))
-        Log.d(TAG, "onTimeJsonObj:" + onTimeJsonObj)
-        Log.d(TAG, "offTimeJsonObj:" + offTimeJsonObj)
     }
 }

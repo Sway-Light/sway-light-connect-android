@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.swaylight.mqtt.SLMqttClient;
 import com.swaylight.mqtt.SLMqttManager;
 import com.swaylight.mqtt.SLTopic;
+import com.swaylight.mqtt.data.SLMusicColor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,9 +48,7 @@ public class MusicFragment extends Fragment {
     private TextView tvBlue;
     private TextView tvOffset;
     private CheckBox cbReleasePublish;
-
-    private JSONObject colorJsonObj;
-    private Map<String, Integer> map;
+    private SLMusicColor colorObj;
 
     public MusicFragment() {
     }
@@ -60,16 +59,11 @@ public class MusicFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_music, container, false);
 
-        this.map = new HashMap<String, Integer>();
-        map.put(getContext().getString(R.string.r), 0);
-        map.put(getContext().getString(R.string.g), 0);
-        map.put(getContext().getString(R.string.b), 0);
-        map.put(getContext().getString(R.string.lvl), 1);
-        this.colorJsonObj = new JSONObject(map);
+        colorObj = new SLMusicColor();
 
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
@@ -96,6 +90,7 @@ public class MusicFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 level = Integer.valueOf((String) parent.getItemAtPosition(position));
                 Log.d(tag, "select " + level);
+                colorObj.setLevel(position);
             }
 
             @Override
@@ -108,9 +103,9 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
-                updateJsonObj();
+                colorObj.setRed(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -121,7 +116,7 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -129,9 +124,9 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
-                updateJsonObj();
+                colorObj.setGreen(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -142,7 +137,7 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -150,9 +145,9 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
-                updateJsonObj();
+                colorObj.setBlue(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -163,7 +158,7 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -189,14 +184,4 @@ public class MusicFragment extends Fragment {
         return v;
     }
 
-    private void updateJsonObj() {
-        try {
-            colorJsonObj.put(getString(R.string.r), sbRed.getProgress());
-            colorJsonObj.put(getString(R.string.g), sbGreen.getProgress());
-            colorJsonObj.put(getString(R.string.b), sbBlue.getProgress());
-            colorJsonObj.put(getString(R.string.lvl), level);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 }

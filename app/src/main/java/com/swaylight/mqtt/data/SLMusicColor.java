@@ -4,7 +4,7 @@ import org.json.JSONException;
 
 public class SLMusicColor extends SLColor{
     public static final String LEVEL = "level";
-    private byte level;
+    private int level;
 
     public SLMusicColor() {
         super();
@@ -15,21 +15,21 @@ public class SLMusicColor extends SLColor{
         }
     }
 
-    public SLMusicColor(byte red, byte green, byte blue) {
+    public SLMusicColor(int red, int green, int blue) {
         super(red, green, blue);
     }
 
-    public SLMusicColor(byte red, byte green, byte blue, byte level) {
+    public SLMusicColor(int red, int green, int blue, int level) {
         super(red, green, blue);
         this.level = level;
         setColor(red, green, blue, level);
     }
 
-    public void setColor(byte red, byte green, byte blue) {
+    public void setColor(int red, int green, int blue) {
         super.setColor(red, green, blue);
     }
 
-    public void setColor(byte red, byte green, byte blue, byte level) {
+    public void setColor(int red, int green, int blue, int level) {
         super.setColor(red, green, blue);
         try {
             jsonObj.put(LEVEL, level);
@@ -38,11 +38,11 @@ public class SLMusicColor extends SLColor{
         }
     }
 
-    public byte getLevel() {
+    public int getLevel() {
         return level;
     }
 
-    public void setLevel(byte level) {
+    public void setLevel(int level) {
         this.level = level;
         setColor(red, green, blue, level);
     }

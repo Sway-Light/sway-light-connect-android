@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.swaylight.mqtt.SLMqttClient;
 import com.swaylight.mqtt.SLMqttManager;
 import com.swaylight.mqtt.SLTopic;
+import com.swaylight.mqtt.data.SLLightColor;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,8 +46,7 @@ public class LightFragment extends Fragment {
     private TextView tvZoom;
     private CheckBox cbReleasePublish;
 
-    private JSONObject colorJsonObj;
-    private Map<String, Integer> map;
+    private SLLightColor colorObj;
 
     public LightFragment() {
 
@@ -63,12 +63,7 @@ public class LightFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_light, container, false);
         tvModeName = v.findViewById(R.id.textview_mode);
 
-        this.map = new HashMap<String, Integer>();
-        map.put(getContext().getString(R.string.r), 0);
-        map.put(getContext().getString(R.string.g), 0);
-        map.put(getContext().getString(R.string.b), 0);
-        map.put(getContext().getString(R.string.lvl), 1);
-        this.colorJsonObj = new JSONObject(map);
+        colorObj = new SLLightColor();
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
 
@@ -93,9 +88,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBrightness.setText(getString(R.string.brightness) + ": " + progress);
-                updateJsonObj();
+                colorObj.setBrightness(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -106,7 +101,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -114,9 +109,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
-                updateJsonObj();
+                colorObj.setRed(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -127,7 +122,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -135,9 +130,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
-                updateJsonObj();
+                colorObj.setGreen(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -148,7 +143,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -156,9 +151,9 @@ public class LightFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
-                updateJsonObj();
+                colorObj.setBlue(progress);
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                    client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
             }
 
@@ -169,7 +164,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorJsonObj);
+                client.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, colorObj.getInstance());
             }
         });
 
@@ -214,16 +209,5 @@ public class LightFragment extends Fragment {
         });
 
         return v;
-    }
-
-    private void updateJsonObj() {
-        try {
-            colorJsonObj.put(getString(R.string.r), sbRed.getProgress());
-            colorJsonObj.put(getString(R.string.g), sbGreen.getProgress());
-            colorJsonObj.put(getString(R.string.b), sbBlue.getProgress());
-            colorJsonObj.put(getString(R.string.brightness), sbBrightness.getProgress());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 }
