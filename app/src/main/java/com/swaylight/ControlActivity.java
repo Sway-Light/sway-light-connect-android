@@ -64,13 +64,22 @@ public class ControlActivity extends AppCompatActivity {
         client = SLMqttManager.getInstance();
         client.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-                tvConnectStatus.setText(R.string.connected);
-                appendLog("connectComplete");
+            public void connectComplete(final boolean reconnect, String serverURI) {
                 try {
                     final String topic = SLTopic.ROOT + deviceName + "/#";
                     client.subscribe(topic, 0);
-                    appendLog("subscribe: " + topic);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(reconnect) {
+                                appendLog("Reconnect complete");
+                            }else {
+                                appendLog("Connect complete");
+                            }
+                            appendLog("subscribe: " + topic);
+                            tvConnectStatus.setText(R.string.connected);
+                        }
+                    });
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
@@ -79,14 +88,25 @@ public class ControlActivity extends AppCompatActivity {
 
             @Override
             public void connectionLost(Throwable cause) {
-                tvConnectStatus.setText(R.string.disconnected);
-                appendLog("connectionLost");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvConnectStatus.setText(R.string.disconnected);
+                        appendLog("Connection LOST");
+                    }
+                });
                 Log.d(MQTT_TAG, "Disconnect to " + broker);
             }
 
             @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                appendLog(topic + ":" + message.toString());
+            public void messageArrived(final String topic, final MqttMessage message) throws Exception {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        appendLog(topic + ":" + message.toString());
+                    }
+                });
+
             }
 
             @Override
@@ -97,15 +117,25 @@ public class ControlActivity extends AppCompatActivity {
         manager.setMqttActionListener(new IMqttActionListener() {
             @Override
             public void onSuccess(IMqttToken asyncActionToken) {
-                tvConnectStatus.setText(R.string.connected);
-                appendLog("Connect to " + broker + " success");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvConnectStatus.setText(R.string.connected);
+                        appendLog("Connect to " + broker + " success");
+                    }
+                });
                 Log.d(MQTT_TAG, "Connect to " + broker + " success");
             }
 
             @Override
             public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                tvConnectStatus.setText(R.string.disconnected);
-                appendLog("Connect to " + broker + " fail");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvConnectStatus.setText(R.string.disconnected);
+                        appendLog("Connect to " + broker + " fail");
+                    }
+                });
                 Log.d(MQTT_TAG, "Connect to " + broker + " fail");
             }
         });
