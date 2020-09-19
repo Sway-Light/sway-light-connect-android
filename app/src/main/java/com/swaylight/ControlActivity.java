@@ -1,5 +1,6 @@
 package com.swaylight;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -34,7 +36,7 @@ public class ControlActivity extends AppCompatActivity {
     SLMqttManager manager;
     SLMqttClient client;
     public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
-    private final static int MAX_LOG_SIZE = 8000;
+    private final static int MAX_LOG_SIZE = 3000;
     private final String MQTT_TAG   = "mqtt";
     private int qos                 = 0;
     private String broker           = "tcp://172.20.10.4";//replace to your broker ip.
@@ -170,8 +172,22 @@ public class ControlActivity extends AppCompatActivity {
         tvLog.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                tvLog.scrollTo(0,0);
-                tvLog.setText("");
+                AlertDialog.Builder builder = new AlertDialog.Builder(ControlActivity.this);
+                builder.setMessage("Clear log?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        tvLog.scrollTo(0,0);
+                        tvLog.setText("");
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                builder.show();
                 return false;
             }
         });
