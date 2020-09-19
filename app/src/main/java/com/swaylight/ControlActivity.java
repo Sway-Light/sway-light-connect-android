@@ -38,7 +38,7 @@ public class ControlActivity extends AppCompatActivity {
     private final String MQTT_TAG   = "mqtt";
     private int qos                 = 0;
     private String broker           = "tcp://172.20.10.4";//replace to your broker ip.
-    private String clientId         = "sway-light";
+    private String clientId;
     private String deviceName;
 
     final String tag = "David";
@@ -55,6 +55,7 @@ public class ControlActivity extends AppCompatActivity {
         setContentView(R.layout.activity_control);
         broker = "tcp://" + this.getIntent().getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883";
         deviceName = this.getIntent().getStringExtra(getString(R.string.DEVICE_NAME));
+        clientId = this.getIntent().getStringExtra(getString(R.string.MQTT_CLIENT_ID));
         tvMqttIp = findViewById(R.id.tv_mqtt_ip);
         tvMqttIp.setText(broker);
         tvConnectStatus = findViewById(R.id.tv_connect_status);
@@ -103,7 +104,7 @@ public class ControlActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        appendLog(topic + ":" + message.toString());
+                        appendLog(topic + ":\n" + message.toString());
                     }
                 });
 

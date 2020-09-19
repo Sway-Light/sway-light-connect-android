@@ -14,6 +14,7 @@ public class ConnectActivity extends AppCompatActivity {
     final String tag = "ConnectActivity";
     private Spinner spBrokers;
     private EditText etDeviceName;
+    private EditText etClientId;
     private Button btConnect;
 
     @Override
@@ -22,6 +23,7 @@ public class ConnectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect);
         spBrokers = findViewById(R.id.broker_spinner);
         etDeviceName = findViewById(R.id.device_name_edittext);
+        etClientId = findViewById(R.id.client_id_edittext);
         btConnect = findViewById(R.id.connect_button);
 
         btConnect.setOnClickListener(new View.OnClickListener() {
@@ -31,6 +33,7 @@ public class ConnectActivity extends AppCompatActivity {
                 Bundle bundle = new Bundle();
                 bundle.putString(getString(R.string.MQTT_BROKER), String.valueOf(spBrokers.getSelectedItem()));
                 bundle.putString(getString(R.string.DEVICE_NAME), String.valueOf(etDeviceName.getText()));
+                bundle.putString(getString(R.string.MQTT_CLIENT_ID), String.valueOf(etClientId.getText()));
                 i.putExtras(bundle);
                 startActivity(i);
             }
