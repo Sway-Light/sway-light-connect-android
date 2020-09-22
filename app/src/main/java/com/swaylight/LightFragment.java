@@ -12,14 +12,8 @@ import androidx.fragment.app.Fragment;
 
 import com.swaylight.mqtt.SLMqttClient;
 import com.swaylight.mqtt.SLMqttManager;
-import com.swaylight.mqtt.SLTopic;
+import com.swaylight.mqtt.data.SLTopic;
 import com.swaylight.mqtt.data.SLLightColor;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class LightFragment extends Fragment {

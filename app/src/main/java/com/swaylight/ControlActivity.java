@@ -16,10 +16,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
-import com.swaylight.mqtt.SLMode;
+import com.swaylight.mqtt.data.SLMode;
 import com.swaylight.mqtt.SLMqttClient;
 import com.swaylight.mqtt.SLMqttManager;
-import com.swaylight.mqtt.SLTopic;
+import com.swaylight.mqtt.data.SLTopic;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;

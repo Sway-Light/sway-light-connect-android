@@ -13,12 +13,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.swaylight.mqtt.SLMqttClient
 import com.swaylight.mqtt.SLMqttManager
-import com.swaylight.mqtt.SLTopic
+import com.swaylight.mqtt.data.SLTopic
 import com.swaylight.mqtt.data.SLClockSetting
-import kotlinx.android.synthetic.main.activity_control.*
-import org.json.JSONArray
-import org.json.JSONObject
-import org.json.JSONStringer
 import java.util.*
 
 class ClockSettingFragment : Fragment() {

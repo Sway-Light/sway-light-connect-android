@@ -3,6 +3,9 @@ package com.swaylight.mqtt;
 import android.content.Context;
 import android.util.Log;
 
+import com.swaylight.mqtt.data.SLMode;
+import com.swaylight.mqtt.data.SLTopic;
+
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -11,6 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SLMqttClient extends MqttAndroidClient {
+    public final String CLIENT_ID = "id";
+    public final String VALUE = "value";
     private final String tag = getClass().getSimpleName();
 
     public SLMqttClient(Context context, String serverURI, String clientId) {
@@ -31,7 +36,7 @@ public class SLMqttClient extends MqttAndroidClient {
 
     public void publish(SLTopic swayLightTopic, String deviceName, JSONObject jsonObject) {
         try {
-            jsonObject.put("id", this.getClientId());
+            jsonObject.put(this.CLIENT_ID, this.getClientId());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -52,8 +57,8 @@ public class SLMqttClient extends MqttAndroidClient {
     public void publish(SLTopic swayLightTopic, String deviceName, String payload) {
         JSONObject jsonObj = new JSONObject();
         try {
-            jsonObj.put("id", this.getClientId());
-            jsonObj.put("value", payload);
+            jsonObj.put(this.CLIENT_ID, this.getClientId());
+            jsonObj.put(this.VALUE, payload);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -74,8 +79,8 @@ public class SLMqttClient extends MqttAndroidClient {
     public void publish(SLTopic swayLightTopic, String deviceName, int value) {
         JSONObject jsonObj = new JSONObject();
         try {
-            jsonObj.put("id", this.getClientId());
-            jsonObj.put("value", value);
+            jsonObj.put(this.CLIENT_ID, this.getClientId());
+            jsonObj.put(this.VALUE, value);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -96,8 +101,8 @@ public class SLMqttClient extends MqttAndroidClient {
     public void publish(SLTopic swayLightTopic, String deviceName, SLMode mode) {
         JSONObject jsonObj = new JSONObject();
         try {
-            jsonObj.put("id", this.getClientId());
-            jsonObj.put("value", mode.getModeNum());
+            jsonObj.put(this.CLIENT_ID, this.getClientId());
+            jsonObj.put(this.VALUE, mode.getModeNum());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -106,6 +111,7 @@ public class SLMqttClient extends MqttAndroidClient {
         try {
             if(SLMqttManager.getInstance().isConnected()){
                 SLMqttManager.getInstance().publish(topic, msg);
+                Log.d(tag, "pub " + topic + ":" + msg.toString());
             }else {
                 return;
             }

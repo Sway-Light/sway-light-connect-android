@@ -1,7 +1,9 @@
 package com.swaylight;
 
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -17,14 +19,8 @@ import android.widget.TextView;
 
 import com.swaylight.mqtt.SLMqttClient;
 import com.swaylight.mqtt.SLMqttManager;
-import com.swaylight.mqtt.SLTopic;
+import com.swaylight.mqtt.data.SLTopic;
 import com.swaylight.mqtt.data.SLMusicColor;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class MusicFragment extends Fragment {
@@ -90,7 +86,7 @@ public class MusicFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 level = Integer.valueOf((String) parent.getItemAtPosition(position));
                 Log.d(tag, "select " + level);
-                colorObj.setLevel(position);
+                colorObj.setLevel(level);
             }
 
             @Override
@@ -184,4 +180,21 @@ public class MusicFragment extends Fragment {
         return v;
     }
 
+
+    private SeekBar.OnSeekBarChangeListener colorSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    };
 }

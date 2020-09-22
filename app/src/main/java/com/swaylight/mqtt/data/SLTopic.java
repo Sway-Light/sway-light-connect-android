@@ -1,4 +1,4 @@
-package com.swaylight.mqtt;
+package com.swaylight.mqtt.data;
 
 public enum SLTopic {
     POWER("/power"),
