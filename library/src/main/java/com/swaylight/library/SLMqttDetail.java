@@ -1,9 +1,11 @@
 package com.swaylight.library;
 
-public class SLMqttDetail {
-    public static final String BROKER = "broker";
-    public static final String DEVICE_NAME = "device_name";
-    public static final String CLIENT_ID = "id";
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.io.Serializable;
+
+public class SLMqttDetail implements Serializable {
 
     private String name;
     private String broker;
@@ -47,5 +49,20 @@ public class SLMqttDetail {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        return this.name.equals(((SLMqttDetail)obj).name);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "SLMqttDetail:{" +
+                "name:" + name  +
+                ", broker:" + broker +
+                ", deviceName:" + deviceName +
+                ", clientId:" + clientId + "}\n";
     }
 }

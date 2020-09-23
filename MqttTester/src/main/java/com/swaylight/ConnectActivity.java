@@ -19,24 +19,19 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.swaylight.library.SLMqttDetail;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
@@ -52,7 +47,6 @@ public class ConnectActivity extends AppCompatActivity {
     private LayoutInflater inflater;
     private MqttAdapter adapter;
     private ArrayList<SLMqttDetail> mqttList = new ArrayList<>();
-    private JsonObject mqttObj = new JsonObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,9 +79,9 @@ public class ConnectActivity extends AppCompatActivity {
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mqttObj.remove(detail.getName());
-                        writeToFile(mqttObj.toString());
-                        Log.d(tag, "mqttObj:" + mqttObj.toString());
+                        mqttList.remove(detail);
+                        writeToFile(mqttList);
+                        Log.d(tag, "mqttList:" + mqttList.toString());
                         updateList();
                     }
                 });
@@ -103,9 +97,9 @@ public class ConnectActivity extends AppCompatActivity {
         });
 
         Log.d(tag, "getFilesDir():" + getFilesDir().toString());
-        Log.d(tag, "readFromFile:" + readFromFile());
         adapter = new MqttAdapter();
         lvMqtt.setAdapter(adapter);
+        readFromFile();
         updateList();
 
         btConnect.setOnClickListener(new View.OnClickListener() {
@@ -118,11 +112,24 @@ public class ConnectActivity extends AppCompatActivity {
                 if(name.isEmpty() || broker.isEmpty() || deviceName.isEmpty() || clientId.isEmpty()) {
                     Log.d(tag, "detail field empty!");
                 }else {
-                    generateJsonObj(new SLMqttDetail(etName.getText().toString(),
+                    SLMqttDetail newDetail = new SLMqttDetail(etName.getText().toString(),
                             etBroker.getText().toString(),
                             etDeviceName.getText().toString(),
-                            etClientId.getText().toString()));
-                    writeToFile(mqttObj.toString());
+                            etClientId.getText().toString());
+                    boolean contain = false;
+                    for(SLMqttDetail detail: mqttList) {
+                        if(detail.equals(newDetail)) {
+                            detail.setBroker(newDetail.getBroker());
+                            detail.setDeviceName(newDetail.getDeviceName());
+                            detail.setClientId(newDetail.getClientId());
+                            contain = true;
+                            break;
+                        }
+                    }
+                    if(!contain) {
+                        mqttList.add(newDetail);
+                    }
+                    writeToFile(mqttList);
                     readFromFile();
                     updateList();
                     Intent i = new Intent(ConnectActivity.this, ControlActivity.class);
@@ -137,29 +144,15 @@ public class ConnectActivity extends AppCompatActivity {
         });
     }
 
-    private void generateJsonObj(SLMqttDetail mqttDetail) {
-        JsonObject detail = new JsonObject();
-        mqttObj.add(mqttDetail.getName(), detail);
-        detail.addProperty(SLMqttDetail.BROKER, mqttDetail.getBroker());
-        detail.addProperty(SLMqttDetail.DEVICE_NAME, mqttDetail.getDeviceName());
-        detail.addProperty(SLMqttDetail.CLIENT_ID, mqttDetail.getClientId());
-    }
+//    private void generateJsonObj(SLMqttDetail mqttDetail) {
+//        JsonObject detail = new JsonObject();
+//        mqttObj.add(mqttDetail.getName(), detail);
+//        detail.addProperty(SLMqttDetail.BROKER, mqttDetail.getBroker());
+//        detail.addProperty(SLMqttDetail.DEVICE_NAME, mqttDetail.getDeviceName());
+//        detail.addProperty(SLMqttDetail.CLIENT_ID, mqttDetail.getClientId());
+//    }
 
     private synchronized void updateList() {
-        if(readFromFile().isEmpty()) {
-            mqttList.clear();
-            return;
-        }
-        mqttObj = (JsonObject) (new JsonParser().parse(readFromFile()));
-        mqttList.clear();
-        for (String key: mqttObj.keySet()) {
-            Log.d(tag, "name:" + key + ", obj:" + mqttObj.get(key).toString());
-            JsonObject temp = (JsonObject) mqttObj.get(key);
-            mqttList.add(new SLMqttDetail(key,
-                    temp.get(SLMqttDetail.BROKER).toString().replace("\"", ""),
-                    temp.get(SLMqttDetail.DEVICE_NAME).toString().replace("\"", ""),
-                    temp.get(SLMqttDetail.CLIENT_ID).toString().replace("\"", "")));
-        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -168,45 +161,46 @@ public class ConnectActivity extends AppCompatActivity {
         });
     }
 
-    private void writeToFile(String data) {
+    private void writeToFile(ArrayList<SLMqttDetail> arrayList) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("mqtt_list.txt", Context.MODE_PRIVATE));
-            outputStreamWriter.write(data);
-            outputStreamWriter.close();
+            FileOutputStream writeStream = new FileOutputStream(getFilesDir() + "/mqtt_list.txt");
+            ObjectOutputStream oos = new ObjectOutputStream(writeStream);
+            for(SLMqttDetail detail: arrayList) {
+                Log.d(tag, "write:" + detail.toString());
+                oos.writeObject(detail);
+            }
+            writeStream.flush();
+            writeStream.close();
         }
         catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
 
-    private String readFromFile() {
-
-        String ret = "";
-
+    private void readFromFile() {
+        mqttList.clear();
         try {
-            InputStream inputStream = getApplicationContext().openFileInput("mqtt_list.txt");
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
+            FileInputStream inputStream = new FileInputStream(getFilesDir() + "/mqtt_list.txt");
+            ObjectInputStream ois = new ObjectInputStream(inputStream);
+            boolean hasNext = true;
+            while (hasNext) {
+                SLMqttDetail temp = (SLMqttDetail) ois.readObject();
+                if (temp == null) {
+                    hasNext = false;
+                }else {
+                    mqttList.add(temp);
+                    Log.d(tag, "readFromFile:" + mqttList.toString());
                 }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
             }
+            inputStream.close();
         }
         catch (FileNotFoundException e) {
             Log.e("login activity", "File not found: " + e.toString());
         } catch (IOException e) {
             Log.e("login activity", "Can not read file: " + e.toString());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-
-        return ret;
     }
 
     private class MqttAdapter extends BaseAdapter {
