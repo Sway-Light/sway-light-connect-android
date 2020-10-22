@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:focusable="false"
+    >
 
     <LinearLayout
         android:layout_width="0dp"
@@ -13,12 +15,14 @@
         android:orientation="vertical"
         android:padding="8dp"
         android:weightSum="3"
+        android:focusable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/mqtt_name_textview"
+            android:focusable="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -27,19 +31,22 @@
             android:textStyle="bold" />
 
         <LinearLayout
+            android:focusable="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="3">
+            android:weightSum="10">
 
             <LinearLayout
+                android:focusable="false"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="3"
                 android:orientation="vertical"
                 android:weightSum="3">
 
                 <TextView
+                    android:focusable="false"
                     android:id="@+id/textView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -47,12 +54,14 @@
                     android:text="broker:" />
 
                 <TextView
+                    android:focusable="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="device name:" />
 
                 <TextView
+                    android:focusable="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -60,14 +69,16 @@
             </LinearLayout>
 
             <LinearLayout
+                android:focusable="false"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
+                android:layout_weight="4"
                 android:orientation="vertical"
                 android:weightSum="3">
 
                 <TextView
                     android:id="@+id/broker_textview"
+                    android:focusable="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -76,6 +87,7 @@
 
                 <TextView
                     android:id="@+id/device_name_textview"
+                    android:focusable="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -83,11 +95,20 @@
 
                 <TextView
                     android:id="@+id/cliet_id_textview"
+                    android:focusable="false"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="id" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/item_connect_button"
+                android:focusable="false"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:text="@string/connect" />
 
         </LinearLayout>
 

@@ -115,6 +115,12 @@
             android:layout_height="wrap_content"
             android:text="Connect" />
 
+        <Button
+            android:id="@+id/connect_to_main_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Main" />
+
         <ListView
             android:id="@+id/mqtt_listview"
             android:layout_width="match_parent"

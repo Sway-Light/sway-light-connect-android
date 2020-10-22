@@ -1,10 +1,8 @@
 package com.swaylight;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,20 +17,14 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.swaylight.library.SLMqttDetail;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class ConnectActivity extends AppCompatActivity {
@@ -43,6 +35,7 @@ public class ConnectActivity extends AppCompatActivity {
     private EditText etDeviceName;
     private EditText etClientId;
     private Button btConnect;
+    private Button btConnectToMain;
     private ListView lvMqtt;
     private LayoutInflater inflater;
     private MqttAdapter adapter;
@@ -57,8 +50,13 @@ public class ConnectActivity extends AppCompatActivity {
         etDeviceName = findViewById(R.id.device_name_edittext);
         etClientId = findViewById(R.id.client_id_edittext);
         btConnect = findViewById(R.id.connect_button);
+        btConnectToMain =findViewById(R.id.connect_to_main_button);
+
         inflater = LayoutInflater.from(this);
         lvMqtt = findViewById(R.id.mqtt_listview);
+        Log.d(tag, "getFilesDir():" + getFilesDir().toString());
+        adapter = new MqttAdapter();
+        lvMqtt.setAdapter(adapter);
 
         lvMqtt.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -96,61 +94,23 @@ public class ConnectActivity extends AppCompatActivity {
             }
         });
 
-        Log.d(tag, "getFilesDir():" + getFilesDir().toString());
-        adapter = new MqttAdapter();
-        lvMqtt.setAdapter(adapter);
         readFromFile();
         updateList();
 
         btConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = etName.getText().toString().trim();
-                String broker = etBroker.getText().toString().trim();
-                String deviceName = etDeviceName.getText().toString().trim();
-                String clientId = etClientId.getText().toString().trim();
-                if(name.isEmpty() || broker.isEmpty() || deviceName.isEmpty() || clientId.isEmpty()) {
-                    Log.d(tag, "detail field empty!");
-                }else {
-                    SLMqttDetail newDetail = new SLMqttDetail(etName.getText().toString(),
-                            etBroker.getText().toString(),
-                            etDeviceName.getText().toString(),
-                            etClientId.getText().toString());
-                    boolean contain = false;
-                    for(SLMqttDetail detail: mqttList) {
-                        if(detail.equals(newDetail)) {
-                            detail.setBroker(newDetail.getBroker());
-                            detail.setDeviceName(newDetail.getDeviceName());
-                            detail.setClientId(newDetail.getClientId());
-                            contain = true;
-                            break;
-                        }
-                    }
-                    if(!contain) {
-                        mqttList.add(newDetail);
-                    }
-                    writeToFile(mqttList);
-                    readFromFile();
-                    updateList();
-                    Intent i = new Intent(ConnectActivity.this, ControlActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(getString(R.string.MQTT_BROKER), String.valueOf(etBroker.getText()));
-                    bundle.putString(getString(R.string.DEVICE_NAME), String.valueOf(etDeviceName.getText()));
-                    bundle.putString(getString(R.string.MQTT_CLIENT_ID), String.valueOf(etClientId.getText()));
-                    i.putExtras(bundle);
-                    startActivity(i);
-                }
+                connectToActivity(ControlActivity.class);
+            }
+        });
+
+        btConnectToMain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                connectToActivity(SwayLightMainActivity.class);
             }
         });
     }
-
-//    private void generateJsonObj(SLMqttDetail mqttDetail) {
-//        JsonObject detail = new JsonObject();
-//        mqttObj.add(mqttDetail.getName(), detail);
-//        detail.addProperty(SLMqttDetail.BROKER, mqttDetail.getBroker());
-//        detail.addProperty(SLMqttDetail.DEVICE_NAME, mqttDetail.getDeviceName());
-//        detail.addProperty(SLMqttDetail.CLIENT_ID, mqttDetail.getClientId());
-//    }
 
     private synchronized void updateList() {
         runOnUiThread(new Runnable() {
@@ -159,6 +119,44 @@ public class ConnectActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    private void connectToActivity(Class<?> cls) {
+        String name = etName.getText().toString().trim();
+        String broker = etBroker.getText().toString().trim();
+        String deviceName = etDeviceName.getText().toString().trim();
+        String clientId = etClientId.getText().toString().trim();
+        if(name.isEmpty() || broker.isEmpty() || deviceName.isEmpty() || clientId.isEmpty()) {
+            Log.d(tag, "detail field empty!");
+        }else {
+            SLMqttDetail newDetail = new SLMqttDetail(etName.getText().toString(),
+                    etBroker.getText().toString(),
+                    etDeviceName.getText().toString(),
+                    etClientId.getText().toString());
+            boolean contain = false;
+            for(SLMqttDetail detail: mqttList) {
+                if(detail.equals(newDetail)) {
+                    detail.setBroker(newDetail.getBroker());
+                    detail.setDeviceName(newDetail.getDeviceName());
+                    detail.setClientId(newDetail.getClientId());
+                    contain = true;
+                    break;
+                }
+            }
+            if(!contain) {
+                mqttList.add(newDetail);
+            }
+            writeToFile(mqttList);
+            readFromFile();
+            updateList();
+            Intent i = new Intent(ConnectActivity.this, cls);
+            Bundle bundle = new Bundle();
+            bundle.putString(getString(R.string.MQTT_BROKER), String.valueOf(etBroker.getText()));
+            bundle.putString(getString(R.string.DEVICE_NAME), String.valueOf(etDeviceName.getText()));
+            bundle.putString(getString(R.string.MQTT_CLIENT_ID), String.valueOf(etClientId.getText()));
+            i.putExtras(bundle);
+            startActivity(i);
+        }
     }
 
     private void writeToFile(ArrayList<SLMqttDetail> arrayList) {
@@ -222,7 +220,7 @@ public class ConnectActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
+            final ViewHolder holder;
             if(convertView == null) {
                 convertView = inflater.inflate(R.layout.mqtt_list_item, parent, false);
                 holder = new ViewHolder();
@@ -230,6 +228,7 @@ public class ConnectActivity extends AppCompatActivity {
                 holder.tvBroker = convertView.findViewById(R.id.broker_textview);
                 holder.tvDeviceName = convertView.findViewById(R.id.device_name_textview);
                 holder.tvClientId = convertView.findViewById(R.id.cliet_id_textview);
+                holder.btConnect = convertView.findViewById(R.id.item_connect_button);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -239,6 +238,22 @@ public class ConnectActivity extends AppCompatActivity {
             holder.tvBroker.setText(detail.getBroker());
             holder.tvDeviceName.setText(detail.getDeviceName());
             holder.tvClientId.setText(detail.getClientId());
+            holder.btConnect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String broker = holder.tvBroker.getText().toString().trim();
+                    String deviceName = holder.tvDeviceName.getText().toString().trim();
+                    String clientId = holder.tvClientId.getText().toString().trim();
+
+                    Intent i = new Intent(ConnectActivity.this, ControlActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(getString(R.string.MQTT_BROKER), broker);
+                    bundle.putString(getString(R.string.DEVICE_NAME), deviceName);
+                    bundle.putString(getString(R.string.MQTT_CLIENT_ID), clientId);
+                    i.putExtras(bundle);
+                    startActivity(i);
+                }
+            });
 
             return convertView;
         }
@@ -248,6 +263,7 @@ public class ConnectActivity extends AppCompatActivity {
             private TextView tvBroker;
             private TextView tvDeviceName;
             private TextView tvClientId;
+            private Button btConnect;
         }
     }
 }
