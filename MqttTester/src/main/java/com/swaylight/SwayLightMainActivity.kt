@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import kotlin.math.atan2
 
 class SwayLightMainActivity : AppCompatActivity() {
 
@@ -32,6 +33,10 @@ class SwayLightMainActivity : AppCompatActivity() {
     var prevZoom = 0
     var prevBrightness = 0
     var lightSlideStartY = 0f
+
+    // const
+    val MAX_ZOOM = 32
+    val MAX_BRIGHTNESS = 100
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +70,16 @@ class SwayLightMainActivity : AppCompatActivity() {
         })
 
         ivRing!!.setOnTouchListener { v, event ->
-            val degree = Math.toDegrees(Math.atan2((ringCenterY - event.rawY).toDouble(), (ringCenterX - event.rawX).toDouble())).toInt()
+            val degree = Math.toDegrees(atan2((ringCenterY - event.rawY).toDouble(), (ringCenterX - event.rawX).toDouble())).toInt()
+            // degree:
+            // 45       90      135
+            //          |
+            // 0        |       179
+            // ---------|----------
+            // 0        |      -179
+            //          |
+            //-45      -90     -135
+            Log.d(tag, "angle:$degree, rotation:${ivRing!!.rotation}")
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree.toFloat()
@@ -74,6 +88,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     ringPrevRotate = ivRing!!.rotation
                 }
                 else -> {
+                    ringPrevRotate + (degree.toFloat() - ringStartRotate)
                     ivRing!!.rotation = ringPrevRotate + (degree.toFloat() - ringStartRotate)
                 }
             }
@@ -91,16 +106,16 @@ class SwayLightMainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_UP -> {
                     if(controlZoomFlag) {
                         var v = prevZoom + delta
-                        if(v > 100) {
-                            v = 100
+                        if(v > MAX_ZOOM) {
+                            v = MAX_ZOOM
                         }else if(v <= 0) {
                             v = 0
                         }
                         prevZoom = v
                     }else {
                         var v = prevBrightness + delta
-                        if(v > 100) {
-                            v = 100
+                        if(v > MAX_BRIGHTNESS) {
+                            v = MAX_BRIGHTNESS
                         }else if(v <= 0) {
                             v = 0
                         }
@@ -110,16 +125,16 @@ class SwayLightMainActivity : AppCompatActivity() {
                 else -> {
                     if(controlZoomFlag) {
                         var v = prevZoom + delta
-                        if(v > 100) {
-                            v = 100
+                        if(v > MAX_ZOOM) {
+                            v = MAX_ZOOM
                         }else if(v <= 0) {
                             v = 0
                         }
                         tvZoom!!.text = "zoom:" + v
                     }else {
                         var v = prevBrightness + delta
-                        if(v > 100) {
-                            v = 100
+                        if(v > MAX_BRIGHTNESS) {
+                            v = MAX_BRIGHTNESS
                         }else if(v <= 0) {
                             v = 0
                         }

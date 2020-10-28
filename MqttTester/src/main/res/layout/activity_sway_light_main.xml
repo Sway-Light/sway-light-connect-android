@@ -54,11 +54,13 @@
         app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint">
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/ti_light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Light" />
 
         <com.google.android.material.tabs.TabItem
+            android:id="@+id/ti_music"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Music" />
