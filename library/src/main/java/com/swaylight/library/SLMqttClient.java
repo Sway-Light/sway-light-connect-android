@@ -16,6 +16,8 @@ import org.json.JSONObject;
 public class SLMqttClient extends MqttAndroidClient {
     public final String CLIENT_ID = "id";
     public final String VALUE = "value";
+    public final String OFFSET = "offset";
+    public final String ZOOM = "zoom";
     private final String tag = getClass().getSimpleName();
 
     public SLMqttClient(Context context, String serverURI, String clientId) {
@@ -66,28 +68,6 @@ public class SLMqttClient extends MqttAndroidClient {
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
             Log.d(tag, "pub " + topic + ":" + payload);
-            if(SLMqttManager.getInstance().isConnected()){
-                SLMqttManager.getInstance().publish(topic, msg);
-            }else {
-                return;
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void publish(SLTopic swayLightTopic, String deviceName, int value) {
-        JSONObject jsonObj = new JSONObject();
-        try {
-            jsonObj.put(this.CLIENT_ID, this.getClientId());
-            jsonObj.put(this.VALUE, value);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
-        String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
-        try {
-            Log.d(tag, "pub " + topic + ":" + value);
             if(SLMqttManager.getInstance().isConnected()){
                 SLMqttManager.getInstance().publish(topic, msg);
             }else {
