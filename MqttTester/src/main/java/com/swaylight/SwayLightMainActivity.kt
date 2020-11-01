@@ -1,10 +1,12 @@
 package com.swaylight
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.TextView
@@ -22,8 +24,10 @@ class SwayLightMainActivity : AppCompatActivity() {
     var ivRing: ImageView? = null
     var tvZoom: TextView? = null
     var tvBrightness: TextView? = null
+    var btDebug: View? = null
 
     // values
+    var debugClickCount = 0
     var ringCenterX = 0
     var ringCenterY = 0
     var ringStartRotate = 0f
@@ -46,6 +50,15 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
+        btDebug = findViewById(R.id.debug_view)
+        btDebug?.setOnClickListener{
+            debugClickCount++
+            if(debugClickCount >= 10) {
+                val intent = Intent(this, ConnectActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+        }
         ivRing = findViewById(R.id.iv_ring)
         tvZoom = findViewById(R.id.tv_zoom)
         tvBrightness = findViewById(R.id.tv_brightness)
