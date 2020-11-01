@@ -10,6 +10,7 @@
 
     <gradient
         android:endColor="@color/warm"
+        android:centerColor="#FFFFFF"
         android:startColor="@color/cold"
         android:type="sweep" />
 
