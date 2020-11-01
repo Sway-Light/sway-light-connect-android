@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.swaylight.library.SLMqttClient;
 import com.swaylight.library.SLMqttManager;
+import com.swaylight.library.data.SLDisplay;
 import com.swaylight.library.data.SLMusicColor;
 import com.swaylight.library.data.SLTopic;
 
@@ -37,12 +38,15 @@ public class MusicFragment extends Fragment {
     private SeekBar sbGreen;
     private SeekBar sbBlue;
     private SeekBar sbOffset;
+    private SeekBar sbZoom;
     private TextView tvRed;
     private TextView tvGreen;
     private TextView tvBlue;
     private TextView tvOffset;
+    private TextView tvZoom;
     private CheckBox cbReleasePublish;
     private SLMusicColor colorObj;
+    private SLDisplay displayObj;
 
     public MusicFragment() {
     }
@@ -58,6 +62,7 @@ public class MusicFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_music, container, false);
 
         colorObj = new SLMusicColor();
+        displayObj = new SLDisplay(0,0);
 
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
@@ -68,11 +73,13 @@ public class MusicFragment extends Fragment {
         sbGreen = v.findViewById(R.id.green_seekbar);
         sbBlue = v.findViewById(R.id.blue_seekbar);
         sbOffset = v.findViewById(R.id.offset_seekbar);
+        sbZoom = v.findViewById(R.id.zoom_seekbar);
 
         tvRed = v.findViewById(R.id.tv_red);
         tvGreen = v.findViewById(R.id.tv_green);
         tvBlue = v.findViewById(R.id.tv_blue);
         tvOffset = v.findViewById(R.id.tv_offset);
+        tvZoom = v.findViewById(R.id.tv_zoom);
         cbReleasePublish = v.findViewById(R.id.release_publish_checkbox);
 
         spLevel = v.findViewById(R.id.level_spinner);
@@ -159,9 +166,10 @@ public class MusicFragment extends Fragment {
         sbOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvOffset.setText(getString(R.string.offset) + ": " + progress);
+                displayObj.setOffset(progress);
+                tvOffset.setText(getString(R.string.offset) + ": " + displayObj.getOffset());
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, progress);
+                    client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, displayObj.getInstance());
                 }
             }
 
@@ -172,7 +180,28 @@ public class MusicFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, seekBar.getProgress());
+                client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, displayObj.getInstance());
+            }
+        });
+
+        sbZoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                displayObj.setZoom(progress);
+                tvZoom.setText(getString(R.string.offset) + ": " + displayObj.getZoom());
+                if(!cbReleasePublish.isChecked()) {
+                    client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, displayObj.getInstance());
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                client.publish(SLTopic.MUSIC_MODE_OFFSET, deviceName, displayObj.getInstance());
             }
         });
         return v;

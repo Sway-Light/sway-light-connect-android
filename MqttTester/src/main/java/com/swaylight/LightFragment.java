@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.swaylight.library.SLMqttClient;
 import com.swaylight.library.SLMqttManager;
+import com.swaylight.library.data.SLDisplay;
 import com.swaylight.library.data.SLLightColor;
 import com.swaylight.library.data.SLTopic;
 
@@ -40,6 +41,7 @@ public class LightFragment extends Fragment {
     private CheckBox cbReleasePublish;
 
     private SLLightColor colorObj;
+    private SLDisplay displayObj;
 
     public LightFragment() {
 
@@ -57,6 +59,7 @@ public class LightFragment extends Fragment {
         tvModeName = v.findViewById(R.id.textview_mode);
 
         colorObj = new SLLightColor();
+        displayObj = new SLDisplay(0 ,0);
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
 
@@ -164,9 +167,10 @@ public class LightFragment extends Fragment {
         sbOffset.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvOffset.setText(getString(R.string.offset) + ": " + progress);
+                displayObj.setOffset(progress);
+                tvOffset.setText(getString(R.string.offset) + ": " + displayObj.getOffset());
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, progress);
+                    client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, displayObj.getInstance());
                 }
             }
 
@@ -177,16 +181,17 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, seekBar.getProgress());
+                client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, displayObj.getInstance());
             }
         });
 
         sbZoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvZoom.setText(getString(R.string.zoom) + ": " + progress);
+                displayObj.setZoom(progress);
+                tvZoom.setText(getString(R.string.zoom) + ": " + displayObj.getZoom());
                 if(!cbReleasePublish.isChecked()) {
-                    client.publish(SLTopic.LIGHT_MODE_ZOOM, deviceName, progress);
+                    client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, displayObj.getInstance());
                 }
             }
 
@@ -197,7 +202,7 @@ public class LightFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                client.publish(SLTopic.LIGHT_MODE_ZOOM, deviceName, seekBar.getProgress());
+                client.publish(SLTopic.LIGHT_MODE_OFFSET, deviceName, displayObj.getInstance());
             }
         });
 
