@@ -21,8 +21,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -35,19 +34,9 @@
                     android:paddingRight="15dp"
                     android:background="@color/card_title_bg">
 
-                    <ImageView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/gradient_circle"
-                        android:rotation="90">
-                    </ImageView>
+                    <com.swaylight.custom_ui.GradientCircle
+                       style="@style/ColdWarmGradient"/>
 
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_weight="0.5">
-                    </View>
 
                     <TextView
                         android:layout_width="0dp"
@@ -60,33 +49,29 @@
 
                 </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="10"
-                android:paddingTop="10dp"
-                android:paddingBottom="5dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:weightSum="10">
+                    android:orientation="horizontal"
+                    android:weightSum="10"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
 
-                    <ImageView
-                        android:id="@+id/iv_gradient_circle"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:src="@drawable/gradient_circle"
-                        android:padding="5dp">
-                    </ImageView>
+                        android:weightSum="10">
 
+                        <com.swaylight.custom_ui.GradientCircle
+                            style="@style/ColdWarmGradient" />
+
+                        <com.swaylight.custom_ui.GradientCircle
+                            style="@style/ColdWarmGradient"/>
+
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
@@ -101,17 +86,49 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="10dp"
-                android:paddingStart="20dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:fontFamily="@font/pt_sans_narrow"
-                    android:text="@string/rgb"
-                    android:textSize="24sp" />
+                    android:orientation="horizontal"
+                    android:weightSum="10"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:background="@color/card_title_bg">
+
+                    <com.swaylight.custom_ui.GradientCircle
+                        style="@style/ColdWarmGradient"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start|center_vertical"
+                        android:fontFamily="@font/pt_sans_narrow"
+                        android:text="@string/rgb"
+                        android:textSize="24sp" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="10"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp">
+
+                    <com.swaylight.custom_ui.GradientCircle
+                        style="@style/ColdWarmGradient"
+                        android:id="@+id/grad_circle"
+                        app:isCheck="true" />
+
+                    <com.swaylight.custom_ui.GradientCircle
+                        style="@style/ColdWarmGradient"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
