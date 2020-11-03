@@ -54,8 +54,6 @@ class SlLightFragment : Fragment() {
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
             val g = CircleView(context!!, null, gradColor.startColor!!, gradColor.endColor!!)
-            g.isCheck = false
-            g.ringColor = 0xFFFFFFFF.toInt()
             g.setOnClickListener{
                 for (gc in gradCircleViews) {
                     gc.isCheck = false
@@ -63,22 +61,16 @@ class SlLightFragment : Fragment() {
                 g.isCheck = true
                 btStartColor!!.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
                 btEndColor!!.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
-                val colors = intArrayOf(g.startColor, g.endColor)
-                val gradDrawable = sbGrad!!.progressDrawable as GradientDrawable
-                gradDrawable.colors = colors
-                gradDrawable.orientation = GradientDrawable.Orientation.LEFT_RIGHT
+                Utils.setSeekBarColor(sbGrad!!, gradColor)
             }
             gradCircleViews.add(g)
             gradCircleGroup!!.addView(g)
         }
 
         val firstCircle = gradCircleViews[0]
-        val colors = intArrayOf(firstCircle.startColor, firstCircle.endColor)
-        val gradDrawable = sbGrad!!.progressDrawable as GradientDrawable
+        Utils.setSeekBarColor(sbGrad!!, gradColorList[0])
         firstCircle.isCheck = true
         btStartColor!!.drawable.colorFilter = PorterDuffColorFilter(firstCircle.startColor, PorterDuff.Mode.SRC)
         btEndColor!!.drawable.colorFilter = PorterDuffColorFilter(firstCircle.endColor, PorterDuff.Mode.SRC)
-        gradDrawable.colors = colors
-        gradDrawable.orientation = GradientDrawable.Orientation.LEFT_RIGHT
     }
 }
