@@ -4,14 +4,16 @@
     android:useLevel="false">
 
     <size
-        android:height="40dp"
-        android:width="40dp">
+        android:height="10dp"
+        android:width="10dp">
     </size>
 
     <gradient
-        android:endColor="@color/warm"
-        android:centerColor="#FFFFFF"
-        android:startColor="@color/cold"
-        android:type="sweep"/>
+        android:type="linear"
+        android:angle="0"
+        android:startColor="@color/grad_rgb1"
+        android:centerColor="@color/grad_rgb2"
+        android:endColor="@color/grad_rgb3">
+    </gradient>
 
 </shape>

@@ -13,4 +13,16 @@
     
     <color name="cold">#A8E0FF</color>
     <color name="warm">#FFE4AF</color>
+    <color name="david_green">#AFFFF1</color>
+
+    <color name="grad_rgb1">#FF7C7C</color>
+    <color name="grad_rgb2">#8296FF</color>
+    <color name="grad_rgb3">#84FF90</color>
+
+    <array name="grad_rgb">
+        <item>#FF7C7C</item>
+        <item>#BC8AC2</item>
+        <item>#8296FF</item>
+        <item>#84FF90</item>
+    </array>
 </resources>

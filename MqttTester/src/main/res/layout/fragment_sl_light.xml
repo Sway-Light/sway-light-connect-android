@@ -45,7 +45,7 @@
                         android:layout_weight="9"
                         android:fontFamily="@font/pt_sans_narrow"
                         android:text="@string/gradient"
-                        android:textSize="24dp" />
+                        android:textSize="24sp" />
 
                 </LinearLayout>
 
@@ -146,8 +146,11 @@
                     android:paddingRight="15dp"
                     android:background="@color/card_title_bg">
 
-                    <com.swaylight.custom_ui.CircleView
-                        style="@style/ColdWarmGradient"/>
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="5dp"
+                        android:src="@drawable/gradient_circle"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -158,6 +161,7 @@
                         android:textSize="24sp" />
 
                 </LinearLayout>
+
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
