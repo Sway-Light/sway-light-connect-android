@@ -6,20 +6,16 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.SweepGradient
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.swaylight.R
-import com.swaylight.R.styleable.*
-import com.swaylight.SwayLightMainActivity
 
 
-class GradientCircle(context: Context, attrs: AttributeSet?): View(context, attrs) {
+class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
 
 
-    private val TAG = GradientCircle::class.java.simpleName
+    private val TAG = CircleView::class.java.simpleName
     var startColor: Int = Color.BLACK
     var endColor: Int = Color.BLACK
     var centerColor: Int? = null
@@ -45,17 +41,17 @@ class GradientCircle(context: Context, attrs: AttributeSet?): View(context, attr
     init {
         context.theme.obtainStyledAttributes(
                 attrs,
-                R.styleable.GradientCircle,
+                R.styleable.CircleView,
                 0, 0).apply {
 
             try {
                 super.setLayoutParams(params)
-                startColor = getInteger(GradientCircle_android_startColor, 0)
-                endColor = getInteger(GradientCircle_android_endColor, 0)
-                centerColor = getInteger(GradientCircle_android_centerColor, 0)
-                ringColor = getInteger(GradientCircle_ringColor, 0xFFFFFFFF.toInt())
-                rotation = getFloat(GradientCircle_android_rotation, 0f).toInt()
-                isCheck = getBoolean(GradientCircle_isCheck, false)
+                startColor = getInteger(R.styleable.CircleView_android_startColor, 0)
+                endColor = getInteger(R.styleable.CircleView_android_endColor, 0)
+                centerColor = getInteger(R.styleable.CircleView_android_centerColor, 0)
+                ringColor = getInteger(R.styleable.CircleView_ringColor, 0xFFFFFFFF.toInt())
+                rotation = getFloat(R.styleable.CircleView_android_rotation, 0f).toInt()
+                isCheck = getBoolean(R.styleable.CircleView_isCheck, false)
             } finally {
                 recycle()
             }

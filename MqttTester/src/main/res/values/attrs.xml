@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="GradientCircle">
+    <declare-styleable name="CircleView">
         <attr name="android:rotation" format="integer"/>
         <attr name="android:startColor" format="color"/>
         <attr name="android:endColor" format="color"/>
@@ -14,6 +14,5 @@
             <enum name="sweep"  value="2" />
         </attr>
         <attr name="isCheck" format="boolean"/>
-
     </declare-styleable>
 </resources>

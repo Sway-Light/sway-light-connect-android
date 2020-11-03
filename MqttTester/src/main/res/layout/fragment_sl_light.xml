@@ -34,7 +34,7 @@
                     android:paddingBottom="5dp"
                     android:weightSum="10">
 
-                    <com.swaylight.custom_ui.GradientCircle
+                    <com.swaylight.custom_ui.CircleView
                         style="@style/ColdWarmGradient" />
 
 
@@ -49,16 +49,76 @@
 
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/grad_circle_group"
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="15dp"
+                    android:paddingTop="10dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="5dp" >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/grad_circle_group"
+                        android:orientation="horizontal" >
+                        <ImageButton
+                            android:id="@+id/bt_add_grad"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_plus"
+                            android:layout_gravity="center_vertical"
+                            android:background="@android:color/transparent"
+                            android:padding="5dp"/>
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:paddingLeft="15dp"
                     android:paddingTop="10dp"
                     android:paddingRight="15dp"
-                    android:paddingBottom="5dp"
-                    android:weightSum="10" />
+                    android:paddingBottom="5dp">
+
+                    <ImageButton
+                        android:id="@+id/bt_start_color"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@android:color/transparent"
+                        android:padding="3dp"
+                        android:src="@drawable/bg_round"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <SeekBar
+                        android:id="@+id/sb_grad"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:thumb="@drawable/thumb"
+                        android:splitTrack="false"
+                        android:progressDrawable="@drawable/progress"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/bt_end_color"
+                        app:layout_constraintStart_toEndOf="@+id/bt_start_color"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageButton
+                        android:id="@+id/bt_end_color"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@android:color/transparent"
+                        android:padding="5dp"
+                        android:src="@drawable/bg_round"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
@@ -86,7 +146,7 @@
                     android:paddingRight="15dp"
                     android:background="@color/card_title_bg">
 
-                    <com.swaylight.custom_ui.GradientCircle
+                    <com.swaylight.custom_ui.CircleView
                         style="@style/ColdWarmGradient"/>
 
                     <TextView
@@ -98,23 +158,29 @@
                         android:textSize="24sp" />
 
                 </LinearLayout>
-                <LinearLayout
+                <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:weightSum="10"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
-                    android:paddingRight="15dp">
+                    android:paddingTop="10dp"
+                    android:paddingRight="15dp"
+                    android:paddingBottom="5dp" >
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/rgb_circle_group"
+                        android:orientation="horizontal" >
+                        <ImageButton
+                            android:id="@+id/bt_add_rgb"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:src="@drawable/ic_plus"
+                            android:background="@android:color/transparent"
+                            android:layout_gravity="center_vertical"
+                            android:padding="5dp"/>
+                    </LinearLayout>
 
-                    <com.swaylight.custom_ui.GradientCircle
-                        style="@style/ColdWarmGradient"
-                        app:isCheck="false" />
-
-                    <com.swaylight.custom_ui.GradientCircle
-                        style="@style/ColdWarmGradient"/>
-
-                </LinearLayout>
+                </HorizontalScrollView>
 
             </LinearLayout>
 
