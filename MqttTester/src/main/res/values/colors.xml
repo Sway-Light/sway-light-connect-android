@@ -7,4 +7,22 @@
     <color name="redBg">#FFBDBD</color>
     <color name="greenBg">#ADFF96</color>
     <color name="blueBg">#ADDEFF</color>
+
+    <color name="card_title_bg">#DADADA</color>
+    <color name="card_bg">#BBBBBB</color>
+    
+    <color name="cold">#A8E0FF</color>
+    <color name="warm">#FFE4AF</color>
+    <color name="david_green">#AFFFF1</color>
+
+    <color name="grad_rgb1">#FF7C7C</color>
+    <color name="grad_rgb2">#8296FF</color>
+    <color name="grad_rgb3">#84FF90</color>
+
+    <array name="grad_rgb">
+        <item>#FF7C7C</item>
+        <item>#BC8AC2</item>
+        <item>#8296FF</item>
+        <item>#84FF90</item>
+    </array>
 </resources>

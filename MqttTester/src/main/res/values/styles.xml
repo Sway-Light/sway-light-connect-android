@@ -8,4 +8,16 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="ColdWarmGradient">
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:startColor">@color/warm</item>
+        <item name="android:endColor">@color/cold</item>
+        <item name="android:centerColor">#FFFFFF</item>
+        <item name="ringColor">#FFFFFF</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="isCheck">false</item>
+        <item name="android:rotation">45</item>
+    </style>
+
 </resources>

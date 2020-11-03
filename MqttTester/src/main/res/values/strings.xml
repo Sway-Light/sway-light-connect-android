@@ -51,6 +51,10 @@
     <string name="MQTT_BROKER">MQTT_BROKER</string>
     <string name="MQTT_CLIENT_ID">MQTT_CLIENT_ID</string>
 
+    <!--    UI String-->
+    <string name="gradient">Gradient</string>
+    <string name="rgb">RGB</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
