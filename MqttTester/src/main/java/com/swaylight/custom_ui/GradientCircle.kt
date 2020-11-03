@@ -32,7 +32,7 @@ class GradientCircle(context: Context, attrs: AttributeSet?): View(context, attr
                 endColor = getInteger(GradientCircle_android_endColor, 0)
                 centerColor = getInteger(GradientCircle_android_centerColor, 0)
                 ringColor = getInteger(GradientCircle_ringColor, 0)
-                rotation = getInteger(GradientCircle_android_rotation, 90)
+                rotation = getFloat(GradientCircle_android_rotation, 0f).toInt()
                 isCheck = getBoolean(GradientCircle_isCheck, false)
             } finally {
                 recycle()

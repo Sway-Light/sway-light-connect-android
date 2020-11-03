@@ -17,6 +17,7 @@
         <item name="ringColor">#FFFFFF</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="isCheck">false</item>
+        <item name="android:rotation">45</item>
     </style>
 
 </resources>
