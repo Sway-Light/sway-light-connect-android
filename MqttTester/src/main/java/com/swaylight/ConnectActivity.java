@@ -17,8 +17,10 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.swaylight.data.FilePath;
 import com.swaylight.library.SLMqttDetail;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -78,7 +80,7 @@ public class ConnectActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mqttList.remove(detail);
-                        writeToFile(mqttList);
+                        writeToFile(FilePath.MQTT_LIST, mqttList);
                         Log.d(tag, "mqttList:" + mqttList.toString());
                         updateList();
                     }
@@ -94,7 +96,7 @@ public class ConnectActivity extends AppCompatActivity {
             }
         });
 
-        readFromFile();
+        readFromFile(FilePath.MQTT_LIST);
         updateList();
 
         btConnect.setOnClickListener(new View.OnClickListener() {
@@ -146,8 +148,8 @@ public class ConnectActivity extends AppCompatActivity {
             if(!contain) {
                 mqttList.add(newDetail);
             }
-            writeToFile(mqttList);
-            readFromFile();
+            writeToFile(FilePath.MQTT_LIST, mqttList);
+            readFromFile(FilePath.MQTT_LIST);
             updateList();
             Intent i = new Intent(ConnectActivity.this, cls);
             Bundle bundle = new Bundle();
@@ -159,9 +161,9 @@ public class ConnectActivity extends AppCompatActivity {
         }
     }
 
-    private void writeToFile(ArrayList<SLMqttDetail> arrayList) {
+    private void writeToFile(FilePath path, ArrayList<SLMqttDetail> arrayList) {
         try {
-            FileOutputStream writeStream = new FileOutputStream(getFilesDir() + "/mqtt_list.txt");
+            FileOutputStream writeStream = new FileOutputStream(getFilesDir() + "/" + path.getFile());
             ObjectOutputStream oos = new ObjectOutputStream(writeStream);
             for(SLMqttDetail detail: arrayList) {
                 Log.d(tag, "write:" + detail.toString());
@@ -175,10 +177,10 @@ public class ConnectActivity extends AppCompatActivity {
         }
     }
 
-    private void readFromFile() {
+    private void readFromFile(FilePath path) {
         mqttList.clear();
         try {
-            FileInputStream inputStream = new FileInputStream(getFilesDir() + "/mqtt_list.txt");
+            FileInputStream inputStream = new FileInputStream(getFilesDir() + "/" + path.getFile());
             ObjectInputStream ois = new ObjectInputStream(inputStream);
             boolean hasNext = true;
             while (hasNext) {

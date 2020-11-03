@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleView">
+        <attr name="android:rotation" format="integer"/>
+        <attr name="android:startColor" format="color"/>
+        <attr name="android:endColor" format="color"/>
+        <attr name="android:centerColor" format="color"/>
+        <attr name="ringColor" format="color"/>
+        <attr name="android:type" format="enum">
+            <enum name="linear" value="0" />
+            <!-- Radial gradient extending from the center point outward. -->
+            <enum name="radial" value="1" />
+            <!-- Sweep (or angular) gradient sweeping counter-clockwise around the center point. -->
+            <enum name="sweep"  value="2" />
+        </attr>
+        <attr name="isCheck" format="boolean"/>
+    </declare-styleable>
+</resources>

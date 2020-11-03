@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.ImageView
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -158,5 +159,10 @@ class SwayLightMainActivity : AppCompatActivity() {
             true
         }
 
+        val fragmentManager = supportFragmentManager
+        val lightFragment: SlLightFragment = SlLightFragment()
+        if(!lightFragment.isAdded) {
+            fragmentManager.beginTransaction().add(R.id.control_sv, lightFragment).commit()
+        }
     }
 }
