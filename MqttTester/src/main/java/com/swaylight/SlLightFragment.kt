@@ -1,6 +1,7 @@
 package com.swaylight
 
 import android.graphics.Color
+import android.graphics.Color.valueOf
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Build
@@ -13,6 +14,8 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.red
+import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.data.GradientColor
@@ -37,7 +40,11 @@ class SlLightFragment : Fragment() {
 
     var btStartColor: ImageButton? = null
     var btEndColor: ImageButton? = null
+    var btRgbColor: ImageButton? = null
     var sbGrad: SeekBar? = null
+    var sbRed: SeekBar? = null
+    var sbGreen: SeekBar? = null
+    var sbBlue: SeekBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +62,7 @@ class SlLightFragment : Fragment() {
         sbGrad = v.findViewById(R.id.sb_grad)
         generateGradCircles()
 
+        btRgbColor = v.findViewById(R.id.bt_rgb_color)
         rgbColorList = arrayListOf(
                 RgbColor(ContextCompat.getColor(context!!, R.color.david_green)),
                 RgbColor(Color.BLACK),
@@ -62,6 +70,9 @@ class SlLightFragment : Fragment() {
                 RgbColor(Color.WHITE),
                 RgbColor(Color.GREEN))
         rgbCircleGroup = v.findViewById(R.id.rgb_circle_group)
+        sbRed = v.findViewById(R.id.sb_red)
+        sbGreen = v.findViewById(R.id.sb_green)
+        sbBlue = v.findViewById(R.id.sb_blue)
         generateRgbCircles()
         return v
     }
@@ -74,12 +85,17 @@ class SlLightFragment : Fragment() {
                     gc.isCheck = false
                 }
                 g.isCheck = true
+                btRgbColor!!.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
+                Utils.setSeekBarColor(sbRed!!, sbGreen!!, sbBlue!!, rgbColor)
             }
             rgbCircleViews.add(g)
             rgbCircleGroup!!.addView(g)
         }
         val firstCircle = rgbCircleViews[0]
         firstCircle.isCheck = true
+        btRgbColor!!.drawable.colorFilter = PorterDuffColorFilter(firstCircle.startColor, PorterDuff.Mode.SRC)
+        Utils.setSeekBarColor(sbRed!!, sbGreen!!, sbBlue!!, rgbColorList!![0])
+
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
