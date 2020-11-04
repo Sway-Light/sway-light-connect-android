@@ -10,6 +10,7 @@
 
     <color name="card_title_bg">#DADADA</color>
     <color name="card_bg">#BBBBBB</color>
+    <color name="tab_bg">#E7E7E7</color>
     
     <color name="cold">#A8E0FF</color>
     <color name="warm">#FFE4AF</color>

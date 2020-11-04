@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval" >
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape
+            android:shape="oval">
+            <solid android:color="@color/card_title_bg" />
+            <size
+                android:height="30dp"
+                android:width="30dp" />
 
-    <solid android:color="@android:color/black" />
+        </shape>
+    </item>
 
-    <size
-        android:height="30dp"
-        android:width="30dp" />
+    <item>
+        <shape
+            android:shape="oval">
+            <gradient
+                android:type="radial"
+                android:gradientRadius="100%p"
+                android:startColor="#00FFFFFF"
+                android:endColor="#575757" />
+        </shape>
+    </item>
 
-</shape>
+</layer-list>
