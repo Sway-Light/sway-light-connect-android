@@ -10,10 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.SeekBar
+import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -58,6 +55,7 @@ class SlLightFragment : Fragment() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -84,13 +82,20 @@ class SlLightFragment : Fragment() {
         sbGreen = v.findViewById(R.id.sb_green)
         sbBlue = v.findViewById(R.id.sb_blue)
         generateRgbCircles()
+        v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_selected)
         gradTab!!.setOnClickListener {
-            if(this.type != ControlType.GRADIENT_COLOR)
+            if(this.type != ControlType.GRADIENT_COLOR) {
+                v.findViewById<TextView>(R.id.tv_rgb).setTextAppearance(R.style.tv_mode_unselected)
+                v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_selected)
                 setControlType(ControlType.GRADIENT_COLOR)
+            }
         }
         rgbTab!!.setOnClickListener {
-            if(this.type != ControlType.RGB_COLOR)
+            if(this.type != ControlType.RGB_COLOR) {
+                v.findViewById<TextView>(R.id.tv_rgb).setTextAppearance(R.style.tv_mode_selected)
+                v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_unselected)
                 setControlType(ControlType.RGB_COLOR)
+            }
         }
         setControlType(ControlType.GRADIENT_COLOR)
         return v
@@ -104,6 +109,7 @@ class SlLightFragment : Fragment() {
     private fun setControlType(type: ControlType) {
         when(type) {
             ControlType.GRADIENT_COLOR ->{
+
                 collapse(rgbControlCard!!)
                 expand(gradControlCard!!)
             }

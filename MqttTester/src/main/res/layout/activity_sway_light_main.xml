@@ -13,7 +13,8 @@
         android:layout_height="300dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/warm">
 
         <ImageView
             android:id="@+id/iv_ring"
@@ -31,6 +32,7 @@
             android:id="@+id/tv_zoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:text="@string/zoom"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -39,6 +41,7 @@
             android:id="@+id/tv_brightness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
             android:text="@string/brightness"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -52,13 +55,52 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <LinearLayout
+        android:id="@+id/mode_group"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/mode_bg_round"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:weightSum="2"
+        app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint">
+
+        <Button
+            android:id="@+id/bt_light"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bt_round"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:text="Light"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/bt_music"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bt_round"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:text="Music"
+            android:visibility="invisible"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint">
+        app:layout_constraintTop_toBottomOf="@+id/mode_group"
+        android:visibility="gone">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/ti_light"
@@ -75,7 +117,6 @@
     </com.google.android.material.tabs.TabLayout>
 
     <ScrollView
-        android:id="@+id/control_sv"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/textView3"
@@ -83,6 +124,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/control_frame"/>
     </ScrollView>
 
     <TextView
@@ -91,7 +136,9 @@
         android:layout_height="40dp"
         android:fontFamily="@font/pt_sans_narrow"
         android:gravity="center"
+        android:letterSpacing="0.2"
         android:text="@string/sway_light"
+        android:textAllCaps="true"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

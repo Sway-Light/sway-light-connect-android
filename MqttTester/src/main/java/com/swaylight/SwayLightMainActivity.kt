@@ -8,9 +8,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.ImageView
-import android.widget.ScrollView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.atan2
@@ -22,12 +20,16 @@ class SwayLightMainActivity : AppCompatActivity() {
     // UI
     var rootConstraint: ConstraintLayout? = null
     var lightTopConstraint: ConstraintLayout? = null
+    var modeGroup: LinearLayout? = null
     var ivRing: ImageView? = null
     var tvZoom: TextView? = null
     var tvBrightness: TextView? = null
     var btDebug: View? = null
+    var btLight: Button? = null
+    var btMusic: Button? = null
 
     // values
+    var mode = Mode.LIGHT
     var debugClickCount = 0
     var ringCenterX = 0
     var ringCenterY = 0
@@ -67,7 +69,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             override fun onGlobalLayout() {
                 val params: ConstraintLayout.LayoutParams = lightTopConstraint?.layoutParams as ConstraintLayout.LayoutParams
 
-                params.height = (rootConstraint?.width!! * 0.7).toInt()
+                params.height = (rootConstraint?.width!! * 0.9).toInt()
                 params.width = (rootConstraint?.width!!).toInt()
                 lightTopConstraint?.layoutParams = params
                 val location = intArrayOf(0, 0)
@@ -160,9 +162,52 @@ class SwayLightMainActivity : AppCompatActivity() {
         }
 
         val fragmentManager = supportFragmentManager
-        val lightFragment: SlLightFragment = SlLightFragment()
+        val lightFragment = SlLightFragment()
+        val musicFragment = SlMusicFragment()
         if(!lightFragment.isAdded) {
-            fragmentManager.beginTransaction().add(R.id.control_sv, lightFragment).commit()
+            fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
         }
+        if(!musicFragment.isAdded) {
+            fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).hide(musicFragment).commit()
+        }
+
+        btLight = findViewById(R.id.bt_light)
+        btMusic = findViewById(R.id.bt_music)
+        modeGroup = findViewById(R.id.mode_group)
+        modeGroup!!.setOnClickListener {
+            when(mode) {
+                Mode.MUSIC -> {
+                    mode = Mode.LIGHT
+                    btLight!!.visibility = View.VISIBLE
+                    btMusic!!.visibility = View.INVISIBLE
+                    fragmentManager.beginTransaction()
+                            .show(lightFragment)
+                            .hide(musicFragment)
+                            .commit()
+                }
+                Mode.LIGHT -> {
+                    mode = Mode.MUSIC
+                    btMusic!!.visibility = View.VISIBLE
+                    btLight!!.visibility = View.INVISIBLE
+                    fragmentManager.beginTransaction()
+                            .show(musicFragment)
+                            .hide(lightFragment)
+                            .commit()
+                }
+            }
+        }
+//        btLight!!.setOnClickListener {
+//            mode = Mode.LIGHT
+//            btMusic!!.visibility = View.INVISIBLE
+//        }
+//        btMusic!!.setOnClickListener {
+//            mode = Mode.MUSIC
+//            btLight!!.visibility = View.INVISIBLE
+//        }
+    }
+
+    enum class Mode(val mode: Int) {
+        LIGHT(0x02),
+        MUSIC(0x03)
     }
 }
