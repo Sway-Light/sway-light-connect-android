@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mqtt Tester</string>
+    <string name="app_name">Sway Light Connect</string>
 
     <string name="connect">Connect</string>
     <string name="config">Configuration</string>
