@@ -1,7 +1,6 @@
 package com.swaylight
 
 import android.graphics.Color
-import android.graphics.Color.valueOf
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Build
@@ -9,13 +8,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.Transformation
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.red
-import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.data.GradientColor
@@ -38,6 +38,11 @@ class SlLightFragment : Fragment() {
     var rgbCircleGroup: LinearLayout? = null
     var rgbColorList: ArrayList<RgbColor>? = null
 
+    var gradTab: LinearLayout? = null
+    var rgbTab: LinearLayout? = null
+    var gradControlCard: RelativeLayout? = null
+    var rgbControlCard: RelativeLayout? = null
+
     var btStartColor: ImageButton? = null
     var btEndColor: ImageButton? = null
     var btRgbColor: ImageButton? = null
@@ -46,16 +51,21 @@ class SlLightFragment : Fragment() {
     var sbGreen: SeekBar? = null
     var sbBlue: SeekBar? = null
 
+    var type: ControlType = ControlType.GRADIENT_COLOR
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_sl_light, container, false)
+        gradTab = v.findViewById(R.id.grad_tab)
+        rgbTab = v.findViewById(R.id.rgb_tab)
+        gradControlCard = v.findViewById(R.id.grad_control_card)
+        rgbControlCard = v.findViewById(R.id.rgb_control_card)
         btStartColor = v.findViewById(R.id.bt_start_color)
         btEndColor = v.findViewById(R.id.bt_end_color)
         gradCircleGroup = v.findViewById(R.id.grad_circle_group)
@@ -74,7 +84,35 @@ class SlLightFragment : Fragment() {
         sbGreen = v.findViewById(R.id.sb_green)
         sbBlue = v.findViewById(R.id.sb_blue)
         generateRgbCircles()
+        gradTab!!.setOnClickListener {
+            if(this.type != ControlType.GRADIENT_COLOR)
+                setControlType(ControlType.GRADIENT_COLOR)
+        }
+        rgbTab!!.setOnClickListener {
+            if(this.type != ControlType.RGB_COLOR)
+                setControlType(ControlType.RGB_COLOR)
+        }
+        setControlType(ControlType.GRADIENT_COLOR)
         return v
+    }
+
+    enum class ControlType(val type: Int) {
+        GRADIENT_COLOR(0x00),
+        RGB_COLOR(0x01)
+    }
+
+    private fun setControlType(type: ControlType) {
+        when(type) {
+            ControlType.GRADIENT_COLOR ->{
+                collapse(rgbControlCard!!)
+                expand(gradControlCard!!)
+            }
+            ControlType.RGB_COLOR -> {
+                collapse(gradControlCard!!)
+                expand(rgbControlCard!!)
+            }
+        }
+        this.type = type
     }
 
     private fun generateRgbCircles() {
@@ -98,7 +136,6 @@ class SlLightFragment : Fragment() {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
             val g = if (gradColor.centerColor == null) {
@@ -124,5 +161,65 @@ class SlLightFragment : Fragment() {
         firstCircle.isCheck = true
         btStartColor!!.drawable.colorFilter = PorterDuffColorFilter(firstCircle.startColor, PorterDuff.Mode.SRC)
         btEndColor!!.drawable.colorFilter = PorterDuffColorFilter(firstCircle.endColor, PorterDuff.Mode.SRC)
+    }
+
+    private fun expand(v: View) {
+        v.isClickable = false
+        v.measure(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+        val targetHeight = v.measuredHeight
+        if (v.isShown) {
+            collapse(v)
+        } else {
+            v.layoutParams.height = 0
+            v.visibility = View.VISIBLE
+            val a: Animation = object : Animation() {
+                override fun applyTransformation(interpolatedTime: Float,
+                                                 t: Transformation?) {
+                    v.layoutParams.height =
+                            if (interpolatedTime == 1f) RelativeLayout.LayoutParams.WRAP_CONTENT
+                            else (targetHeight * interpolatedTime).toInt()
+                    v.requestLayout()
+                }
+
+                override fun willChangeBounds(): Boolean {
+                    return true
+                }
+
+                override fun hasEnded(): Boolean {
+                    v.isClickable = true
+                    return super.hasEnded()
+                }
+            }
+            a.duration = (targetHeight + 300).toLong()
+            v.startAnimation(a)
+        }
+    }
+
+    private fun collapse(v: View) {
+        v.isClickable = false
+        val initialHeight = v.measuredHeight
+        val a: Animation = object : Animation() {
+            override fun applyTransformation(interpolatedTime: Float,
+                                             t: Transformation?) {
+                if (interpolatedTime == 1f) {
+                    v.visibility = View.GONE
+                } else {
+                    v.layoutParams.height = (initialHeight
+                            - (initialHeight * interpolatedTime).toInt())
+                    v.requestLayout()
+                }
+            }
+
+            override fun willChangeBounds(): Boolean {
+                return true
+            }
+
+            override fun hasEnded(): Boolean {
+                v.isClickable = true
+                return super.hasEnded()
+            }
+        }
+        a.duration = (v.layoutParams.height + 300).toLong()
+        v.startAnimation(a)
     }
 }
