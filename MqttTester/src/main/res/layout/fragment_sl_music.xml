@@ -100,12 +100,12 @@
                             android:layout_width="200dp"
                             android:layout_height="100dp"
                             app:freq_size="32"
-                            app:high_color="@color/red"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
                             app:level_size="10"
-                            app:low_color="@color/green"
-                            app:medium_color="@color/yellow" />
+                            app:high_color="@color/red"
+                            app:medium_color="@color/yellow"
+                            app:low_color="@color/green" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </RelativeLayout>

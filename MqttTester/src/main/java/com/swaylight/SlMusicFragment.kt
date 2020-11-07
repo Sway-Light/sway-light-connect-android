@@ -1,5 +1,6 @@
 package com.swaylight
 
+import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -29,6 +30,7 @@ class SlMusicFragment : Fragment() {
     private lateinit var sbRed: SeekBar
     private lateinit var sbGreen: SeekBar
     private lateinit var sbBlue: SeekBar
+    private var currIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +59,16 @@ class SlMusicFragment : Fragment() {
         generateGradCircles()
 //        v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_selected)
         return v
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            Utils.setBgColor(lightTopConstraint,
+                    gradColorList[currIndex],
+                    GradientDrawable.Orientation.TOP_BOTTOM)
+            setEqualizerColor(gradColorList[currIndex])
+        }
     }
 
     private fun initUi() {
@@ -90,9 +102,7 @@ class SlMusicFragment : Fragment() {
                     gc.isCheck = false
                 }
                 g.isCheck = true
-                equalizerView.highColor = g.startColor
-                equalizerView.mediumColor = g.centerColor!!
-                equalizerView.lowColor = g.endColor
+                currIndex = gradCircleViews.indexOf(g)
 //                btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
 //                btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
 //                Utils.setSeekBarColor(sbGrad, gradColor)
@@ -102,11 +112,23 @@ class SlMusicFragment : Fragment() {
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
+                setEqualizerColor(gradColor)
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)
-            gradCircleViews[0].isCheck = true
         }
+        currIndex = 0
+        gradCircleViews[currIndex].isCheck = true
+        Utils.setBgColor(lightTopConstraint,
+                gradColorList[currIndex],
+                GradientDrawable.Orientation.TOP_BOTTOM)
+        setEqualizerColor(gradColorList[currIndex])
+    }
+
+    private fun setEqualizerColor(g: GradientColor) {
+        equalizerView.highColor = g.startColor!!
+        equalizerView.mediumColor = g.centerColor!!
+        equalizerView.lowColor = g.endColor!!
     }
 
     private fun expand(v: View) {

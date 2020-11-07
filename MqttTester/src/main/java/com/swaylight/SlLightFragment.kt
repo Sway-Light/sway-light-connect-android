@@ -50,6 +50,8 @@ class SlLightFragment : Fragment() {
     private lateinit var sbRed: SeekBar
     private lateinit var sbGreen: SeekBar
     private lateinit var sbBlue: SeekBar
+    private var currGradIndex = 0
+    private var currRgbIndex = 0
 
     var type: ControlType = ControlType.GRADIENT_COLOR
 
@@ -90,6 +92,24 @@ class SlLightFragment : Fragment() {
         return v
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) {
+            when(type) {
+                ControlType.GRADIENT_COLOR -> {
+                    Utils.setBgColor(lightTopConstraint,
+                            gradColorList[currGradIndex],
+                            GradientDrawable.Orientation.TOP_BOTTOM)
+                }
+                ControlType.RGB_COLOR -> {
+                    Utils.setBgColor(lightTopConstraint,
+                            rgbColorList!![currRgbIndex],
+                            GradientDrawable.Orientation.TOP_BOTTOM)
+                }
+            }
+        }
+    }
+
     private fun initUi() {
         lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
         gradTab = v.findViewById(R.id.grad_tab)
@@ -115,13 +135,18 @@ class SlLightFragment : Fragment() {
     private fun setControlType(type: ControlType) {
         when(type) {
             ControlType.GRADIENT_COLOR ->{
-
                 collapse(rgbControlCard)
                 expand(gradControlCard)
+                Utils.setBgColor(lightTopConstraint,
+                        gradColorList[currGradIndex],
+                        GradientDrawable.Orientation.TOP_BOTTOM)
             }
             ControlType.RGB_COLOR -> {
                 collapse(gradControlCard)
                 expand(rgbControlCard)
+                Utils.setBgColor(lightTopConstraint,
+                        rgbColorList!![currRgbIndex],
+                        GradientDrawable.Orientation.TOP_BOTTOM)
             }
         }
         this.type = type
@@ -140,14 +165,15 @@ class SlLightFragment : Fragment() {
                 Utils.setBgColor(lightTopConstraint,
                         rgbColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
+                currRgbIndex = rgbCircleViews!!.indexOf(g)
             }
             rgbCircleViews.add(g)
             rgbCircleGroup.addView(g)
         }
-        val firstCircle = rgbCircleViews[0]
-        firstCircle.isCheck = true
-        btRgbColor.drawable.colorFilter = PorterDuffColorFilter(firstCircle.startColor, PorterDuff.Mode.SRC)
-        Utils.setSeekBarColor(sbRed, sbGreen, sbBlue, rgbColorList!![0])
+        currRgbIndex = 0
+        rgbCircleViews[currRgbIndex].isCheck = true
+        btRgbColor.drawable.colorFilter = PorterDuffColorFilter(rgbCircleViews[currRgbIndex].startColor, PorterDuff.Mode.SRC)
+        Utils.setSeekBarColor(sbRed, sbGreen, sbBlue, rgbColorList!![currRgbIndex])
 
     }
 
@@ -178,16 +204,17 @@ class SlLightFragment : Fragment() {
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
+                currGradIndex = gradCircleViews.indexOf(g)
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)
         }
 
-        val firstCircle = gradCircleViews[0]
-        Utils.setSeekBarColor(sbGrad, gradColorList[0])
-        firstCircle.isCheck = true
-        btStartColor.drawable.colorFilter = PorterDuffColorFilter(firstCircle.startColor, PorterDuff.Mode.SRC)
-        btEndColor.drawable.colorFilter = PorterDuffColorFilter(firstCircle.endColor, PorterDuff.Mode.SRC)
+        currGradIndex = 0
+        Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+        gradCircleViews[currGradIndex].isCheck = true
+        btStartColor.drawable.colorFilter = PorterDuffColorFilter(gradCircleViews[currGradIndex].startColor, PorterDuff.Mode.SRC)
+        btEndColor.drawable.colorFilter = PorterDuffColorFilter(gradCircleViews[currGradIndex].endColor, PorterDuff.Mode.SRC)
     }
 
     private fun expand(v: View) {

@@ -159,8 +159,8 @@ class SwayLightMainActivity : AppCompatActivity() {
         }
 
         val fragmentManager = supportFragmentManager
-        val lightFragment = SlLightFragment()
         val musicFragment = SlMusicFragment()
+        val lightFragment = SlLightFragment()
         if(!musicFragment.isAdded) {
             fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).hide(musicFragment).commit()
         }
@@ -175,7 +175,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                     btLight.visibility = View.VISIBLE
                     btMusic.visibility = View.INVISIBLE
                     fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right)
                             .show(lightFragment)
+                            .commit()
+                    fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right)
                             .hide(musicFragment)
                             .commit()
                 }
@@ -184,7 +188,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                     btMusic.visibility = View.VISIBLE
                     btLight.visibility = View.INVISIBLE
                     fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left)
                             .show(musicFragment)
+                            .commit()
+                    fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left)
                             .hide(lightFragment)
                             .commit()
                 }

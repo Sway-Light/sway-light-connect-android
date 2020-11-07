@@ -10,6 +10,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.swaylight.R
+import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 
@@ -63,7 +64,7 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
                     startValue[i] = 100
                     endValue[i] = 100
                 }
-                getRandomData()
+                generateRandomData()
                 startAnimation()
             } finally {
                 recycle()
@@ -71,10 +72,12 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
         }
     }
 
-    private fun getRandomData() {
+    private fun generateRandomData() {
         for (i in 0 until freqSize) {
             startValue[i] = endValue[i]
-            endValue[i] = Random.nextInt(0, 100)
+            val weight = i.minus(freqSize.div(2)).absoluteValue.toFloat()
+                    .div(freqSize.div(2f))
+            endValue[i] = Random.nextInt(80.times(weight).toInt(), 50 + 50.times(weight).times(weight).toInt())
             deltaValue[i] = endValue[i] - startValue[i]
         }
     }
@@ -91,7 +94,7 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
         }
         animator?.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
-                getRandomData()
+                generateRandomData()
                 startAnimation()
             }
         })
