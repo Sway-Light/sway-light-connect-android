@@ -41,17 +41,17 @@ class SlMusicFragment : Fragment() {
         v = inflater.inflate(R.layout.fragment_sl_music, container, false)
         gradColorList = arrayListOf(
                 GradientColor(
-                        ContextCompat.getColor(context!!, R.color.green),
                         ContextCompat.getColor(context!!, R.color.red),
-                        ContextCompat.getColor(context!!, R.color.yellow)),
+                        ContextCompat.getColor(context!!, R.color.yellow),
+                        ContextCompat.getColor(context!!, R.color.green)),
                 GradientColor(
-                        ContextCompat.getColor(context!!, R.color.music_grad1_l),
                         ContextCompat.getColor(context!!, R.color.music_grad1_h),
-                        ContextCompat.getColor(context!!, R.color.music_grad1_m)),
+                        ContextCompat.getColor(context!!, R.color.music_grad1_m),
+                        ContextCompat.getColor(context!!, R.color.music_grad1_l)),
                 GradientColor(
-                        ContextCompat.getColor(context!!, R.color.music_grad2_l),
                         ContextCompat.getColor(context!!, R.color.music_grad2_h),
-                        ContextCompat.getColor(context!!, R.color.music_grad2_m))
+                        ContextCompat.getColor(context!!, R.color.music_grad2_m),
+                        ContextCompat.getColor(context!!, R.color.music_grad2_l))
         )
         initUi()
         generateGradCircles()
@@ -90,9 +90,9 @@ class SlMusicFragment : Fragment() {
                     gc.isCheck = false
                 }
                 g.isCheck = true
-                equalizerView.highColor = g.endColor
+                equalizerView.highColor = g.startColor
                 equalizerView.mediumColor = g.centerColor!!
-                equalizerView.lowColor = g.startColor
+                equalizerView.lowColor = g.endColor
 //                btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
 //                btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
 //                Utils.setSeekBarColor(sbGrad, gradColor)

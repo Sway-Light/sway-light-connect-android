@@ -14,7 +14,7 @@ class GradientColor {
         this.endColor = endColor
     }
 
-    constructor(startColor: Int, endColor: Int, centerColor: Int) {
+    constructor(startColor: Int, centerColor: Int, endColor: Int) {
         this.startColor = startColor
         this.endColor = endColor
         this.centerColor = centerColor

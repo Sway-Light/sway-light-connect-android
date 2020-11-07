@@ -29,7 +29,6 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
     private var grad: Shader? = null
 
     constructor(context: Context, attrs: Nothing?, startColor: Int, endColor: Int, centerColor: Int?, type: Int) : this(context, attrs) {
-//        this.grad = SweepGradient(size,  size, intArrayOf(startColor, centerColor, endColor), floatArrayOf(0f, 0.5f, 1.0f))
         this.startColor = startColor
         this.endColor = endColor
         this.centerColor = centerColor
@@ -37,16 +36,22 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
         when(type) {
             GradientDrawable.SWEEP_GRADIENT -> {
                 grad = if (centerColor == null) {
-                    SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
+                    SweepGradient(size,  size,
+                            intArrayOf(startColor, endColor),
+                            floatArrayOf(0f, 1.0f)
+                    )
                 }else {
-                    SweepGradient(size,  size, intArrayOf(startColor, centerColor, endColor), floatArrayOf(0f, 0.5f, 1.0f))
+                    SweepGradient(size,  size,
+                            intArrayOf(startColor, centerColor, endColor),
+                            floatArrayOf(0f, 0.5f, 1.0f)
+                    )
                 }
             }
             GradientDrawable.LINEAR_GRADIENT -> {
                 grad = LinearGradient(
                         size, size*2, size, 0f,
-                        intArrayOf(startColor, centerColor!!, endColor),
-                        floatArrayOf(0.1f, 0.5f, 0.9f),
+                        intArrayOf(endColor, centerColor!!, startColor),
+                        floatArrayOf(0.2f, 0.5f, 0.8f),
                         Shader.TileMode.REPEAT
                 )
             }
@@ -54,7 +59,6 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
     }
 
     constructor(context: Context, attrs: Nothing?, startColor: Int, endColor: Int, type: Int) : this(context, attrs) {
-//        this.grad = SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
         this.startColor = startColor
         this.endColor = endColor
         this.type = type
@@ -65,8 +69,8 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
             GradientDrawable.LINEAR_GRADIENT -> {
                 grad = LinearGradient(
                         size, size*2, size, 0f,
-                        intArrayOf(startColor, endColor),
-                        floatArrayOf(0.1f, 0.9f),
+                        intArrayOf(endColor, startColor),
+                        floatArrayOf(0.2f, 0.8f),
                         Shader.TileMode.REPEAT
                 )
             }
@@ -104,8 +108,8 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
                     }
                     GradientDrawable.LINEAR_GRADIENT -> {
                         grad = LinearGradient(size/2, 0f, size/2, size,
-                        intArrayOf(startColor, centerColor!!, endColor),
-                        floatArrayOf(0f, 0.5f, 1f),
+                        intArrayOf(endColor, centerColor!!, startColor),
+                        floatArrayOf(0.2f, 0.5f, 0.8f),
                         Shader.TileMode.REPEAT)
                     }
                 }
