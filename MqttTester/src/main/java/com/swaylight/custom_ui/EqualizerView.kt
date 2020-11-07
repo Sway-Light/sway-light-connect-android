@@ -53,7 +53,7 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
                 grad = LinearGradient(
                         width / 2, height, width / 2, 0f,
                         intArrayOf(lowColor, mediumColor, highColor),
-                        floatArrayOf(0f, 0.4f, 0.9f),
+                        floatArrayOf(0f, 0.5f, 1f),
                         Shader.TileMode.REPEAT
                 )
                 startValue = IntArray(freqSize)
@@ -120,6 +120,12 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
     override fun draw(canvas: Canvas?) {
         super.setLayoutParams(params)
         super.draw(canvas)
+        grad = LinearGradient(
+                width / 2, height, width / 2, 0f,
+                intArrayOf(lowColor, mediumColor, highColor),
+                floatArrayOf(0f, 0.5f, 1f),
+                Shader.TileMode.REPEAT
+        )
 
         fillPaint.apply {
             style = Paint.Style.FILL

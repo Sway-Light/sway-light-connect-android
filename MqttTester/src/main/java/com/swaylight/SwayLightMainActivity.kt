@@ -30,7 +30,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var btMusic: Button
 
     // values
-    var mode = Mode.MUSIC
+    var mode = Mode.LIGHT
     var debugClickCount = 0
     var ringCenterX = 0
     var ringCenterY = 0
@@ -162,10 +162,10 @@ class SwayLightMainActivity : AppCompatActivity() {
         val lightFragment = SlLightFragment()
         val musicFragment = SlMusicFragment()
         if(!musicFragment.isAdded) {
-            fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).commit()
+            fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).hide(musicFragment).commit()
         }
         if(!lightFragment.isAdded) {
-            fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).hide(lightFragment).commit()
+            fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
         }
 
         modeGroup.setOnClickListener {

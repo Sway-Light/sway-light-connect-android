@@ -154,9 +154,18 @@ class SlLightFragment : Fragment() {
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
             val g = if (gradColor.centerColor == null) {
-                CircleView(context!!, null, gradColor.startColor!!, gradColor.endColor!!)
+                CircleView(context!!, null,
+                        gradColor.startColor!!,
+                        gradColor.endColor!!,
+                        GradientDrawable.SWEEP_GRADIENT
+                )
             }else {
-                CircleView(context!!, null, gradColor.startColor!!, gradColor.endColor!!, gradColor.centerColor!!)
+                CircleView(context!!, null,
+                        gradColor.startColor!!,
+                        gradColor.endColor!!,
+                        gradColor.centerColor!!,
+                        GradientDrawable.SWEEP_GRADIENT
+                )
             }
             g.setOnClickListener{
                 for (gc in gradCircleViews) {

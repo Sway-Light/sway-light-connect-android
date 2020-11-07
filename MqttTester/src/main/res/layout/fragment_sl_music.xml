@@ -96,6 +96,7 @@
                         android:paddingBottom="15dp">
 
                         <com.swaylight.custom_ui.EqualizerView
+                            android:id="@+id/equalizer_view"
                             android:layout_width="200dp"
                             android:layout_height="100dp"
                             app:freq_size="32"

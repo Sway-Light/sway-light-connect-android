@@ -26,6 +26,14 @@
     <color name="warm">#FFE4AF</color>
     <color name="david_green">#AFFFF1</color>
 
+    <color name="music_grad1_h">#FFBABA</color>
+    <color name="music_grad1_m">#B730FF</color>
+    <color name="music_grad1_l">#87CDFF</color>
+
+    <color name="music_grad2_h">#FFD362</color>
+    <color name="music_grad2_m">#EFB6AE</color>
+    <color name="music_grad2_l">#DE98FF</color>
+
     <color name="grad_rgb1">#FF7C7C</color>
     <color name="grad_rgb2">#8296FF</color>
     <color name="grad_rgb3">#84FF90</color>
