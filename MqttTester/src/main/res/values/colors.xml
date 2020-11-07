@@ -4,13 +4,23 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
 
+    <color name="red">#FF0000</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="green">#00FF00</color>
+
     <color name="redBg">#FFBDBD</color>
     <color name="greenBg">#ADFF96</color>
     <color name="blueBg">#ADDEFF</color>
 
-    <color name="card_title_bg">#DADADA</color>
-    <color name="card_bg">#BBBBBB</color>
-    <color name="tab_bg">#E7E7E7</color>
+    <color name="light_card_title_bg">#DADADA</color>
+    <color name="light_card_bg">#BBBBBB</color>
+    <color name="light_tab_bg">#E7E7E7</color>
+    <color name="light_control_bg">@android:color/white</color>
+
+    <color name="music_card_title_bg">#DADADA</color>
+    <color name="music_card_bg">#BBBBBB</color>
+    <color name="music_tab_bg">#E7E7E7</color>
+    <color name="music_control_bg">@android:color/white</color>
     
     <color name="cold">#A8E0FF</color>
     <color name="warm">#FFE4AF</color>

@@ -19,18 +19,18 @@ class SwayLightMainActivity : AppCompatActivity() {
     val tag = SwayLightMainActivity::class.java.simpleName
 
     // UI
-    var rootConstraint: ConstraintLayout? = null
-    var lightTopConstraint: ConstraintLayout? = null
-    var modeGroup: LinearLayout? = null
-    var ivRing: ImageView? = null
-    var tvZoom: TextView? = null
-    var tvBrightness: TextView? = null
-    var btDebug: View? = null
-    var btLight: Button? = null
-    var btMusic: Button? = null
+    private lateinit var rootConstraint: ConstraintLayout
+    private lateinit var lightTopConstraint: ConstraintLayout
+    private lateinit var modeGroup: LinearLayout
+    private lateinit var ivRing: ImageView
+    private lateinit var tvZoom: TextView
+    private lateinit var tvBrightness: TextView
+    private lateinit var btDebug: View
+    private lateinit var btLight: Button
+    private lateinit var btMusic: Button
 
     // values
-    var mode = Mode.LIGHT
+    var mode = Mode.MUSIC
     var debugClickCount = 0
     var ringCenterX = 0
     var ringCenterY = 0
@@ -52,11 +52,9 @@ class SwayLightMainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sway_light_main)
         this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
+        initUi()
 
-        rootConstraint = findViewById(R.id.rootConstraint)
-        lightTopConstraint = findViewById(R.id.lightTopConstraint)
-        btDebug = findViewById(R.id.debug_view)
-        btDebug?.setOnClickListener{
+        btDebug.setOnClickListener{
             debugClickCount++
             if(debugClickCount >= 10) {
                 val intent = Intent(this, ConnectActivity::class.java)
@@ -64,25 +62,22 @@ class SwayLightMainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        ivRing = findViewById(R.id.iv_ring)
-        tvZoom = findViewById(R.id.tv_zoom)
-        tvBrightness = findViewById(R.id.tv_brightness)
-        rootConstraint?.viewTreeObserver?.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener{
+        rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener{
             override fun onGlobalLayout() {
-                val params: ConstraintLayout.LayoutParams = lightTopConstraint?.layoutParams as ConstraintLayout.LayoutParams
+                val params: ConstraintLayout.LayoutParams = lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams
 
-                params.height = (rootConstraint?.width!! * 0.9).toInt()
-                params.width = (rootConstraint?.width!!).toInt()
-                lightTopConstraint?.layoutParams = params
+                params.height = (rootConstraint.width * 0.9).toInt()
+                params.width = (rootConstraint.width)
+                lightTopConstraint.layoutParams = params
                 val location = intArrayOf(0, 0)
-                ivRing!!.getLocationOnScreen(location)
-                ringCenterX = location[0] + ivRing!!.width/2
-                ringCenterY = location[1] + ivRing!!.height/2
-                Log.d(tag, "ring h:${ivRing!!.height}, w:${ivRing!!.width}")
+                ivRing.getLocationOnScreen(location)
+                ringCenterX = location[0] + ivRing.width/2
+                ringCenterY = location[1] + ivRing.height/2
+                Log.d(tag, "ring h:${ivRing.height}, w:${ivRing.width}")
                 Log.d(tag, "x:${ringCenterX}, y:${ringCenterY}")
                 // 延後一下在remove listener
                 Handler().postDelayed({
-                    rootConstraint!!.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    rootConstraint.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }, 100)
             }
         })
@@ -97,29 +92,29 @@ class SwayLightMainActivity : AppCompatActivity() {
             // 0        |      -179
             //          |
             //-45      -90     -135
-            Log.d(tag, "angle:$degree, rotation:${ivRing!!.rotation}")
+            Log.d(tag, "angle:$degree, rotation:${ivRing.rotation}")
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree.toFloat()
                 }
                 MotionEvent.ACTION_UP -> {
-                    ringPrevRotate = ivRing!!.rotation
+                    ringPrevRotate = ivRing.rotation
                 }
                 else -> {
                     ringPrevRotate + (degree.toFloat() - ringStartRotate)
-                    ivRing!!.rotation = ringPrevRotate + (degree.toFloat() - ringStartRotate)
+                    ivRing.rotation = ringPrevRotate + (degree.toFloat() - ringStartRotate)
                 }
             }
             true
         }
 
-        lightTopConstraint!!.setOnTouchListener{ v, event ->
+        lightTopConstraint.setOnTouchListener{ v, event ->
             val delta = ((lightSlideStartY - event.rawY) / 20).toInt()
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     // 右半邊控制亮度/左半邊控制縮放
                     lightSlideStartY = event.rawY
-                    controlZoomFlag = (event.rawX <= lightTopConstraint!!.width / 2)
+                    controlZoomFlag = (event.rawX <= lightTopConstraint.width / 2)
                 }
                 MotionEvent.ACTION_UP -> {
                     if(controlZoomFlag) {
@@ -148,7 +143,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }else if(v <= 0) {
                             v = 0
                         }
-                        tvZoom!!.text = "zoom:" + v
+                        tvZoom.text = "zoom:" + v
                     }else {
                         var v = prevBrightness + delta
                         if(v > MAX_BRIGHTNESS) {
@@ -156,7 +151,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }else if(v <= 0) {
                             v = 0
                         }
-                        tvBrightness!!.text = "brightness:" + v
+                        tvBrightness.text = "brightness:" + v
                     }
                 }
             }
@@ -166,22 +161,19 @@ class SwayLightMainActivity : AppCompatActivity() {
         val fragmentManager = supportFragmentManager
         val lightFragment = SlLightFragment()
         val musicFragment = SlMusicFragment()
-        if(!lightFragment.isAdded) {
-            fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
-        }
         if(!musicFragment.isAdded) {
-            fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).hide(musicFragment).commit()
+            fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).commit()
+        }
+        if(!lightFragment.isAdded) {
+            fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).hide(lightFragment).commit()
         }
 
-        btLight = findViewById(R.id.bt_light)
-        btMusic = findViewById(R.id.bt_music)
-        modeGroup = findViewById(R.id.mode_group)
-        modeGroup!!.setOnClickListener {
+        modeGroup.setOnClickListener {
             when(mode) {
                 Mode.MUSIC -> {
                     mode = Mode.LIGHT
-                    btLight!!.visibility = View.VISIBLE
-                    btMusic!!.visibility = View.INVISIBLE
+                    btLight.visibility = View.VISIBLE
+                    btMusic.visibility = View.INVISIBLE
                     fragmentManager.beginTransaction()
                             .show(lightFragment)
                             .hide(musicFragment)
@@ -189,8 +181,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 Mode.LIGHT -> {
                     mode = Mode.MUSIC
-                    btMusic!!.visibility = View.VISIBLE
-                    btLight!!.visibility = View.INVISIBLE
+                    btMusic.visibility = View.VISIBLE
+                    btLight.visibility = View.INVISIBLE
                     fragmentManager.beginTransaction()
                             .show(musicFragment)
                             .hide(lightFragment)
@@ -206,6 +198,18 @@ class SwayLightMainActivity : AppCompatActivity() {
 //            mode = Mode.MUSIC
 //            btLight!!.visibility = View.INVISIBLE
 //        }
+    }
+
+    private fun initUi() {
+        rootConstraint = findViewById(R.id.rootConstraint)
+        lightTopConstraint = findViewById(R.id.lightTopConstraint)
+        btDebug = findViewById(R.id.debug_view)
+        ivRing = findViewById(R.id.iv_ring)
+        tvZoom = findViewById(R.id.tv_zoom)
+        tvBrightness = findViewById(R.id.tv_brightness)
+        btLight = findViewById(R.id.bt_light)
+        btMusic = findViewById(R.id.bt_music)
+        modeGroup = findViewById(R.id.mode_group)
     }
 
     enum class Mode(val mode: Int) {

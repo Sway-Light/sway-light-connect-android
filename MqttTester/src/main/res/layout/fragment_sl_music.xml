@@ -11,18 +11,12 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Music"/>
-
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="@color/light_card_bg"
             app:cardCornerRadius="20dp"
-            app:cardUseCompatPadding="true"
-            android:visibility="gone">
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,7 +27,7 @@
                     android:id="@+id/grad_tab"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/card_title_bg"
+                    android:background="@color/light_card_title_bg"
                     android:orientation="horizontal"
                     android:paddingLeft="15dp"
                     android:paddingTop="10dp"
@@ -99,43 +93,18 @@
                         android:paddingLeft="15dp"
                         android:paddingTop="10dp"
                         android:paddingRight="15dp"
-                        android:paddingBottom="5dp">
+                        android:paddingBottom="15dp">
 
-                        <ImageButton
-                            android:id="@+id/bt_start_color"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@android:color/transparent"
-                            android:padding="3dp"
-                            android:src="@drawable/bg_round"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                        <com.swaylight.custom_ui.EqualizerView
+                            android:layout_width="200dp"
+                            android:layout_height="100dp"
+                            app:freq_size="32"
+                            app:high_color="@color/red"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <SeekBar
-                            android:id="@+id/sb_grad"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:progressDrawable="@drawable/progress"
-                            android:splitTrack="false"
-                            android:thumb="@drawable/thumb"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@+id/bt_end_color"
-                            app:layout_constraintStart_toEndOf="@+id/bt_start_color"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageButton
-                            android:id="@+id/bt_end_color"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@android:color/transparent"
-                            android:padding="3dp"
-                            android:src="@drawable/bg_round"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:level_size="10"
+                            app:low_color="@color/green"
+                            app:medium_color="@color/yellow" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </RelativeLayout>
@@ -147,7 +116,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="@color/light_card_bg"
             app:cardCornerRadius="20dp"
             app:cardUseCompatPadding="true"
             android:visibility="gone">
@@ -167,7 +136,7 @@
                     android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp"
-                    android:background="@color/card_title_bg">
+                    android:background="@color/light_card_title_bg">
 
                     <ImageView
                         android:layout_width="40dp"
