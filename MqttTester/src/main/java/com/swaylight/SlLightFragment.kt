@@ -24,16 +24,7 @@ class SlLightFragment : Fragment() {
 
     private val TAG = SwayLightMainActivity::class.java.simpleName
 
-    var gradCircleViews: ArrayList<CircleView> = arrayListOf()
-    var gradColorList: ArrayList<GradientColor> = arrayListOf(
-            GradientColor(Color.BLACK, Color.WHITE, Color.BLUE),
-            GradientColor(Color.BLACK, Color.BLUE),
-            GradientColor(Color.WHITE, Color.RED),
-            GradientColor(Color.GREEN, Color.DKGRAY))
-    var rgbCircleViews: ArrayList<CircleView> = arrayListOf()
-
-    var rgbColorList: ArrayList<RgbColor>? = null
-
+    // UI
     private lateinit var v: View
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var rgbCircleGroup: LinearLayout
@@ -42,18 +33,27 @@ class SlLightFragment : Fragment() {
     private lateinit var rgbTab: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
     private lateinit var rgbControlCard: RelativeLayout
-
     private lateinit var btStartColor: ImageButton
     private lateinit var btEndColor: ImageButton
+
     private lateinit var btRgbColor: ImageButton
     private lateinit var sbGrad: SeekBar
     private lateinit var sbRed: SeekBar
     private lateinit var sbGreen: SeekBar
     private lateinit var sbBlue: SeekBar
+
+    // values
     private var currGradIndex = 0
     private var currRgbIndex = 0
-
     var type: ControlType = ControlType.GRADIENT_COLOR
+    var gradCircleViews: ArrayList<CircleView> = arrayListOf()
+    var rgbCircleViews: ArrayList<CircleView> = arrayListOf()
+    var gradColorList: ArrayList<GradientColor> = arrayListOf(
+            GradientColor(Color.BLACK, Color.WHITE, Color.BLUE),
+            GradientColor(Color.BLACK, Color.BLUE),
+            GradientColor(Color.WHITE, Color.RED),
+            GradientColor(Color.GREEN, Color.DKGRAY))
+    var rgbColorList: ArrayList<RgbColor>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +88,66 @@ class SlLightFragment : Fragment() {
                 setControlType(ControlType.RGB_COLOR)
             }
         }
+        sbRed.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val color = sbRed.progress.shl(16)
+                        .plus(sbGreen.progress.shl(8))
+                        .plus(sbBlue.progress.shl(0))
+                        .plus(255.shl(24))
+
+                if (fromUser) {
+                    btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
+
+        sbGreen.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val color = sbRed.progress.shl(16)
+                        .plus(sbGreen.progress.shl(8))
+                        .plus(sbBlue.progress.shl(0))
+                        .plus(255.shl(24))
+                if (fromUser) {
+                    btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
+
+        sbBlue.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val color = sbRed.progress.shl(16)
+                        .plus(sbGreen.progress.shl(8))
+                        .plus(sbBlue.progress.shl(0))
+                        .plus(255.shl(24))
+                if (fromUser) {
+                    btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
         setControlType(ControlType.GRADIENT_COLOR)
         return v
     }
@@ -165,7 +225,10 @@ class SlLightFragment : Fragment() {
                 Utils.setBgColor(lightTopConstraint,
                         rgbColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
-                currRgbIndex = rgbCircleViews!!.indexOf(g)
+                currRgbIndex = rgbCircleViews.indexOf(g)
+            }
+            g.setOnLongClickListener {
+                TODO("long click to remove color")
             }
             rgbCircleViews.add(g)
             rgbCircleGroup.addView(g)
@@ -205,6 +268,9 @@ class SlLightFragment : Fragment() {
                         gradColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
                 currGradIndex = gradCircleViews.indexOf(g)
+            }
+            g.setOnLongClickListener {
+                TODO("long click to remove color")
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)

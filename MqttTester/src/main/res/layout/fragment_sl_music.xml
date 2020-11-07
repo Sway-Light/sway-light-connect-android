@@ -35,19 +35,16 @@
                     android:paddingBottom="5dp"
                     android:weightSum="10">
 
-                    <com.swaylight.custom_ui.CircleView
-                        style="@style/ColdWarmGradient" />
-
-
                     <TextView
                         android:id="@+id/tv_grad"
+                        style="@style/tv_mode_selected"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start|center_vertical"
                         android:layout_weight="9"
                         android:fontFamily="@font/pt_sans_narrow"
                         android:letterSpacing="0.05"
-                        android:text="@string/gradient"
+                        android:text="color"
                         android:textAllCaps="true"
                         android:textSize="24sp" />
 
@@ -98,7 +95,7 @@
                         <com.swaylight.custom_ui.EqualizerView
                             android:id="@+id/equalizer_view"
                             android:layout_width="200dp"
-                            android:layout_height="100dp"
+                            android:layout_height="120dp"
                             app:freq_size="32"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
@@ -106,6 +103,87 @@
                             app:high_color="@color/red"
                             app:medium_color="@color/yellow"
                             app:low_color="@color/green" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@+id/equalizer_view"
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:orientation="vertical"
+                            android:weightSum="3" >
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_high_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/high"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_medium_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/middle"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_low_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/low"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+                        </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </RelativeLayout>

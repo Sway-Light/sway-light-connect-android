@@ -1,8 +1,8 @@
 package com.swaylight
 
-import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,17 +20,23 @@ class SlMusicFragment : Fragment() {
 
     private val TAG = SlMusicFragment::class.java.simpleName
 
+    // UI
     private lateinit var v: View
-    var gradCircleViews: ArrayList<CircleView> = arrayListOf()
     private lateinit var lightTopConstraint: ViewGroup
     private lateinit var gradCircleGroup: LinearLayout
-    private lateinit var gradColorList: ArrayList<GradientColor>
     private lateinit var gradControlCard: RelativeLayout
     private lateinit var equalizerView: EqualizerView
+    private lateinit var highCircleView: CircleView
+    private lateinit var mediumCircleView: CircleView
+    private lateinit var lowCircleView: CircleView
     private lateinit var sbRed: SeekBar
     private lateinit var sbGreen: SeekBar
     private lateinit var sbBlue: SeekBar
+
+    // values
     private var currIndex = 0
+    var gradCircleViews: ArrayList<CircleView> = arrayListOf()
+    private lateinit var gradColorList: ArrayList<GradientColor>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +82,9 @@ class SlMusicFragment : Fragment() {
         gradControlCard = v.findViewById(R.id.grad_control_card)
         gradCircleGroup = v.findViewById(R.id.grad_circle_group)
         equalizerView = v.findViewById(R.id.equalizer_view)
+        highCircleView = v.findViewById(R.id.music_high_circle)
+        mediumCircleView = v.findViewById(R.id.music_medium_circle)
+        lowCircleView = v.findViewById(R.id.music_low_circle)
         sbRed = v.findViewById(R.id.sb_red)
         sbGreen = v.findViewById(R.id.sb_green)
         sbBlue = v.findViewById(R.id.sb_blue)
@@ -109,10 +118,15 @@ class SlMusicFragment : Fragment() {
 //                Utils.setBgColor(lightTopConstraint,
 //                        gradColor,
 //                        GradientDrawable.Orientation.TOP_BOTTOM)
+
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
                 setEqualizerColor(gradColor)
+                setCirclesColor(gradColor)
+            }
+            g.setOnLongClickListener {
+                TODO("long click to remove color")
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)
@@ -123,12 +137,19 @@ class SlMusicFragment : Fragment() {
                 gradColorList[currIndex],
                 GradientDrawable.Orientation.TOP_BOTTOM)
         setEqualizerColor(gradColorList[currIndex])
+        setCirclesColor(gradColorList[currIndex])
     }
 
     private fun setEqualizerColor(g: GradientColor) {
         equalizerView.highColor = g.startColor!!
         equalizerView.mediumColor = g.centerColor!!
         equalizerView.lowColor = g.endColor!!
+    }
+
+    private fun setCirclesColor(g: GradientColor) {
+        highCircleView.setColor(g.startColor!!)
+        mediumCircleView.setColor(g.centerColor!!)
+        lowCircleView.setColor(g.endColor!!)
     }
 
     private fun expand(v: View) {

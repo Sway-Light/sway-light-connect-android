@@ -119,6 +119,47 @@ class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
         }
     }
 
+    fun setColor(startColor: Int, centerColor: Int?, endColor: Int, type: Int) {
+        this.startColor = startColor
+        this.centerColor = centerColor
+        this.endColor = endColor
+        this.type = type
+        when(type) {
+            GradientDrawable.SWEEP_GRADIENT -> {
+                grad = SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
+            }
+            GradientDrawable.LINEAR_GRADIENT -> {
+                if (centerColor == null) {
+                    grad = LinearGradient(
+                            size, size*2, size, 0f,
+                            intArrayOf(endColor, startColor),
+                            floatArrayOf(0.2f, 0.8f),
+                            Shader.TileMode.REPEAT
+                    )
+                }else {
+                    grad = LinearGradient(
+                            size, size*2, size, 0f,
+                            intArrayOf(endColor, centerColor, startColor),
+                            floatArrayOf(0.2f, 0.5f, 0.8f),
+                            Shader.TileMode.REPEAT
+                    )
+                }
+            }
+        }
+    }
+
+    fun setColor(color: Int) {
+        this.startColor = color
+        this.centerColor = color
+        this.endColor = color
+        grad = LinearGradient(
+                size, size*2, size, 0f,
+                color,
+                color,
+                Shader.TileMode.REPEAT
+        )
+    }
+
     override fun onDraw(canvas: Canvas?) {
         this.layoutParams = params
         super.onDraw(canvas)
