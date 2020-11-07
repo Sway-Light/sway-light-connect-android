@@ -11,6 +11,7 @@ import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import kotlin.math.atan2
 
 class SwayLightMainActivity : AppCompatActivity() {
@@ -49,6 +50,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sway_light_main)
+        this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
 
         rootConstraint = findViewById(R.id.rootConstraint)

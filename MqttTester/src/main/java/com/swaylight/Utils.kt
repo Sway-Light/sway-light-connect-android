@@ -2,22 +2,23 @@ package com.swaylight
 
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.view.View
 import android.widget.SeekBar
-import androidx.core.graphics.red
-import androidx.core.graphics.toColor
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
-import kotlin.math.roundToInt
 
 class Utils {
     companion object {
-        fun setSeekBarColor(seekBar: SeekBar, g: GradientColor) {
-            var colors: IntArray? = null
-            colors = if(g.centerColor == null) {
-                intArrayOf(g.startColor!!, g.endColor!!)
+        fun setSeekBarColor(seekBar: SeekBar, gradientColor: GradientColor) {
+            val colors = if(gradientColor.centerColor == null) {
+                intArrayOf(gradientColor.startColor!!,
+                        gradientColor.endColor!!)
             }else {
-                intArrayOf(g.startColor!!, g.centerColor!!, g.endColor!!)
+                intArrayOf(gradientColor.startColor!!,
+                        gradientColor.centerColor!!,
+                        gradientColor.endColor!!)
             }
             val gradDrawable = seekBar.progressDrawable as GradientDrawable
             gradDrawable.colors = colors
@@ -28,6 +29,32 @@ class Utils {
             sbRed.progress = rgbColor.color!!.shr(16).and(0xFF)
             sbGreen.progress = rgbColor.color!!.shr(8).and(0xFF)
             sbBlue.progress = rgbColor.color!!.shr(0).and(0xFF)
+        }
+
+        fun setBgColor(view: View, gradientColor: GradientColor, orientation: GradientDrawable.Orientation) {
+            val colors = if(gradientColor.centerColor == null) {
+                intArrayOf(gradientColor.startColor!!,
+                        gradientColor.endColor!!)
+            }else {
+                intArrayOf(gradientColor.startColor!!,
+                        gradientColor.centerColor!!,
+                        gradientColor.endColor!!)
+            }
+            val gradDrawable = GradientDrawable().apply {
+                this.colors = colors
+                this.orientation = orientation
+            }
+            view.background = gradDrawable
+        }
+
+        fun setBgColor(view: View, rgbColor: RgbColor, orientation: GradientDrawable.Orientation) {
+            val colors = intArrayOf(rgbColor.color!!, Color.WHITE)
+
+            val gradDrawable = GradientDrawable().apply {
+                this.colors = colors
+                this.orientation = orientation
+            }
+            view.background = gradDrawable
         }
     }
 }
