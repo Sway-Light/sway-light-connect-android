@@ -15,4 +15,14 @@
         </attr>
         <attr name="isCheck" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="EqualizerView">
+        <attr name="android:layout_height" format="dimension"/>
+        <attr name="android:layout_width" format="dimension"/>
+        <attr name="freq_size" format="integer"/>
+        <attr name="level_size" format="integer"/>
+        <attr name="high_color" format="color"/>
+        <attr name="medium_color" format="color"/>
+        <attr name="low_color" format="color"/>
+    </declare-styleable>
 </resources>

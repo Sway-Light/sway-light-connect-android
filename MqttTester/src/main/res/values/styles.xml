@@ -23,7 +23,7 @@
     <style name="tv_mode_selected">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:shadowColor">@color/card_bg</item>
+        <item name="android:shadowColor">@color/light_card_bg</item>
         <item name="android:shadowDx">1</item>
         <item name="android:shadowDy">8</item>
         <item name="android:shadowRadius">5</item>
@@ -32,7 +32,10 @@
     <style name="tv_mode_unselected">
         <item name="android:textColor">#616161</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:shadowColor">@android:color/transparent</item>
+        <item name="android:shadowColor">@color/light_card_title_bg</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">0</item>
     </style>
 
 </resources>

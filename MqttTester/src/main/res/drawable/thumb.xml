@@ -3,22 +3,14 @@
     <item>
         <shape
             android:shape="oval">
-            <solid android:color="@color/card_title_bg" />
+            <stroke
+                android:color="#CCCCCC"
+                android:width="3dp"/>
+            <solid android:color="@android:color/white" />
             <size
                 android:height="30dp"
                 android:width="30dp" />
 
-        </shape>
-    </item>
-
-    <item>
-        <shape
-            android:shape="oval">
-            <gradient
-                android:type="radial"
-                android:gradientRadius="100%p"
-                android:startColor="#00FFFFFF"
-                android:endColor="#575757" />
         </shape>
     </item>
 

@@ -11,18 +11,12 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Music"/>
-
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="@color/light_card_bg"
             app:cardCornerRadius="20dp"
-            app:cardUseCompatPadding="true"
-            android:visibility="gone">
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -33,7 +27,7 @@
                     android:id="@+id/grad_tab"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/card_title_bg"
+                    android:background="@color/light_card_title_bg"
                     android:orientation="horizontal"
                     android:paddingLeft="15dp"
                     android:paddingTop="10dp"
@@ -41,19 +35,16 @@
                     android:paddingBottom="5dp"
                     android:weightSum="10">
 
-                    <com.swaylight.custom_ui.CircleView
-                        style="@style/ColdWarmGradient" />
-
-
                     <TextView
                         android:id="@+id/tv_grad"
+                        style="@style/tv_mode_selected"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start|center_vertical"
                         android:layout_weight="9"
                         android:fontFamily="@font/pt_sans_narrow"
                         android:letterSpacing="0.05"
-                        android:text="@string/gradient"
+                        android:text="color"
                         android:textAllCaps="true"
                         android:textSize="24sp" />
 
@@ -99,43 +90,100 @@
                         android:paddingLeft="15dp"
                         android:paddingTop="10dp"
                         android:paddingRight="15dp"
-                        android:paddingBottom="5dp">
+                        android:paddingBottom="15dp">
 
-                        <ImageButton
-                            android:id="@+id/bt_start_color"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@android:color/transparent"
-                            android:padding="3dp"
-                            android:src="@drawable/bg_round"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                        <com.swaylight.custom_ui.EqualizerView
+                            android:id="@+id/equalizer_view"
+                            android:layout_width="200dp"
+                            android:layout_height="120dp"
+                            app:freq_size="32"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:level_size="10"
+                            app:high_color="@color/red"
+                            app:medium_color="@color/yellow"
+                            app:low_color="@color/green" />
 
-                        <SeekBar
-                            android:id="@+id/sb_grad"
+                        <LinearLayout
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:progressDrawable="@drawable/progress"
-                            android:splitTrack="false"
-                            android:thumb="@drawable/thumb"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@+id/bt_end_color"
-                            app:layout_constraintStart_toEndOf="@+id/bt_start_color"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageButton
-                            android:id="@+id/bt_end_color"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_gravity="center_vertical"
-                            android:background="@android:color/transparent"
-                            android:padding="3dp"
-                            android:src="@drawable/bg_round"
+                            android:layout_height="0dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintStart_toEndOf="@+id/equalizer_view"
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:orientation="vertical"
+                            android:weightSum="3" >
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_high_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/high"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_medium_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/middle"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1">
+                                <com.swaylight.custom_ui.CircleView
+                                    android:id="@+id/music_low_circle"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:startColor="@android:color/white"
+                                    android:endColor="@android:color/white"
+                                    android:centerColor="@android:color/white"/>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/low"
+                                    android:fontFamily="@font/pt_sans_narrow"
+                                    android:letterSpacing="0.05"
+                                    android:textAllCaps="true"
+                                    android:textSize="20sp"
+                                    android:layout_gravity="center_vertical"/>
+
+                            </LinearLayout>
+                        </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </RelativeLayout>
@@ -147,7 +195,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="@color/light_card_bg"
             app:cardCornerRadius="20dp"
             app:cardUseCompatPadding="true"
             android:visibility="gone">
@@ -167,7 +215,7 @@
                     android:paddingBottom="5dp"
                     android:paddingLeft="15dp"
                     android:paddingRight="15dp"
-                    android:background="@color/card_title_bg">
+                    android:background="@color/light_card_title_bg">
 
                     <ImageView
                         android:layout_width="40dp"
