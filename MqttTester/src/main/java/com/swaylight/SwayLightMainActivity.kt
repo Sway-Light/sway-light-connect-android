@@ -1,18 +1,28 @@
 package com.swaylight
 
+import android.R.attr.x
+import android.R.attr.y
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Point
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.*
+import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.swaylight.custom_ui.TopLightView
 import kotlin.math.atan2
+
 
 class SwayLightMainActivity : AppCompatActivity() {
 
@@ -22,7 +32,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var rootConstraint: ConstraintLayout
     private lateinit var lightTopConstraint: ConstraintLayout
     private lateinit var modeGroup: LinearLayout
-    private lateinit var ivRing: ImageView
+    private lateinit var ivRing: TopLightView
     private lateinit var tvZoom: TextView
     private lateinit var tvBrightness: TextView
     private lateinit var btDebug: View
@@ -42,8 +52,14 @@ class SwayLightMainActivity : AppCompatActivity() {
     var prevBrightness = 0
     var lightSlideStartY = 0f
 
+    private val lightRectF = Rect()
+    private val musicRectF = Rect()
+    private lateinit var lightAnimation: TranslateAnimation
+    private lateinit var musicAnimation: TranslateAnimation
+
     // const
     val MAX_ZOOM = 32
+    val MIN_ZOOM = 4
     val MAX_BRIGHTNESS = 100
 
     @SuppressLint("ClickableViewAccessibility")
@@ -62,7 +78,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener{
+        rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 val params: ConstraintLayout.LayoutParams = lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams
 
@@ -71,19 +87,50 @@ class SwayLightMainActivity : AppCompatActivity() {
                 lightTopConstraint.layoutParams = params
                 val location = intArrayOf(0, 0)
                 ivRing.getLocationOnScreen(location)
-                ringCenterX = location[0] + ivRing.width/2
-                ringCenterY = location[1] + ivRing.height/2
+                ringCenterX = location[0] + ivRing.width / 2
+                ringCenterY = location[1] + ivRing.height / 2
                 Log.d(tag, "ring h:${ivRing.height}, w:${ivRing.width}")
                 Log.d(tag, "x:${ringCenterX}, y:${ringCenterY}")
+
                 // 延後一下在remove listener
                 Handler().postDelayed({
+                    // set btLight, btMusic animation
+                    val offset = Point()
+                    btLight.getGlobalVisibleRect(lightRectF, offset)
+                    btMusic.getGlobalVisibleRect(musicRectF)
+                    lightAnimation = TranslateAnimation(
+                            Animation.ABSOLUTE,
+                            musicRectF.left.toFloat(),
+                            Animation.ABSOLUTE,
+                            lightRectF.left.minus(offset.x).toFloat(),
+                            Animation.ABSOLUTE,
+                            0f,
+                            Animation.ABSOLUTE,
+                            0f,
+                    )
+                    musicAnimation = TranslateAnimation(
+                            Animation.ABSOLUTE,
+                            lightRectF.left.minus(lightRectF.width() + offset.x).toFloat(),
+                            Animation.ABSOLUTE,
+                            lightRectF.left.minus(offset.x).toFloat(),
+                            Animation.ABSOLUTE,
+                            0f,
+                            Animation.ABSOLUTE,
+                            0f,
+                    )
+                    lightAnimation.duration = 400
+                    musicAnimation.duration = 400
                     rootConstraint.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }, 100)
             }
         })
 
-        ivRing!!.setOnTouchListener { v, event ->
-            val degree = Math.toDegrees(atan2((ringCenterY - event.rawY).toDouble(), (ringCenterX - event.rawX).toDouble())).toInt()
+        ivRing.setOnTouchListener { v, event ->
+            val degree = getAngle(
+                    ringCenterX.toFloat(),
+                    ringCenterY.toFloat(),
+                    event.rawX,
+                    event.rawY)
             // degree:
             // 45       90      135
             //          |
@@ -95,14 +142,15 @@ class SwayLightMainActivity : AppCompatActivity() {
             Log.d(tag, "angle:$degree, rotation:${ivRing.rotation}")
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    ringStartRotate = degree.toFloat()
+                    ringStartRotate = degree
                 }
                 MotionEvent.ACTION_UP -> {
-                    ringPrevRotate = ivRing.rotation
+                    ringPrevRotate = ivRing.offsetAngle
                 }
                 else -> {
-                    ringPrevRotate + (degree.toFloat() - ringStartRotate)
-                    ivRing.rotation = ringPrevRotate + (degree.toFloat() - ringStartRotate)
+                    val offset = (ringPrevRotate + degree - ringStartRotate).div(TopLightView.ANGLE_UNIT)
+                    Log.d(tag, "offset:${offset.toInt()}")
+                    ivRing.offsetValue = offset.toInt()
                 }
             }
             true
@@ -117,19 +165,19 @@ class SwayLightMainActivity : AppCompatActivity() {
                     controlZoomFlag = (event.rawX <= lightTopConstraint.width / 2)
                 }
                 MotionEvent.ACTION_UP -> {
-                    if(controlZoomFlag) {
+                    if (controlZoomFlag) {
                         var v = prevZoom + delta
-                        if(v > MAX_ZOOM) {
+                        if (v > MAX_ZOOM) {
                             v = MAX_ZOOM
-                        }else if(v <= 0) {
+                        } else if (v <= 0) {
                             v = 0
                         }
                         prevZoom = v
-                    }else {
+                    } else {
                         var v = prevBrightness + delta
-                        if(v > MAX_BRIGHTNESS) {
+                        if (v > MAX_BRIGHTNESS) {
                             v = MAX_BRIGHTNESS
-                        }else if(v <= 0) {
+                        } else if (v <= 0) {
                             v = 0
                         }
                         prevBrightness = v
@@ -140,9 +188,10 @@ class SwayLightMainActivity : AppCompatActivity() {
                         var v = prevZoom + delta
                         if(v > MAX_ZOOM) {
                             v = MAX_ZOOM
-                        }else if(v <= 0) {
-                            v = 0
+                        }else if(v < MIN_ZOOM) {
+                            v = MIN_ZOOM
                         }
+                        ivRing.zoomValue = v
                         tvZoom.text = "zoom:" + v
                     }else {
                         var v = prevBrightness + delta
@@ -151,6 +200,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }else if(v <= 0) {
                             v = 0
                         }
+                        ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155+v).shl(24))
                         tvBrightness.text = "brightness:" + v
                     }
                 }
@@ -174,6 +224,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     mode = Mode.LIGHT
                     btLight.visibility = View.VISIBLE
                     btMusic.visibility = View.INVISIBLE
+                    btLight.startAnimation(lightAnimation)
                     fragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right)
                             .show(lightFragment)
@@ -187,6 +238,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     mode = Mode.MUSIC
                     btMusic.visibility = View.VISIBLE
                     btLight.visibility = View.INVISIBLE
+                    btMusic.startAnimation(musicAnimation)
                     fragmentManager.beginTransaction()
                             .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left)
                             .show(musicFragment)
@@ -223,5 +275,13 @@ class SwayLightMainActivity : AppCompatActivity() {
     enum class Mode(val mode: Int) {
         LIGHT(0x02),
         MUSIC(0x03)
+    }
+
+    private fun getAngle(center_x: Float, center_y: Float, x: Float, y: Float): Float {
+        var angle = Math.toDegrees(atan2((center_y - y).toDouble(), (center_x - x).toDouble())).toFloat()
+        if (angle < 0) {
+            angle += 360f
+        }
+        return angle
     }
 }

@@ -21,7 +21,7 @@
     <color name="music_card_bg">#BBBBBB</color>
     <color name="music_tab_bg">#E7E7E7</color>
     <color name="music_control_bg">@android:color/white</color>
-    
+
     <color name="cold">#A8E0FF</color>
     <color name="warm">#FFE4AF</color>
     <color name="david_green">#AFFFF1</color>
