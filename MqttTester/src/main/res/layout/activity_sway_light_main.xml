@@ -16,17 +16,20 @@
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/warm">
 
-        <ImageView
+        <com.swaylight.custom_ui.TopLightView
             android:id="@+id/iv_ring"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:src="@drawable/ring"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        </ImageView>
+            app:layout_constraintTop_toTopOf="parent"
+            app:offset_value="29"
+            app:stroke_color="@android:color/white"
+            app:stroke_bg_color="@android:color/darker_gray"
+            app:fill_color="@android:color/transparent"
+            app:stroke_width="20dp"
+            app:zoom_value="4" />
 
         <TextView
             android:id="@+id/tv_zoom"

@@ -1,0 +1,11 @@
+<resources>
+    <declare-styleable name="TopLightView">
+        <attr name="stroke_width" format="dimension" />
+        <attr name="stroke_color" format="color" />
+        <attr name="zoom_value" format="integer" />
+        <attr name="offset_value" format="integer" />
+        <attr name="fill_color" format="color" />
+        <attr name="stroke_bg_color" format="color" />
+        <attr name="exampleDrawable" format="color|reference" />
+    </declare-styleable>
+</resources>
