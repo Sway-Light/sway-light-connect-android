@@ -5,6 +5,7 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -14,12 +15,15 @@ import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.SLDisplay
+import com.swaylight.library.data.SLMode
 import com.swaylight.library.data.SLTopic
 import org.eclipse.paho.client.mqttv3.*
 import java.text.SimpleDateFormat
@@ -57,22 +61,24 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var deviceName: String
     private var clientId: String? = null
 
-    var mode = Mode.LIGHT
-    var debugClickCount = 0
+    var mode = SLMode.LIGHT
     var ringCenterX = 0
     var ringCenterY = 0
     var ringStartRotate = 0f
     var ringPrevRotate = 0f
 
     var controlZoomFlag = true
-    var prevZoom = 0
-    var prevBrightness = 0
+    var prevZoom = 4
+    var prevBrightness = 100
     var lightSlideStartY = 0f
 
     private val lightRectF = Rect()
     private val musicRectF = Rect()
     private lateinit var lightAnimation: TranslateAnimation
     private lateinit var musicAnimation: TranslateAnimation
+
+    // MQTT Objects
+    var displayObj = SLDisplay(4, 0)
 
     // const
     val MAX_ZOOM = 32
@@ -96,61 +102,17 @@ class SwayLightMainActivity : AppCompatActivity() {
         btNetworkConfig.setOnClickListener {
             this.onBackPressed()
         }
-
-        broker = "tcp://" + this.intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
-        deviceName = this.intent.getStringExtra(getString(R.string.DEVICE_NAME))
-        clientId = this.intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
-        manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
-        client = SLMqttManager.getInstance()
-        client!!.setCallback(object : MqttCallbackExtended {
-            override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                try {
-                    progressView.visibility = View.INVISIBLE
-                    val topic = SLTopic.ROOT + deviceName + "/#"
-                    client!!.subscribe(topic, 0)
-                    if (reconnect) {
-                        appendLog("Reconnect complete")
-                    } else {
-                        appendLog("Connect complete")
-                    }
-                    appendLog("subscribe: $topic")
-                } catch (e: MqttException) {
-                    e.printStackTrace()
-                }
-                Log.d(MQTT_TAG, "Connected to $broker")
+        tvLog.movementMethod = ScrollingMovementMethod()
+        tvLog.setOnLongClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("Clear log?")
+            builder.setPositiveButton("Yes") { dialog, which ->
+                tvLog.scrollTo(0, 0)
+                tvLog.text = ""
             }
-
-            override fun connectionLost(cause: Throwable) {
-                progressView.visibility = View.VISIBLE
-                appendLog("Connection LOST")
-                Log.d(MQTT_TAG, "Disconnect to $broker")
-            }
-
-            @Throws(Exception::class)
-            override fun messageArrived(topic: String, message: MqttMessage) {
-                appendLog("$topic:\n$message")
-            }
-
-            override fun deliveryComplete(token: IMqttDeliveryToken) {}
-        })
-        manager!!.setMqttActionListener(object : IMqttActionListener {
-            override fun onSuccess(asyncActionToken: IMqttToken) {
-                progressView.visibility = View.INVISIBLE
-                appendLog("長按右上角開關debug畫面")
-                appendLog("Connect to $broker success")
-                Log.d(MQTT_TAG, "Connect to $broker success")
-            }
-
-            override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
-//                progressView.visibility = View.VISIBLE
-                appendLog("Connect to $broker fail")
-                Log.d(MQTT_TAG, "Connect to $broker fail")
-            }
-        })
-        try {
-            manager!!.connect()
-        } catch (ex: MqttException) {
-            ex.printStackTrace()
+            builder.setNegativeButton("Cancel") { dialog, which -> }
+            builder.show()
+            false
         }
 
         btDebug.setOnLongClickListener {
@@ -172,8 +134,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                 ivRing.getLocationOnScreen(location)
                 ringCenterX = location[0] + ivRing.width / 2
                 ringCenterY = location[1] + ivRing.height / 2
-                Log.d(tag, "ring h:${ivRing.height}, w:${ivRing.width}")
-                Log.d(tag, "x:${ringCenterX}, y:${ringCenterY}")
+//                Log.d(tag, "ring h:${ivRing.height}, w:${ivRing.width}")
+//                Log.d(tag, "x:${ringCenterX}, y:${ringCenterY}")
 
                 // 延後一下在remove listener
                 Handler().postDelayed({
@@ -234,6 +196,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                     val offset = (ringPrevRotate + degree - ringStartRotate).div(TopLightView.ANGLE_UNIT)
                     Log.d(tag, "offset:${offset.toInt()}")
                     ivRing.offsetValue = offset.toInt()
+                    if (displayObj.offset != ivRing.offsetValue) {
+                        displayObj.offset = ivRing.offsetValue
+                        client!!.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                        client!!.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                    }
                 }
             }
             true
@@ -241,6 +208,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         lightTopConstraint.setOnTouchListener{ v, event ->
             val delta = ((lightSlideStartY - event.rawY) / 20).toInt()
+            var v: Int = 0
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     // 右半邊控制亮度/左半邊控制縮放
@@ -249,7 +217,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
-                        var v = prevZoom + delta
+                        v = prevZoom + delta
                         if (v > MAX_ZOOM) {
                             v = MAX_ZOOM
                         } else if (v <= 0) {
@@ -257,7 +225,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         prevZoom = v
                     } else {
-                        var v = prevBrightness + delta
+                        v = prevBrightness + delta
                         if (v > MAX_BRIGHTNESS) {
                             v = MAX_BRIGHTNESS
                         } else if (v <= 0) {
@@ -268,7 +236,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 else -> {
                     if(controlZoomFlag) {
-                        var v = prevZoom + delta
+                        v = prevZoom + delta
                         if(v > MAX_ZOOM) {
                             v = MAX_ZOOM
                         }else if(v < MIN_ZOOM) {
@@ -276,8 +244,13 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         ivRing.zoomValue = v
                         tvZoom.text = "zoom:" + v
+                        if (displayObj.zoom != ivRing.zoomValue) {
+                            displayObj.zoom = ivRing.zoomValue
+                            client!!.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                            client!!.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                        }
                     }else {
-                        var v = prevBrightness + delta
+                        v = prevBrightness + delta
                         if(v > MAX_BRIGHTNESS) {
                             v = MAX_BRIGHTNESS
                         }else if(v <= 0) {
@@ -303,8 +276,8 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         modeGroup.setOnClickListener {
             when(mode) {
-                Mode.MUSIC -> {
-                    mode = Mode.LIGHT
+                SLMode.MUSIC -> {
+                    mode = SLMode.LIGHT
                     btLight.visibility = View.VISIBLE
                     btMusic.visibility = View.INVISIBLE
                     btLight.startAnimation(lightAnimation)
@@ -317,8 +290,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .hide(musicFragment)
                             .commit()
                 }
-                Mode.LIGHT -> {
-                    mode = Mode.MUSIC
+                SLMode.LIGHT -> {
+                    mode = SLMode.MUSIC
                     btMusic.visibility = View.VISIBLE
                     btLight.visibility = View.INVISIBLE
                     btMusic.startAnimation(musicAnimation)
@@ -332,7 +305,76 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .commit()
                 }
             }
+            client!!.publish(SLTopic.CURR_MODE, deviceName, mode)
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if(client != null) {
+            client!!.setCallback(null)
+            client!!.disconnect()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        broker = "tcp://" + intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
+        deviceName = intent.getStringExtra(getString(R.string.DEVICE_NAME))
+        clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
+        manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
+        client = SLMqttManager.getInstance()
+        client!!.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                try {
+                    progressView.visibility = View.INVISIBLE
+                    val topic = SLTopic.ROOT + deviceName + "/#"
+                    client!!.subscribe(topic, 0)
+                    if (reconnect) {
+                        appendLog("Reconnect complete")
+                    } else {
+                        appendLog("Connect complete")
+                    }
+                    appendLog("subscribe: $topic")
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+                Log.d(MQTT_TAG, "Connected to $broker")
+            }
+
+            override fun connectionLost(cause: Throwable) {
+                progressView.visibility = View.VISIBLE
+                appendLog("Connection LOST")
+                Log.d(MQTT_TAG, "Disconnect to $broker")
+            }
+
+            @Throws(Exception::class)
+            override fun messageArrived(topic: String, message: MqttMessage) {
+                appendLog("$topic:\n$message")
+            }
+
+            override fun deliveryComplete(token: IMqttDeliveryToken) {}
+        })
+        manager!!.setMqttActionListener(object : IMqttActionListener {
+            override fun onSuccess(asyncActionToken: IMqttToken) {
+                progressView.visibility = View.INVISIBLE
+                appendLog("長按右上角開關debug畫面")
+                appendLog("Connect to $broker success")
+                Log.d(MQTT_TAG, "Connect to $broker success")
+            }
+
+            override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
+                progressView.visibility = View.VISIBLE
+                appendLog("Connect to $broker fail")
+                Log.d(MQTT_TAG, "Connect to $broker fail")
+            }
+        })
+        try {
+            manager!!.connect()
+        } catch (ex: MqttException) {
+            ex.printStackTrace()
+        }
+
     }
 
     override fun onBackPressed() {
@@ -345,6 +387,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             } catch (e: MqttException) {
                 e.printStackTrace()
             }
+            client = null
         }
         finish()
     }
@@ -363,11 +406,6 @@ class SwayLightMainActivity : AppCompatActivity() {
         btLight = findViewById(R.id.bt_light)
         btMusic = findViewById(R.id.bt_music)
         modeGroup = findViewById(R.id.mode_group)
-    }
-
-    enum class Mode(val mode: Int) {
-        LIGHT(0x02),
-        MUSIC(0x03)
     }
 
     private fun getAngle(center_x: Float, center_y: Float, x: Float, y: Float): Float {

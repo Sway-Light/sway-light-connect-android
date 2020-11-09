@@ -151,13 +151,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/log_view"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="150dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" >
 
         <TextView
             android:id="@+id/tv_log"
+            android:textSize="12sp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/progress_bg"
@@ -194,6 +195,7 @@
             android:gravity="center"
             android:letterSpacing="0.2"
             android:text="Connecting..."
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="@+id/progressBar"
@@ -205,6 +207,7 @@
             android:id="@+id/bt_network_config"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:layout_marginStart="64dp"
             android:layout_marginEnd="64dp"
             android:layout_marginBottom="128dp"
