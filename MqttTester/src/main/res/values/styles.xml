@@ -14,6 +14,7 @@
         <item name="android:startColor">@color/warm</item>
         <item name="android:endColor">@color/cold</item>
         <item name="android:centerColor">#FFFFFF</item>
+        <item name="android:type">sweep</item>
         <item name="ringColor">#FFFFFF</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="isCheck">false</item>

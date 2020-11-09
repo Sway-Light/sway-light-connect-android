@@ -19,6 +19,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.skydoves.colorpickerview.ColorEnvelope
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.flag.BubbleFlag
+import com.skydoves.colorpickerview.flag.FlagMode
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
@@ -327,7 +332,6 @@ class SwayLightMainActivity : AppCompatActivity() {
         client!!.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 try {
-                    progressView.visibility = View.INVISIBLE
                     val topic = SLTopic.ROOT + deviceName + "/#"
                     client!!.subscribe(topic, 0)
                     if (reconnect) {
@@ -336,6 +340,9 @@ class SwayLightMainActivity : AppCompatActivity() {
                         appendLog("Connect complete")
                     }
                     appendLog("subscribe: $topic")
+                    runOnUiThread {
+                        progressView.visibility = View.INVISIBLE
+                    }
                 } catch (e: MqttException) {
                     e.printStackTrace()
                 }
@@ -343,7 +350,9 @@ class SwayLightMainActivity : AppCompatActivity() {
             }
 
             override fun connectionLost(cause: Throwable) {
-                progressView.visibility = View.VISIBLE
+                runOnUiThread {
+                    progressView.visibility = View.VISIBLE
+                }
                 appendLog("Connection LOST")
                 Log.d(MQTT_TAG, "Disconnect to $broker")
             }
@@ -357,7 +366,9 @@ class SwayLightMainActivity : AppCompatActivity() {
         })
         manager!!.setMqttActionListener(object : IMqttActionListener {
             override fun onSuccess(asyncActionToken: IMqttToken) {
-                progressView.visibility = View.INVISIBLE
+                runOnUiThread {
+                    progressView.visibility = View.INVISIBLE
+                }
                 appendLog("長按右上角開關debug畫面")
                 appendLog("Connect to $broker success")
                 Log.d(MQTT_TAG, "Connect to $broker success")

@@ -1,10 +1,10 @@
 package com.swaylight
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,9 +12,14 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.skydoves.colorpickerview.ColorEnvelope
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.flag.BubbleFlag
+import com.skydoves.colorpickerview.flag.FlagMode
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import com.swaylight.R.styleable.CircleView
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
@@ -88,6 +93,53 @@ class SlLightFragment : Fragment() {
                 setControlType(ControlType.RGB_COLOR)
             }
         }
+
+        btStartColor.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker start color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                btStartColor.drawable.colorFilter = PorterDuffColorFilter(envelope.color, PorterDuff.Mode.SRC)
+                                gradCircleViews[currGradIndex].setColor(envelope.color)
+                                gradColorList[currGradIndex].startColor = envelope.color
+                                Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+                                Utils.setBgColor(lightTopConstraint,
+                                        gradColorList[currGradIndex],
+                                        GradientDrawable.Orientation.TOP_BOTTOM)
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
+        btEndColor.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker end color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                btEndColor.drawable.colorFilter = PorterDuffColorFilter(envelope.color, PorterDuff.Mode.SRC)
+                                gradCircleViews[currGradIndex].endColor = envelope.color
+                                gradColorList[currGradIndex].endColor = envelope.color
+                                Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+                                Utils.setBgColor(lightTopConstraint,
+                                        gradColorList[currGradIndex],
+                                        GradientDrawable.Orientation.TOP_BOTTOM)
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
         sbRed.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val color = sbRed.progress.shl(16)
@@ -214,7 +266,13 @@ class SlLightFragment : Fragment() {
 
     private fun generateRgbCircles() {
         for(rgbColor in rgbColorList!!) {
-            val g = CircleView(context!!, null, rgbColor.color!!)
+            val g = CircleView(requireContext()).apply {
+                startColor = rgbColor.color!!
+                centerColor = rgbColor.color!!
+                endColor = rgbColor.color!!
+                gradientType = GradientDrawable.SWEEP_GRADIENT
+                isCheck = false
+            }
             g.setOnClickListener{
                 for (gc in rgbCircleViews) {
                     gc.isCheck = false
@@ -242,19 +300,11 @@ class SlLightFragment : Fragment() {
 
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
-            val g = if (gradColor.centerColor == null) {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        GradientDrawable.SWEEP_GRADIENT
-                )
-            }else {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        gradColor.centerColor!!,
-                        GradientDrawable.SWEEP_GRADIENT
-                )
+            val g = CircleView(requireContext()).apply {
+                startColor = gradColor.startColor!!
+                centerColor = gradColor.centerColor
+                endColor = gradColor.endColor!!
+                gradientType = GradientDrawable.SWEEP_GRADIENT
             }
             g.setOnClickListener{
                 for (gc in gradCircleViews) {
@@ -275,7 +325,6 @@ class SlLightFragment : Fragment() {
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)
         }
-
         currGradIndex = 0
         Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
         gradCircleViews[currGradIndex].isCheck = true

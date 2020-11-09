@@ -7,7 +7,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.LinearLayout
 import com.swaylight.R
 
 /**
@@ -142,6 +144,7 @@ class TopLightView : View {
                 R.styleable.TopLightView_offset_value,
                 offsetValue
         )
+        layoutParams = LinearLayout.LayoutParams(R.dimen.color_circle_radius, R.dimen.color_circle_radius)
         arcPaint = Paint()
         fillPaint = Paint()
         strokeBgPaint = Paint()

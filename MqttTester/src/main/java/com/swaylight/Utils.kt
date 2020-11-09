@@ -2,10 +2,12 @@ package com.swaylight
 
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.View
 import android.widget.SeekBar
+import com.skydoves.colorpickerview.ColorEnvelope
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
 
@@ -20,9 +22,11 @@ class Utils {
                         gradientColor.centerColor!!,
                         gradientColor.endColor!!)
             }
-            val gradDrawable = seekBar.progressDrawable as GradientDrawable
-            gradDrawable.colors = colors
-            gradDrawable.orientation = GradientDrawable.Orientation.LEFT_RIGHT
+            val gradDrawable = GradientDrawable().apply {
+                this.colors = colors
+                this.orientation = GradientDrawable.Orientation.LEFT_RIGHT
+            }
+            seekBar.progressDrawable = gradDrawable
         }
 
         fun setSeekBarColor(sbRed: SeekBar, sbGreen: SeekBar, sbBlue: SeekBar, rgbColor: RgbColor) {

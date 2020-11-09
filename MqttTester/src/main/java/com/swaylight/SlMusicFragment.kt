@@ -1,5 +1,6 @@
 package com.swaylight
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -43,6 +44,7 @@ class SlMusicFragment : Fragment() {
 
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -77,6 +79,7 @@ class SlMusicFragment : Fragment() {
         }
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     private fun initUi() {
         lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
         gradControlCard = v.findViewById(R.id.grad_control_card)
@@ -92,19 +95,11 @@ class SlMusicFragment : Fragment() {
 
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
-            val g = if (gradColor.centerColor == null) {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        GradientDrawable.LINEAR_GRADIENT
-                )
-            }else {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        gradColor.centerColor!!,
-                        GradientDrawable.LINEAR_GRADIENT
-                )
+            val g = CircleView(requireContext()).apply {
+                startColor = gradColor.startColor!!
+                centerColor = gradColor.centerColor
+                endColor = gradColor.endColor!!
+                gradientType = GradientDrawable.LINEAR_GRADIENT
             }
             g.setOnClickListener{
                 for (gc in gradCircleViews) {
@@ -112,12 +107,6 @@ class SlMusicFragment : Fragment() {
                 }
                 g.isCheck = true
                 currIndex = gradCircleViews.indexOf(g)
-//                btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
-//                btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
-//                Utils.setSeekBarColor(sbGrad, gradColor)
-//                Utils.setBgColor(lightTopConstraint,
-//                        gradColor,
-//                        GradientDrawable.Orientation.TOP_BOTTOM)
 
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,

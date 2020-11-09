@@ -1,0 +1,18 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <com.swaylight.custom_ui.CircleView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:width="300dp"
+        app:ringColor="@android:color/white"
+        android:type="linear"
+        android:startColor="@color/warm"
+        android:endColor="@color/cold"
+        android:centerColor="@color/green"
+        app:isCheck="true" />
+
+</FrameLayout>
