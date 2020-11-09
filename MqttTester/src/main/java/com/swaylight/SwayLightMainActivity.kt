@@ -1,9 +1,6 @@
 package com.swaylight
 
-import android.R.attr.x
-import android.R.attr.y
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
@@ -21,6 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.swaylight.custom_ui.TopLightView
+import com.swaylight.library.SLMqttClient
+import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.SLTopic
+import org.eclipse.paho.client.mqttv3.*
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.atan2
 
 
@@ -29,6 +32,8 @@ class SwayLightMainActivity : AppCompatActivity() {
     val tag = SwayLightMainActivity::class.java.simpleName
 
     // UI
+    private lateinit var progressView: ConstraintLayout
+    private lateinit var btNetworkConfig: Button
     private lateinit var rootConstraint: ConstraintLayout
     private lateinit var lightTopConstraint: ConstraintLayout
     private lateinit var modeGroup: LinearLayout
@@ -38,8 +43,20 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var btDebug: View
     private lateinit var btLight: Button
     private lateinit var btMusic: Button
+    private lateinit var tvLog: TextView
+    private lateinit var logView: ConstraintLayout
 
     // values
+    var manager: SLMqttManager? = null
+    var client: SLMqttClient? = null
+    var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
+    private val MAX_LOG_SIZE = 3000
+    private val MQTT_TAG = "mqtt"
+    private val qos = 0
+    private lateinit var broker: String
+    private lateinit var deviceName: String
+    private var clientId: String? = null
+
     var mode = Mode.LIGHT
     var debugClickCount = 0
     var ringCenterX = 0
@@ -70,13 +87,79 @@ class SwayLightMainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         initUi()
 
-        btDebug.setOnClickListener{
-            debugClickCount++
-            if(debugClickCount >= 10) {
-                val intent = Intent(this, ConnectActivity::class.java)
-                finish()
-                startActivity(intent)
+        // Block control view and show progress view.
+        // Delay 3 secs to show config button.
+        progressView.visibility = View.VISIBLE
+        Handler().postDelayed({
+            btNetworkConfig.visibility = View.VISIBLE
+        }, 3000)
+        btNetworkConfig.setOnClickListener {
+            this.onBackPressed()
+        }
+
+        broker = "tcp://" + this.intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
+        deviceName = this.intent.getStringExtra(getString(R.string.DEVICE_NAME))
+        clientId = this.intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
+        manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
+        client = SLMqttManager.getInstance()
+        client!!.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                try {
+                    progressView.visibility = View.INVISIBLE
+                    val topic = SLTopic.ROOT + deviceName + "/#"
+                    client!!.subscribe(topic, 0)
+                    if (reconnect) {
+                        appendLog("Reconnect complete")
+                    } else {
+                        appendLog("Connect complete")
+                    }
+                    appendLog("subscribe: $topic")
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+                Log.d(MQTT_TAG, "Connected to $broker")
             }
+
+            override fun connectionLost(cause: Throwable) {
+                progressView.visibility = View.VISIBLE
+                appendLog("Connection LOST")
+                Log.d(MQTT_TAG, "Disconnect to $broker")
+            }
+
+            @Throws(Exception::class)
+            override fun messageArrived(topic: String, message: MqttMessage) {
+                appendLog("$topic:\n$message")
+            }
+
+            override fun deliveryComplete(token: IMqttDeliveryToken) {}
+        })
+        manager!!.setMqttActionListener(object : IMqttActionListener {
+            override fun onSuccess(asyncActionToken: IMqttToken) {
+                progressView.visibility = View.INVISIBLE
+                appendLog("長按右上角開關debug畫面")
+                appendLog("Connect to $broker success")
+                Log.d(MQTT_TAG, "Connect to $broker success")
+            }
+
+            override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
+//                progressView.visibility = View.VISIBLE
+                appendLog("Connect to $broker fail")
+                Log.d(MQTT_TAG, "Connect to $broker fail")
+            }
+        })
+        try {
+            manager!!.connect()
+        } catch (ex: MqttException) {
+            ex.printStackTrace()
+        }
+
+        btDebug.setOnLongClickListener {
+            logView.visibility = if (logView.visibility == View.VISIBLE) {
+                View.INVISIBLE
+            } else {
+                View.VISIBLE
+            }
+            true
         }
         rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -200,7 +283,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }else if(v <= 0) {
                             v = 0
                         }
-                        ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155+v).shl(24))
+                        ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
                         tvBrightness.text = "brightness:" + v
                     }
                 }
@@ -250,17 +333,27 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
             }
         }
-//        btLight!!.setOnClickListener {
-//            mode = Mode.LIGHT
-//            btMusic!!.visibility = View.INVISIBLE
-//        }
-//        btMusic!!.setOnClickListener {
-//            mode = Mode.MUSIC
-//            btLight!!.visibility = View.INVISIBLE
-//        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (client != null) {
+            try {
+                // 先移除callback，callback裡有處理UI，finish後會找不到UI
+                client!!.setCallback(null)
+                client!!.disconnect()
+            } catch (e: MqttException) {
+                e.printStackTrace()
+            }
+        }
+        finish()
     }
 
     private fun initUi() {
+        progressView = findViewById(R.id.progress_view)
+        btNetworkConfig = findViewById(R.id.bt_network_config)
+        tvLog = findViewById(R.id.tv_log)
+        logView = findViewById(R.id.log_view)
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
         btDebug = findViewById(R.id.debug_view)
@@ -283,5 +376,19 @@ class SwayLightMainActivity : AppCompatActivity() {
             angle += 360f
         }
         return angle
+    }
+
+    @Synchronized
+    fun appendLog(str: String) {
+        runOnUiThread {
+            var strFull = "\n${ControlActivity.DATE_FORMAT.format(Date())} $str${tvLog.text}"
+            if (strFull.length > MAX_LOG_SIZE) {
+                strFull = strFull.substring(0, MAX_LOG_SIZE)
+            }
+            tvLog.text = strFull
+            while (tvLog.canScrollVertically(-1)) {
+                tvLog.scrollBy(0, -1)
+            }
+        }
     }
 }

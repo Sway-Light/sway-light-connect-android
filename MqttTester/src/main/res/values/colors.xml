@@ -16,6 +16,7 @@
     <color name="light_card_bg">#BBBBBB</color>
     <color name="light_tab_bg">#E7E7E7</color>
     <color name="light_control_bg">@android:color/white</color>
+    <color name="progress_bg">#A0FFFFFF</color>
 
     <color name="music_card_title_bg">#DADADA</color>
     <color name="music_card_bg">#BBBBBB</color>
