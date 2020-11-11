@@ -6,6 +6,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,12 +29,13 @@ import com.swaylight.data.RgbColor
 class SlLightFragment : Fragment() {
 
     private val TAG = SwayLightMainActivity::class.java.simpleName
-
     // UI
     private lateinit var v: View
+
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var rgbCircleGroup: LinearLayout
     private lateinit var lightTopConstraint: ViewGroup
+    private lateinit var topBgView: FrameLayout
     private lateinit var gradTab: LinearLayout
     private lateinit var rgbTab: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
@@ -70,7 +72,7 @@ class SlLightFragment : Fragment() {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_sl_light, container, false)
         rgbColorList = arrayListOf(
-                RgbColor(ContextCompat.getColor(context!!, R.color.david_green)),
+                RgbColor(ContextCompat.getColor(requireContext(), R.color.david_green)),
                 RgbColor(Color.BLACK),
                 RgbColor(Color.BLUE),
                 RgbColor(Color.WHITE),
@@ -94,6 +96,24 @@ class SlLightFragment : Fragment() {
             }
         }
 
+        sbGrad.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val currGrad = gradColorList[currGradIndex]
+                if (fromUser) {
+                    val color = Utils.getColorFromGradient(currGrad.startColor!!, currGrad.endColor!!, progress, sbGrad.max)
+                    lightTopConstraint.setBackgroundColor(color)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
+
         btStartColor.setOnClickListener {
             val builder = ColorPickerDialog.Builder(context)
                     .setTitle("ColorPicker start color")
@@ -102,12 +122,16 @@ class SlLightFragment : Fragment() {
                             getString(android.R.string.ok),
                             ColorEnvelopeListener { envelope, _ ->
                                 btStartColor.drawable.colorFilter = PorterDuffColorFilter(envelope.color, PorterDuff.Mode.SRC)
-                                gradCircleViews[currGradIndex].setColor(envelope.color)
+                                gradCircleViews[currGradIndex].startColor = envelope.color
                                 gradColorList[currGradIndex].startColor = envelope.color
                                 Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
-                                Utils.setBgColor(lightTopConstraint,
-                                        gradColorList[currGradIndex],
-                                        GradientDrawable.Orientation.TOP_BOTTOM)
+                                lightTopConstraint.setBackgroundColor(
+                                        Utils.getColorFromGradient(
+                                                gradColorList[currGradIndex].startColor!!,
+                                                gradColorList[currGradIndex].endColor!!,
+                                                sbGrad.progress,
+                                                sbGrad.max)
+                                )
                             }
                     )
                     .setNegativeButton(
@@ -128,9 +152,13 @@ class SlLightFragment : Fragment() {
                                 gradCircleViews[currGradIndex].endColor = envelope.color
                                 gradColorList[currGradIndex].endColor = envelope.color
                                 Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
-                                Utils.setBgColor(lightTopConstraint,
-                                        gradColorList[currGradIndex],
-                                        GradientDrawable.Orientation.TOP_BOTTOM)
+                                lightTopConstraint.setBackgroundColor(
+                                        Utils.getColorFromGradient(
+                                                gradColorList[currGradIndex].startColor!!,
+                                                gradColorList[currGradIndex].endColor!!,
+                                                sbGrad.progress,
+                                                sbGrad.max)
+                                )
                             }
                     )
                     .setNegativeButton(
@@ -148,6 +176,7 @@ class SlLightFragment : Fragment() {
                         .plus(255.shl(24))
 
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -168,6 +197,7 @@ class SlLightFragment : Fragment() {
                         .plus(sbBlue.progress.shl(0))
                         .plus(255.shl(24))
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -188,6 +218,7 @@ class SlLightFragment : Fragment() {
                         .plus(sbBlue.progress.shl(0))
                         .plus(255.shl(24))
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -209,21 +240,19 @@ class SlLightFragment : Fragment() {
         if (!hidden) {
             when(type) {
                 ControlType.GRADIENT_COLOR -> {
-                    Utils.setBgColor(lightTopConstraint,
-                            gradColorList[currGradIndex],
-                            GradientDrawable.Orientation.TOP_BOTTOM)
+                    lightTopConstraint.setBackgroundColor(gradColorList[currGradIndex].startColor!!)
                 }
                 ControlType.RGB_COLOR -> {
-                    Utils.setBgColor(lightTopConstraint,
-                            rgbColorList!![currRgbIndex],
-                            GradientDrawable.Orientation.TOP_BOTTOM)
+                    lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
                 }
             }
+            topBgView.setBackgroundResource(R.drawable.bg_top_light_view)
         }
     }
 
     private fun initUi() {
-        lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
+        lightTopConstraint = requireActivity().findViewById(R.id.lightTopConstraint)
+        topBgView = requireActivity().findViewById(R.id.light_bg_view)
         gradTab = v.findViewById(R.id.grad_tab)
         rgbTab = v.findViewById(R.id.rgb_tab)
         gradControlCard = v.findViewById(R.id.grad_control_card)
@@ -249,16 +278,18 @@ class SlLightFragment : Fragment() {
             ControlType.GRADIENT_COLOR ->{
                 collapse(rgbControlCard)
                 expand(gradControlCard)
-                Utils.setBgColor(lightTopConstraint,
-                        gradColorList[currGradIndex],
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(
+                        Utils.getColorFromGradient(
+                                gradColorList[currGradIndex].startColor!!,
+                                gradColorList[currGradIndex].endColor!!,
+                                sbGrad.progress,
+                                sbGrad.max)
+                )
             }
             ControlType.RGB_COLOR -> {
                 collapse(gradControlCard)
                 expand(rgbControlCard)
-                Utils.setBgColor(lightTopConstraint,
-                        rgbColorList!![currRgbIndex],
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
             }
         }
         this.type = type
@@ -280,9 +311,7 @@ class SlLightFragment : Fragment() {
                 g.isCheck = true
                 btRgbColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
                 Utils.setSeekBarColor(sbRed, sbGreen, sbBlue, rgbColor)
-                Utils.setBgColor(lightTopConstraint,
-                        rgbColor,
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(rgbColor.color!!)
                 currRgbIndex = rgbCircleViews.indexOf(g)
             }
             g.setOnLongClickListener {
@@ -314,9 +343,7 @@ class SlLightFragment : Fragment() {
                 btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
                 btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
                 Utils.setSeekBarColor(sbGrad, gradColor)
-                Utils.setBgColor(lightTopConstraint,
-                        gradColor,
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(gradColor.startColor!!)
                 currGradIndex = gradCircleViews.indexOf(g)
             }
             g.setOnLongClickListener {

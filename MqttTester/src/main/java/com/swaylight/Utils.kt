@@ -2,14 +2,13 @@ package com.swaylight
 
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
-import com.skydoves.colorpickerview.ColorEnvelope
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
+import kotlin.math.absoluteValue
 
 class Utils {
     companion object {
@@ -22,11 +21,16 @@ class Utils {
                         gradientColor.centerColor!!,
                         gradientColor.endColor!!)
             }
+//            (seekBar.progressDrawable as GradientDrawable).apply {
+//                this.colors = colors
+//                this.orientation = GradientDrawable.Orientation.LEFT_RIGHT
+//            }
             val gradDrawable = GradientDrawable().apply {
                 this.colors = colors
                 this.orientation = GradientDrawable.Orientation.LEFT_RIGHT
             }
             seekBar.progressDrawable = gradDrawable
+            seekBar.progressDrawable.invalidateSelf()
         }
 
         fun setSeekBarColor(sbRed: SeekBar, sbGreen: SeekBar, sbBlue: SeekBar, rgbColor: RgbColor) {
@@ -59,6 +63,33 @@ class Utils {
                 this.orientation = orientation
             }
             view.background = gradDrawable
+        }
+
+        fun getColorFromGradient(startColor: Int, endColor: Int, progress: Int, maxProgress: Int): Int {
+            val weight = progress.div(maxProgress.toFloat())
+            val deltaR = endColor.shr(16).and(0xFF).minus(startColor.shr(16).and(0xFF))
+            val deltaG = endColor.shr(8).and(0xFF).minus(startColor.shr(8).and(0xFF))
+            val deltaB = endColor.shr(0).and(0xFF).minus(startColor.shr(0).and(0xFF))
+            val red = if(deltaR > 0) {
+                startColor.shr(16).and(0xFF).plus(deltaR.times(weight).toInt())
+            }else {
+                endColor.shr(16).and(0xFF).minus(deltaR.times(1f - weight).toInt())
+            }
+            val green = if(deltaG > 0){
+                startColor.shr(8).and(0xFF).plus(deltaG.times(weight).toInt())
+            }else {
+                endColor.shr(8).and(0xFF).minus(deltaG.times(1f- weight).toInt())
+            }
+
+            val blue = if(deltaB > 0) {
+                startColor.shr(0).and(0xFF).plus(deltaB.times(weight).toInt())
+            }else {
+                endColor.shr(0).and(0xFF).minus(deltaB.times(1f - weight).toInt())
+            }
+            return 0xFF000000
+                    .plus(red.shl(16))
+                    .plus(green.shl(8))
+                    .plus(blue.shl(0)).toInt()
         }
     }
 }

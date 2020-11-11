@@ -19,11 +19,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import com.skydoves.colorpickerview.ColorEnvelope
-import com.skydoves.colorpickerview.ColorPickerDialog
-import com.skydoves.colorpickerview.flag.BubbleFlag
-import com.skydoves.colorpickerview.flag.FlagMode
-import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
@@ -107,6 +102,11 @@ class SwayLightMainActivity : AppCompatActivity() {
         btNetworkConfig.setOnClickListener {
             this.onBackPressed()
         }
+        btNetworkConfig.setOnLongClickListener {
+            progressView.visibility = View.INVISIBLE
+            true
+        }
+
         tvLog.movementMethod = ScrollingMovementMethod()
         tvLog.setOnLongClickListener {
             val builder = AlertDialog.Builder(this)
@@ -203,8 +203,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                     ivRing.offsetValue = offset.toInt()
                     if (displayObj.offset != ivRing.offsetValue) {
                         displayObj.offset = ivRing.offsetValue
-                        client!!.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
-                        client!!.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                        client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                        client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
                     }
                 }
             }
@@ -218,7 +218,13 @@ class SwayLightMainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_DOWN -> {
                     // 右半邊控制亮度/左半邊控制縮放
                     lightSlideStartY = event.rawY
-                    controlZoomFlag = (event.rawX <= lightTopConstraint.width / 2)
+                    if (event.rawX <= lightTopConstraint.width / 2) {
+                        controlZoomFlag = true
+                        tvZoom.visibility = View.VISIBLE
+                    }else {
+                        controlZoomFlag = false
+                        tvBrightness.visibility = View.VISIBLE
+                    }
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
@@ -229,6 +235,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = 0
                         }
                         prevZoom = v
+                        tvZoom.visibility = View.INVISIBLE
                     } else {
                         v = prevBrightness + delta
                         if (v > MAX_BRIGHTNESS) {
@@ -237,6 +244,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = 0
                         }
                         prevBrightness = v
+                        tvBrightness.visibility = View.INVISIBLE
                     }
                 }
                 else -> {
@@ -248,11 +256,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = MIN_ZOOM
                         }
                         ivRing.zoomValue = v
-                        tvZoom.text = "zoom:" + v
+                        tvZoom.text = v.toString()
                         if (displayObj.zoom != ivRing.zoomValue) {
                             displayObj.zoom = ivRing.zoomValue
-                            client!!.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
-                            client!!.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                            client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                            client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
                         }
                     }else {
                         v = prevBrightness + delta
@@ -262,7 +270,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = 0
                         }
                         ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
-                        tvBrightness.text = "brightness:" + v
+                        tvBrightness.text = v.toString()
                     }
                 }
             }
@@ -310,16 +318,14 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .commit()
                 }
             }
-            client!!.publish(SLTopic.CURR_MODE, deviceName, mode)
+            client?.publish(SLTopic.CURR_MODE, deviceName, mode)
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if(client != null) {
-            client!!.setCallback(null)
-            client!!.disconnect()
-        }
+        client?.setCallback(null)
+        client?.disconnect()
     }
 
     override fun onResume() {
@@ -329,11 +335,11 @@ class SwayLightMainActivity : AppCompatActivity() {
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
         manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
         client = SLMqttManager.getInstance()
-        client!!.setCallback(object : MqttCallbackExtended {
+        client?.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 try {
                     val topic = SLTopic.ROOT + deviceName + "/#"
-                    client!!.subscribe(topic, 0)
+                    client?.subscribe(topic, 0)
                     if (reconnect) {
                         appendLog("Reconnect complete")
                     } else {

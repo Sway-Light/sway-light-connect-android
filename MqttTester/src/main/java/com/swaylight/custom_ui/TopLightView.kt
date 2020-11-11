@@ -185,7 +185,7 @@ class TopLightView : View {
 
     private fun startAnimation() {
         animator?.cancel()
-        animator = ValueAnimator.ofFloat(0f, 1f).apply {
+        animator = ValueAnimator.ofFloat(0f, 0f).apply {
             duration = 200
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener { valueAnimator ->

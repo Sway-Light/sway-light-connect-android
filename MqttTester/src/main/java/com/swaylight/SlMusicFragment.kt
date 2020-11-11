@@ -24,6 +24,7 @@ class SlMusicFragment : Fragment() {
     // UI
     private lateinit var v: View
     private lateinit var lightTopConstraint: ViewGroup
+    private lateinit var topBgView: FrameLayout
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
     private lateinit var equalizerView: EqualizerView
@@ -75,6 +76,7 @@ class SlMusicFragment : Fragment() {
             Utils.setBgColor(lightTopConstraint,
                     gradColorList[currIndex],
                     GradientDrawable.Orientation.TOP_BOTTOM)
+            topBgView.setBackgroundResource(R.drawable.bg_top_music_view)
             setEqualizerColor(gradColorList[currIndex])
         }
     }
@@ -82,6 +84,7 @@ class SlMusicFragment : Fragment() {
     @SuppressLint("UseRequireInsteadOfGet")
     private fun initUi() {
         lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
+        topBgView = activity!!.findViewById(R.id.light_bg_view)
         gradControlCard = v.findViewById(R.id.grad_control_card)
         gradCircleGroup = v.findViewById(R.id.grad_circle_group)
         equalizerView = v.findViewById(R.id.equalizer_view)
