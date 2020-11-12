@@ -70,7 +70,6 @@ class CircleView : View {
         get() = _isCheck
         set(value) {
             _isCheck = value
-            Log.d(tag, "set isClick")
             invalidatePaintAndMeasurements()
         }
 

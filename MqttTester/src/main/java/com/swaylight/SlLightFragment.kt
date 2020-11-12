@@ -22,6 +22,10 @@ import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
+import com.swaylight.library.SLMqttClient
+import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.SLColor
+import com.swaylight.library.data.SLTopic
 
 
 class SlLightFragment : Fragment() {
@@ -50,6 +54,8 @@ class SlLightFragment : Fragment() {
     private lateinit var sbBlue: SeekBar
 
     // values
+    private var client: SLMqttClient? = null
+    private var deviceName: String? = null
     private var currGradIndex = 0
     private var currRgbIndex = 0
     var type: ControlType = ControlType.GRADIENT_COLOR
@@ -57,6 +63,7 @@ class SlLightFragment : Fragment() {
     var rgbCircleViews: ArrayList<CircleView> = arrayListOf()
     var gradColorList: ArrayList<GradientColor> = arrayListOf()
     var rgbColorList: ArrayList<RgbColor>? = null
+    private var mqttColorObj = SLColor(0, 0, 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +74,8 @@ class SlLightFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_sl_light, container, false)
+        client = SLMqttManager.getInstance()
+        deviceName = SLMqttManager.getDeviceName()
         rgbColorList = arrayListOf(
                 RgbColor(ContextCompat.getColor(requireContext(), R.color.david_green)),
                 RgbColor(Color.BLACK),
@@ -77,12 +86,15 @@ class SlLightFragment : Fragment() {
         gradColorList.addAll(
                 arrayOf(
                         GradientColor(
-                        ContextCompat.getColor(requireContext(), R.color.cold),
-                        Color.WHITE,
-                        ContextCompat.getColor(requireContext(), R.color.warm)),
-                        GradientColor(Color.BLACK, Color.BLUE),
-                        GradientColor(Color.WHITE, Color.RED),
-                        GradientColor(Color.GREEN, Color.DKGRAY)
+                                ContextCompat.getColor(requireContext(), R.color.light_grad_default_start),
+                                Color.WHITE,
+                                ContextCompat.getColor(requireContext(), R.color.light_grad_default_end)),
+                        GradientColor(
+                                ContextCompat.getColor(requireContext(), R.color.light_grad1_start),
+                                ContextCompat.getColor(requireContext(), R.color.light_grad1_end)),
+                        GradientColor(
+                                ContextCompat.getColor(requireContext(), R.color.light_grad2_start),
+                                ContextCompat.getColor(requireContext(), R.color.light_grad2_end))
                 )
         )
         generateGradCircles()
@@ -117,6 +129,8 @@ class SlLightFragment : Fragment() {
                         }
                     }
                     lightTopConstraint.setBackgroundColor(color)
+                    mqttColorObj.setColor(color)
+                    client?.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, mqttColorObj.instance)
                 }
             }
 
@@ -191,7 +205,7 @@ class SlLightFragment : Fragment() {
 
         btAddRgb.setOnClickListener {
             val newRgbColor = RgbColor(Color.BLACK)
-            rgbColorList!!.add(RgbColor(Color.BLACK))
+            rgbColorList!!.add(newRgbColor)
             generateRgbCircles()
         }
 
@@ -204,6 +218,8 @@ class SlLightFragment : Fragment() {
                     rgbColorList!![currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                    mqttColorObj.setColor(color)
+                    client?.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, mqttColorObj.instance)
                 }
             }
 
@@ -224,6 +240,8 @@ class SlLightFragment : Fragment() {
                     rgbColorList!![currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                    mqttColorObj.setColor(color)
+                    client?.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, mqttColorObj.instance)
                 }
             }
 
@@ -244,6 +262,8 @@ class SlLightFragment : Fragment() {
                     rgbColorList!![currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
+                    mqttColorObj.setColor(color)
+                    client?.publish(SLTopic.LIGHT_MODE_COLOR, deviceName, mqttColorObj.instance)
                 }
             }
 
@@ -264,10 +284,12 @@ class SlLightFragment : Fragment() {
         if (!hidden) {
             when(type) {
                 ControlType.GRADIENT_COLOR -> {
-                    lightTopConstraint.setBackgroundColor(gradColorList[currGradIndex].startColor!!)
+//                    lightTopConstraint.setBackgroundColor(gradColorList[currGradIndex].startColor!!)
+                    generateGradCircles()
                 }
                 ControlType.RGB_COLOR -> {
-                    lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
+//                    lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
+                    generateRgbCircles()
                 }
             }
             topBgView.setBackgroundResource(R.drawable.bg_top_light_view)
@@ -325,26 +347,26 @@ class SlLightFragment : Fragment() {
         rgbCircleViews.clear()
         rgbCircleGroup.removeAllViews()
         for(rgbColor in rgbColorList!!) {
-            val g = CircleView(requireContext()).apply {
+            val circleView = CircleView(requireContext()).apply {
                 startColor = rgbColor.color!!
                 centerColor = rgbColor.color!!
                 endColor = rgbColor.color!!
                 gradientType = GradientDrawable.SWEEP_GRADIENT
                 isCheck = false
             }
-            g.setOnClickListener{
+            circleView.setOnClickListener{
                 for (gc in rgbCircleViews) {
                     gc.isCheck = false
                 }
-                g.isCheck = true
-                btRgbColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
+                circleView.isCheck = true
+                btRgbColor.drawable.colorFilter = PorterDuffColorFilter(circleView.startColor, PorterDuff.Mode.SRC)
                 Utils.setSeekBarColor(sbRed, sbGreen, sbBlue, rgbColor)
                 lightTopConstraint.setBackgroundColor(rgbColor.color!!)
-                currRgbIndex = rgbCircleViews.indexOf(g)
+                currRgbIndex = rgbCircleViews.indexOf(circleView)
             }
-            g.setOnLongClickListener {
+            circleView.setOnLongClickListener {
                 if (rgbCircleViews.size > 1) {
-                    val removeIndex = rgbCircleViews.indexOf(g)
+                    val removeIndex = rgbCircleViews.indexOf(circleView)
                     val builder = AlertDialog.Builder(requireContext())
                     builder.setMessage("Delete this color?")
                     builder.setPositiveButton("Yes") { dialog, which ->
@@ -360,8 +382,8 @@ class SlLightFragment : Fragment() {
                 }
                 true
             }
-            rgbCircleViews.add(g)
-            rgbCircleGroup.addView(g)
+            rgbCircleViews.add(circleView)
+            rgbCircleGroup.addView(circleView)
         }
         rgbCircleGroup[currRgbIndex].callOnClick()
     }
@@ -375,6 +397,7 @@ class SlLightFragment : Fragment() {
                 centerColor = gradColor.centerColor
                 endColor = gradColor.endColor!!
                 gradientType = GradientDrawable.SWEEP_GRADIENT
+                rotation = 45f
             }
             circleView.setOnClickListener{
                 for (gc in gradCircleViews) {

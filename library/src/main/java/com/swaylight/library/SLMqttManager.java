@@ -1,6 +1,7 @@
 package com.swaylight.library;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -28,6 +29,9 @@ public class SLMqttManager {
     }
 
     static public SLMqttClient getInstance() {
+        if(client == null) {
+            Log.e(SLMqttManager.class.getSimpleName(), "get mqtt instance failed!");
+        }
         return client;
     }
 

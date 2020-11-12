@@ -11,8 +11,8 @@
     <style name="cold_warm_gradient_circle_view">
         <item name="android:layout_height">40dp</item>
         <item name="android:layout_width">40dp</item>
-        <item name="android:startColor">@color/warm</item>
-        <item name="android:endColor">@color/cold</item>
+        <item name="android:startColor">@color/light_grad_default_start</item>
+        <item name="android:endColor">@color/light_grad_default_end</item>
         <item name="android:centerColor">#FFFFFF</item>
         <item name="android:type">sweep</item>
         <item name="ringColor">#FFFFFF</item>

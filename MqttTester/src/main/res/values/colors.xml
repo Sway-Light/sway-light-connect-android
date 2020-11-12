@@ -25,8 +25,12 @@
     <color name="music_tab_bg">#E7E7E7</color>
     <color name="music_control_bg">@android:color/white</color>
 
-    <color name="cold">#A8E0FF</color>
-    <color name="warm">#FFE4AF</color>
+    <color name="light_grad_default_start">#A8E0FF</color>
+    <color name="light_grad_default_end">#FFE4AF</color>
+    <color name="light_grad1_start">#FF2DAB</color>
+    <color name="light_grad1_end">#FFBBC7</color>
+    <color name="light_grad2_start">#BEFF8A</color>
+    <color name="light_grad2_end">#2DB4FF</color>
     <color name="david_green">#AFFFF1</color>
 
     <color name="music_grad1_h">#FFBABA</color>

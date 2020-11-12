@@ -220,13 +220,13 @@
 
                             <ImageButton
                                 android:id="@+id/bt_add_rgb"
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:src="@drawable/ic_plus"
-                                android:background="@android:color/transparent"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
                                 android:layout_gravity="center_vertical"
                                 android:layout_marginLeft="10dp"
-                                android:padding="5dp"/>
+                                android:background="@android:color/transparent"
+                                android:padding="5dp"
+                                android:src="@drawable/ic_plus" />
                         </LinearLayout>
 
                     </HorizontalScrollView>

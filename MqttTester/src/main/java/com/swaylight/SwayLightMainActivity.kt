@@ -89,8 +89,10 @@ class SwayLightMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sway_light_main)
+
         this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
+        initMqtt()
         initUi()
 
         // Block control view and show progress view.
@@ -330,6 +332,30 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        try {
+            manager!!.connect()
+        } catch (ex: MqttException) {
+            ex.printStackTrace()
+        }
+
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (client != null) {
+            try {
+                // 先移除callback，callback裡有處理UI，finish後會找不到UI
+                client!!.setCallback(null)
+                client!!.disconnect()
+            } catch (e: MqttException) {
+                e.printStackTrace()
+            }
+            client = null
+        }
+        finish()
+    }
+
+    private fun initMqtt() {
         broker = "tcp://" + intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
         deviceName = intent.getStringExtra(getString(R.string.DEVICE_NAME))
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
@@ -338,6 +364,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         client?.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 try {
+                    Log.d(MQTT_TAG, "client: $client")
                     val topic = SLTopic.ROOT + deviceName + "/#"
                     client?.subscribe(topic, 0)
                     if (reconnect) {
@@ -386,27 +413,6 @@ class SwayLightMainActivity : AppCompatActivity() {
                 Log.d(MQTT_TAG, "Connect to $broker fail")
             }
         })
-        try {
-            manager!!.connect()
-        } catch (ex: MqttException) {
-            ex.printStackTrace()
-        }
-
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (client != null) {
-            try {
-                // 先移除callback，callback裡有處理UI，finish後會找不到UI
-                client!!.setCallback(null)
-                client!!.disconnect()
-            } catch (e: MqttException) {
-                e.printStackTrace()
-            }
-            client = null
-        }
-        finish()
     }
 
     private fun initUi() {

@@ -1,5 +1,8 @@
 package com.swaylight.library.data;
 
+import android.graphics.Color;
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,6 +41,16 @@ public class SLColor {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+    }
+
+    public void setColor(int color) {
+        setColor(
+                (color >> 16) & 0xFF,
+                (color >> 8) & 0xFF,
+                (color >> 0) & 0xFF);
     }
 
     public JSONObject getInstance() {
