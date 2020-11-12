@@ -10,7 +10,9 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.custom_ui.EqualizerView
@@ -118,7 +120,22 @@ class SlMusicFragment : Fragment() {
                 setCirclesColor(gradColor)
             }
             g.setOnLongClickListener {
-                TODO("long click to remove color")
+                if (gradCircleViews.size > 1) {
+                    val removeIndex = gradCircleViews.indexOf(g)
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setMessage("Delete this color?")
+                    builder.setPositiveButton("Yes") { dialog, which ->
+                        gradColorList.removeAt(removeIndex)
+                        gradCircleGroup.removeViewAt(removeIndex)
+                        gradCircleViews.removeAt(removeIndex)
+                        if (removeIndex == currIndex) {
+                            gradCircleGroup[0].callOnClick()
+                        }
+                    }
+                    builder.setNegativeButton("Cancel") { dialog, which -> }
+                    builder.show()
+                }
+                true
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)

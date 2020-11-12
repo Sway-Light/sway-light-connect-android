@@ -110,7 +110,7 @@
                             app:freq_size="32"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:level_size="10"
+                            app:level_size="15"
                             app:high_color="@color/red"
                             app:medium_color="@color/yellow"
                             app:low_color="@color/green" />
@@ -140,12 +140,13 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/high"
+                                    android:layout_gravity="center_vertical"
                                     android:fontFamily="@font/pt_sans_narrow"
                                     android:letterSpacing="0.05"
+                                    android:text="@string/high"
                                     android:textAllCaps="true"
-                                    android:textSize="20sp"
-                                    android:layout_gravity="center_vertical"/>
+                                    android:textColor="@android:color/white"
+                                    android:textSize="20sp" />
 
                             </LinearLayout>
 
@@ -160,15 +161,17 @@
                                     android:startColor="@android:color/white"
                                     android:endColor="@android:color/white"
                                     android:centerColor="@android:color/white"/>
+
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/middle"
+                                    android:layout_gravity="center_vertical"
                                     android:fontFamily="@font/pt_sans_narrow"
                                     android:letterSpacing="0.05"
+                                    android:text="@string/middle"
                                     android:textAllCaps="true"
-                                    android:textSize="20sp"
-                                    android:layout_gravity="center_vertical"/>
+                                    android:textColor="@android:color/white"
+                                    android:textSize="20sp" />
 
                             </LinearLayout>
 
@@ -183,15 +186,17 @@
                                     android:startColor="@android:color/white"
                                     android:endColor="@android:color/white"
                                     android:centerColor="@android:color/white"/>
+
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/low"
+                                    android:layout_gravity="center_vertical"
                                     android:fontFamily="@font/pt_sans_narrow"
                                     android:letterSpacing="0.05"
+                                    android:text="@string/low"
                                     android:textAllCaps="true"
-                                    android:textSize="20sp"
-                                    android:layout_gravity="center_vertical"/>
+                                    android:textColor="@android:color/white"
+                                    android:textSize="20sp" />
 
                             </LinearLayout>
                         </LinearLayout>

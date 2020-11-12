@@ -29,6 +29,7 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
     private var grad: Shader? = null
     private var fillPaint = Paint()
     private var strokePaint = Paint()
+    private var linePaint = Paint()
     private var animator: ValueAnimator? = null
     private var currentValue = 0f
     private var startValue: IntArray = IntArray(0)
@@ -48,6 +49,7 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
                 params.width = width.toInt()
                 super.setLayoutParams(params)
                 freqSize = getInteger(R.styleable.EqualizerView_freq_size, 16)
+                levelSize = getInteger(R.styleable.EqualizerView_level_size, 10)
                 highColor = getInteger(R.styleable.EqualizerView_high_color, 0)
                 mediumColor = getInteger(R.styleable.EqualizerView_medium_color, 0)
                 lowColor = getInteger(R.styleable.EqualizerView_low_color, 0)
@@ -140,6 +142,11 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
             color = Color.GRAY
         }
 
+        linePaint.apply {
+            strokeWidth = 2f
+            color = 0x80FFFFFF.toInt()
+        }
+
         for (i in 0 until freqSize) {
             canvas?.drawRect(
                     width * (i.toFloat() / freqSize),
@@ -153,6 +160,25 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
                     width * ((i.toFloat() + 1) / freqSize),
                     height,
                     strokePaint)
+        }
+
+        for (i in 0..freqSize) {
+            canvas?.drawLine(
+                    width * (i.div(freqSize.toFloat())),
+                    0f,
+                    width * (i.div(freqSize.toFloat())),
+                    height,
+                    linePaint
+            )
+        }
+        for (i in 0..levelSize) {
+            canvas?.drawLine(
+                    0f,
+                    height * (i.div(levelSize.toFloat())),
+                    width,
+                    height * (i.div(levelSize.toFloat())),
+                    linePaint
+            )
         }
     }
 }
