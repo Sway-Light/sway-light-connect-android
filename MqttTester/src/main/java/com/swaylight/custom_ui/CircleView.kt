@@ -93,6 +93,12 @@ class CircleView : View {
         this.endColor = color
     }
 
+    fun setColor(start: Int, center: Int?, end: Int) {
+        this.startColor = start
+        this.centerColor = center
+        this.endColor = end
+    }
+
     constructor(context: Context) : super(context) {
         init(null, 0)
     }
