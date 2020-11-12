@@ -4,185 +4,223 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
-import android.util.TypedValue
+import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
+import android.view.ViewGroup.LayoutParams
 import com.swaylight.R
 
+/**
+ * TODO: document your custom view class.
+ */
+class CircleView : View {
 
-class CircleView(context: Context, attrs: AttributeSet?): View(context, attrs) {
+    private val tag = CircleView::class.java.simpleName
+    private var _width: Float = resources.getDimensionPixelSize(R.dimen.color_circle_radius)*2f
+    private var _startColor: Int = Color.BLACK
+    private var _centerColor: Int? = Color.WHITE
+    private var _endColor: Int = Color.BLACK
+    private var _ringColor: Int = 0xFFFFFFFF.toInt()
+    private var _isCheck: Boolean = false
+    private var _gradientType: Int = GradientDrawable.LINEAR_GRADIENT
 
+    private lateinit var circlePaint: Paint
+    private lateinit var ringPaint: Paint
+    private lateinit var grad: Shader
 
-    private val TAG = CircleView::class.java.simpleName
-    var startColor: Int = Color.BLACK
-    var endColor: Int = Color.BLACK
-    var centerColor: Int? = null
-    var ringColor: Int = 0xFFFFFFFF.toInt()
-    var rotation: Int = 0
-    var isCheck: Boolean = false
-    var type: Int = 0
+    private val colors = IntArray(3)
+    private val sweepPosition2: FloatArray = floatArrayOf(0f, 1f)
+    private val sweepPosition3: FloatArray = floatArrayOf(0f, 0.5f, 1f)
+    private val linearPosition2: FloatArray = floatArrayOf(0.2f, 0.8f)
+    private val linearPosition3: FloatArray = floatArrayOf(0.2f, 0.5f, 0.8f)
 
-    private var size = resources.getDimension(R.dimen.color_circle_radius)
-    private val params: LinearLayout.LayoutParams = LinearLayout.LayoutParams(size.toInt()*2, size.toInt()*2)
-    private val circlePaint = Paint()
-    private val ringPaint = Paint()
-    private var grad: Shader? = null
-
-    constructor(context: Context, attrs: Nothing?, startColor: Int, endColor: Int, centerColor: Int?, type: Int) : this(context, attrs) {
-        this.startColor = startColor
-        this.endColor = endColor
-        this.centerColor = centerColor
-        this.type = type
-        when(type) {
-            GradientDrawable.SWEEP_GRADIENT -> {
-                grad = if (centerColor == null) {
-                    SweepGradient(size,  size,
-                            intArrayOf(startColor, endColor),
-                            floatArrayOf(0f, 1.0f)
-                    )
-                }else {
-                    SweepGradient(size,  size,
-                            intArrayOf(startColor, centerColor, endColor),
-                            floatArrayOf(0f, 0.5f, 1.0f)
-                    )
-                }
-            }
-            GradientDrawable.LINEAR_GRADIENT -> {
-                grad = LinearGradient(
-                        size, size*2, size, 0f,
-                        intArrayOf(endColor, centerColor!!, startColor),
-                        floatArrayOf(0.2f, 0.5f, 0.8f),
-                        Shader.TileMode.REPEAT
-                )
-            }
+    var startColor: Int
+        get() = _startColor
+        set(value) {
+            _startColor = value
+            colors[0] = _startColor
+            invalidatePaintAndMeasurements()
         }
-    }
 
-    constructor(context: Context, attrs: Nothing?, startColor: Int, endColor: Int, type: Int) : this(context, attrs) {
-        this.startColor = startColor
-        this.endColor = endColor
-        this.type = type
-        when(type) {
-            GradientDrawable.SWEEP_GRADIENT -> {
-                grad = SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
+    var centerColor: Int?
+        get() = _centerColor
+        set(value) {
+            _centerColor = value
+            if (_centerColor != null) {
+                colors[1] = _centerColor!!
             }
-            GradientDrawable.LINEAR_GRADIENT -> {
-                grad = LinearGradient(
-                        size, size*2, size, 0f,
-                        intArrayOf(endColor, startColor),
-                        floatArrayOf(0.2f, 0.8f),
-                        Shader.TileMode.REPEAT
-                )
-            }
+            invalidatePaintAndMeasurements()
         }
-    }
 
-    constructor(context: Context, attrs: Nothing?, color: Int) : this(context, attrs) {
-        this.grad = SweepGradient(size,  size, color, color)
-        this.startColor = color
-        this.endColor = color
-    }
-
-    init {
-        context.theme.obtainStyledAttributes(
-                attrs,
-                R.styleable.CircleView,
-                0, 0).apply {
-
-            try {
-                super.setLayoutParams(params)
-                startColor = getInteger(R.styleable.CircleView_android_startColor, 0)
-                endColor = getInteger(R.styleable.CircleView_android_endColor, 0)
-                centerColor = getInteger(R.styleable.CircleView_android_centerColor, 0)
-                ringColor = getInteger(R.styleable.CircleView_ringColor, 0xFFFFFFFF.toInt())
-                rotation = getFloat(R.styleable.CircleView_android_rotation, 0f).toInt()
-                isCheck = getBoolean(R.styleable.CircleView_isCheck, false)
-                type = getInteger(R.styleable.CircleView_android_type, GradientDrawable.SWEEP_GRADIENT)
-                when(type) {
-                    GradientDrawable.SWEEP_GRADIENT -> {
-                        grad = if (centerColor == null) {
-                            SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
-                        }else {
-                            SweepGradient(size,  size, intArrayOf(startColor, centerColor!!, endColor), floatArrayOf(0f, 0.5f, 1.0f))
-                        }
-                    }
-                    GradientDrawable.LINEAR_GRADIENT -> {
-                        grad = LinearGradient(size/2, 0f, size/2, size,
-                        intArrayOf(endColor, centerColor!!, startColor),
-                        floatArrayOf(0.2f, 0.5f, 0.8f),
-                        Shader.TileMode.REPEAT)
-                    }
-                }
-            } finally {
-                recycle()
-            }
+    var endColor: Int
+        get() = _endColor
+        set(value) {
+            _endColor = value
+            colors[2] = _endColor
+            invalidatePaintAndMeasurements()
         }
-    }
 
-    fun setColor(startColor: Int, centerColor: Int?, endColor: Int, type: Int) {
-        this.startColor = startColor
-        this.centerColor = centerColor
-        this.endColor = endColor
-        this.type = type
-        when(type) {
-            GradientDrawable.SWEEP_GRADIENT -> {
-                grad = SweepGradient(size,  size, intArrayOf(startColor, endColor), floatArrayOf(0f, 1.0f))
-            }
-            GradientDrawable.LINEAR_GRADIENT -> {
-                if (centerColor == null) {
-                    grad = LinearGradient(
-                            size, size*2, size, 0f,
-                            intArrayOf(endColor, startColor),
-                            floatArrayOf(0.2f, 0.8f),
-                            Shader.TileMode.REPEAT
-                    )
-                }else {
-                    grad = LinearGradient(
-                            size, size*2, size, 0f,
-                            intArrayOf(endColor, centerColor, startColor),
-                            floatArrayOf(0.2f, 0.5f, 0.8f),
-                            Shader.TileMode.REPEAT
-                    )
-                }
-            }
+    var ringColor: Int
+        get() = _ringColor
+        set(value) {
+            _ringColor = value
+            invalidatePaintAndMeasurements()
         }
-    }
+
+    var isCheck: Boolean
+        get() = _isCheck
+        set(value) {
+            _isCheck = value
+            Log.d(tag, "set isClick")
+            invalidatePaintAndMeasurements()
+        }
+
+    var gradientType: Int
+        get() = _gradientType
+        set(value) {
+            _gradientType = value
+            invalidatePaintAndMeasurements()
+        }
+    var width: Float
+        get() = _width
+        set(value) {
+            _width = value
+            invalidatePaintAndMeasurements()
+        }
 
     fun setColor(color: Int) {
         this.startColor = color
         this.centerColor = color
         this.endColor = color
-        grad = LinearGradient(
-                size, size*2, size, 0f,
-                color,
-                color,
-                Shader.TileMode.REPEAT
-        )
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        this.layoutParams = params
+    constructor(context: Context) : super(context) {
+        init(null, 0)
+    }
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        init(attrs, 0)
+    }
+
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
+        init(attrs, defStyle)
+    }
+
+    private fun init(attrs: AttributeSet?, defStyle: Int) {
+        // Load attributes
+        val a = context.obtainStyledAttributes(
+                attrs, R.styleable.CircleView, defStyle, 0)
+
+        _width = a.getDimension(R.styleable.CircleView_android_width, width)
+        this.layoutParams = LayoutParams(_width.toInt(), _width.toInt())
+        _startColor = a.getColor(R.styleable.CircleView_android_startColor, startColor)
+        _centerColor = a.getColor(R.styleable.CircleView_android_centerColor, centerColor!!)
+        _endColor = a.getColor(R.styleable.CircleView_android_endColor, endColor)
+        _ringColor = a.getColor(R.styleable.CircleView_ringColor, ringColor)
+        _isCheck = a.getBoolean(R.styleable.CircleView_isCheck, isCheck)
+        _gradientType = a.getInteger(R.styleable.CircleView_android_type, gradientType)
+        circlePaint = Paint()
+        ringPaint = Paint()
+        colors.apply {
+            this[0] = _startColor
+            this[1] = _centerColor!!
+            this[2] = _endColor
+        }
+
+        a.recycle()
+
+        // Update TextPaint and text measurements from attributes
+        invalidatePaintAndMeasurements()
+    }
+
+    private fun invalidatePaintAndMeasurements() {
+        when(_gradientType) {
+            GradientDrawable.SWEEP_GRADIENT -> {
+                grad = if (_centerColor == null) {
+                    SweepGradient(
+                            _width/2f,
+                            _width/2f,
+                            _startColor,
+                            _endColor
+                    )
+                }else {
+                    SweepGradient(
+                            _width/2f,
+                            _width/2f,
+                            colors,
+                            sweepPosition3
+                    )
+                }
+            }
+            GradientDrawable.LINEAR_GRADIENT -> {
+                grad = if (_centerColor == null) {
+                    LinearGradient(
+                            _width/2f,
+                            _width,
+                            _width/2f,
+                            0f,
+                            _endColor,
+                            _startColor,
+                            Shader.TileMode.REPEAT
+                    )
+                }else {
+                    LinearGradient(
+                            _width/2f,
+                            _width,
+                            _width/2f,
+                            0f,
+                            colors,
+                            linearPosition3,
+                            Shader.TileMode.REPEAT
+                    )
+                }
+            }
+        }
+        invalidate()
+    }
+
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.rotate(rotation.toFloat(), size, size)
-        circlePaint.apply {
-            isAntiAlias = true
-            isFilterBitmap = true
-            shader = grad
-        }
+        // TODO: consider storing these as member variables to reduce
+        // allocations per draw cycle.
+        val paddingLeft = paddingLeft
+        val paddingTop = paddingTop
+        val paddingRight = paddingRight
+        val paddingBottom = paddingBottom
+
+        val contentWidth = width - paddingLeft - paddingRight
+        val contentHeight = height - paddingTop - paddingBottom
+
+        canvas.rotate(rotation, contentWidth/2f, contentWidth/2f)
+
 
         ringPaint.apply {
             isAntiAlias = true
             isFilterBitmap = true
             style = Paint.Style.STROKE
             color = ringColor
-            strokeWidth = size * 0.15F
+            strokeWidth = contentWidth/2f * 0.15F
+        }
+        circlePaint.apply {
+            isAntiAlias = true
+            isFilterBitmap = true
+            shader = grad
         }
 
-        canvas?.drawCircle(size, size, size*0.7F, circlePaint)
-        if(isCheck) {
-            canvas?.drawCircle(size, size, size*0.9F, ringPaint)
+        canvas.drawCircle(
+                contentWidth/2f,
+                contentWidth/2f,
+                contentWidth/2f*0.7F,
+                circlePaint
+        )
+
+        if(_isCheck) {
+            canvas.drawCircle(
+                    contentWidth/2f,
+                    contentWidth/2f,
+                    contentWidth/2f*0.9F,
+                    ringPaint
+            )
         }
-        invalidate()
     }
 }

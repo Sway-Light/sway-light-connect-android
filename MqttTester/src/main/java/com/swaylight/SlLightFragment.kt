@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,9 +11,15 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.*
-import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
+import androidx.core.view.iterator
 import androidx.fragment.app.Fragment
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.flag.BubbleFlag
+import com.skydoves.colorpickerview.flag.FlagMode
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
@@ -23,18 +28,21 @@ import com.swaylight.data.RgbColor
 class SlLightFragment : Fragment() {
 
     private val TAG = SwayLightMainActivity::class.java.simpleName
-
     // UI
     private lateinit var v: View
+
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var rgbCircleGroup: LinearLayout
     private lateinit var lightTopConstraint: ViewGroup
+    private lateinit var topBgView: FrameLayout
     private lateinit var gradTab: LinearLayout
     private lateinit var rgbTab: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
     private lateinit var rgbControlCard: RelativeLayout
     private lateinit var btStartColor: ImageButton
     private lateinit var btEndColor: ImageButton
+    private lateinit var btAddGrad: ImageButton
+    private lateinit var btAddRgb: ImageButton
 
     private lateinit var btRgbColor: ImageButton
     private lateinit var sbGrad: SeekBar
@@ -65,7 +73,7 @@ class SlLightFragment : Fragment() {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_sl_light, container, false)
         rgbColorList = arrayListOf(
-                RgbColor(ContextCompat.getColor(context!!, R.color.david_green)),
+                RgbColor(ContextCompat.getColor(requireContext(), R.color.david_green)),
                 RgbColor(Color.BLACK),
                 RgbColor(Color.BLUE),
                 RgbColor(Color.WHITE),
@@ -88,7 +96,119 @@ class SlLightFragment : Fragment() {
                 setControlType(ControlType.RGB_COLOR)
             }
         }
-        sbRed.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+
+        btAddGrad.setOnClickListener {
+            val newCircleView = CircleView(requireContext()).apply {
+                startColor = Color.BLACK
+                endColor = Color.WHITE
+            }
+            val newGradColor = GradientColor(Color.BLACK, null, Color.WHITE)
+            gradColorList.add(newGradColor)
+            gradCircleViews.add(newCircleView)
+            gradCircleGroup.addView(newCircleView)
+            newCircleView.setOnClickListener {
+                for (gc in gradCircleGroup) {
+                    (gc as CircleView).isCheck = false
+                }
+                newCircleView.isCheck = true
+                btStartColor.drawable.colorFilter = PorterDuffColorFilter(newCircleView.startColor, PorterDuff.Mode.SRC)
+                btEndColor.drawable.colorFilter = PorterDuffColorFilter(newCircleView.endColor, PorterDuff.Mode.SRC)
+                Utils.setSeekBarColor(sbGrad, newGradColor)
+                lightTopConstraint.setBackgroundColor(Utils.getColorFromGradient(
+                        newGradColor.startColor!!,
+                        newGradColor.endColor!!,
+                        sbGrad.progress,
+                        sbGrad.max
+                ))
+                currGradIndex = gradCircleViews.indexOf(newCircleView)
+            }
+            newCircleView.callOnClick()
+        }
+
+        sbGrad.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val currGrad = gradColorList[currGradIndex]
+                if (fromUser) {
+                    val color = Utils.getColorFromGradient(currGrad.startColor!!, currGrad.endColor!!, progress, sbGrad.max)
+                    lightTopConstraint.setBackgroundColor(color)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+        })
+
+        btAddRgb.setOnClickListener {
+            val newCircleView = CircleView(requireContext()).apply {
+                startColor = Color.BLACK
+                endColor = Color.BLACK
+            }
+            rgbColorList!!.add(RgbColor(Color.WHITE))
+            Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+            rgbCircleViews.add(newCircleView)
+            rgbCircleGroup.addView(newCircleView)
+        }
+
+        btStartColor.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker start color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                btStartColor.drawable.colorFilter = PorterDuffColorFilter(envelope.color, PorterDuff.Mode.SRC)
+                                gradCircleViews[currGradIndex].startColor = envelope.color
+                                gradColorList[currGradIndex].startColor = envelope.color
+                                Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+                                lightTopConstraint.setBackgroundColor(
+                                        Utils.getColorFromGradient(
+                                                gradColorList[currGradIndex].startColor!!,
+                                                gradColorList[currGradIndex].endColor!!,
+                                                sbGrad.progress,
+                                                sbGrad.max)
+                                )
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
+        btEndColor.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker end color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                btEndColor.drawable.colorFilter = PorterDuffColorFilter(envelope.color, PorterDuff.Mode.SRC)
+                                gradCircleViews[currGradIndex].endColor = envelope.color
+                                gradColorList[currGradIndex].endColor = envelope.color
+                                Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
+                                lightTopConstraint.setBackgroundColor(
+                                        Utils.getColorFromGradient(
+                                                gradColorList[currGradIndex].startColor!!,
+                                                gradColorList[currGradIndex].endColor!!,
+                                                sbGrad.progress,
+                                                sbGrad.max)
+                                )
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
+        sbRed.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val color = sbRed.progress.shl(16)
                         .plus(sbGreen.progress.shl(8))
@@ -96,6 +216,7 @@ class SlLightFragment : Fragment() {
                         .plus(255.shl(24))
 
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -109,13 +230,14 @@ class SlLightFragment : Fragment() {
             }
         })
 
-        sbGreen.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+        sbGreen.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val color = sbRed.progress.shl(16)
                         .plus(sbGreen.progress.shl(8))
                         .plus(sbBlue.progress.shl(0))
                         .plus(255.shl(24))
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -129,13 +251,14 @@ class SlLightFragment : Fragment() {
             }
         })
 
-        sbBlue.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+        sbBlue.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val color = sbRed.progress.shl(16)
                         .plus(sbGreen.progress.shl(8))
                         .plus(sbBlue.progress.shl(0))
                         .plus(255.shl(24))
                 if (fromUser) {
+                    lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                 }
             }
@@ -157,21 +280,19 @@ class SlLightFragment : Fragment() {
         if (!hidden) {
             when(type) {
                 ControlType.GRADIENT_COLOR -> {
-                    Utils.setBgColor(lightTopConstraint,
-                            gradColorList[currGradIndex],
-                            GradientDrawable.Orientation.TOP_BOTTOM)
+                    lightTopConstraint.setBackgroundColor(gradColorList[currGradIndex].startColor!!)
                 }
                 ControlType.RGB_COLOR -> {
-                    Utils.setBgColor(lightTopConstraint,
-                            rgbColorList!![currRgbIndex],
-                            GradientDrawable.Orientation.TOP_BOTTOM)
+                    lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
                 }
             }
+            topBgView.setBackgroundResource(R.drawable.bg_top_light_view)
         }
     }
 
     private fun initUi() {
-        lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
+        lightTopConstraint = requireActivity().findViewById(R.id.lightTopConstraint)
+        topBgView = requireActivity().findViewById(R.id.light_bg_view)
         gradTab = v.findViewById(R.id.grad_tab)
         rgbTab = v.findViewById(R.id.rgb_tab)
         gradControlCard = v.findViewById(R.id.grad_control_card)
@@ -185,6 +306,8 @@ class SlLightFragment : Fragment() {
         sbRed = v.findViewById(R.id.sb_red)
         sbGreen = v.findViewById(R.id.sb_green)
         sbBlue = v.findViewById(R.id.sb_blue)
+        btAddGrad = v.findViewById(R.id.bt_add_grad)
+        btAddRgb = v.findViewById(R.id.bt_add_rgb)
     }
 
     enum class ControlType(val type: Int) {
@@ -194,19 +317,21 @@ class SlLightFragment : Fragment() {
 
     private fun setControlType(type: ControlType) {
         when(type) {
-            ControlType.GRADIENT_COLOR ->{
+            ControlType.GRADIENT_COLOR -> {
                 collapse(rgbControlCard)
                 expand(gradControlCard)
-                Utils.setBgColor(lightTopConstraint,
-                        gradColorList[currGradIndex],
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(
+                        Utils.getColorFromGradient(
+                                gradColorList[currGradIndex].startColor!!,
+                                gradColorList[currGradIndex].endColor!!,
+                                sbGrad.progress,
+                                sbGrad.max)
+                )
             }
             ControlType.RGB_COLOR -> {
                 collapse(gradControlCard)
                 expand(rgbControlCard)
-                Utils.setBgColor(lightTopConstraint,
-                        rgbColorList!![currRgbIndex],
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(rgbColorList!![currRgbIndex].color!!)
             }
         }
         this.type = type
@@ -214,7 +339,13 @@ class SlLightFragment : Fragment() {
 
     private fun generateRgbCircles() {
         for(rgbColor in rgbColorList!!) {
-            val g = CircleView(context!!, null, rgbColor.color!!)
+            val g = CircleView(requireContext()).apply {
+                startColor = rgbColor.color!!
+                centerColor = rgbColor.color!!
+                endColor = rgbColor.color!!
+                gradientType = GradientDrawable.SWEEP_GRADIENT
+                isCheck = false
+            }
             g.setOnClickListener{
                 for (gc in rgbCircleViews) {
                     gc.isCheck = false
@@ -222,13 +353,26 @@ class SlLightFragment : Fragment() {
                 g.isCheck = true
                 btRgbColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
                 Utils.setSeekBarColor(sbRed, sbGreen, sbBlue, rgbColor)
-                Utils.setBgColor(lightTopConstraint,
-                        rgbColor,
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(rgbColor.color!!)
                 currRgbIndex = rgbCircleViews.indexOf(g)
             }
             g.setOnLongClickListener {
-                TODO("long click to remove color")
+                if (rgbCircleViews.size > 1) {
+                    val removeIndex = rgbCircleViews.indexOf(g)
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setMessage("Delete this color?")
+                    builder.setPositiveButton("Yes") { dialog, which ->
+                        rgbColorList!!.removeAt(removeIndex)
+                        rgbCircleGroup.removeViewAt(removeIndex)
+                        rgbCircleViews.removeAt(removeIndex)
+                        if (removeIndex == currRgbIndex) {
+                            rgbCircleGroup[0].callOnClick()
+                        }
+                    }
+                    builder.setNegativeButton("Cancel") { dialog, which -> }
+                    builder.show()
+                }
+                true
             }
             rgbCircleViews.add(g)
             rgbCircleGroup.addView(g)
@@ -242,19 +386,11 @@ class SlLightFragment : Fragment() {
 
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
-            val g = if (gradColor.centerColor == null) {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        GradientDrawable.SWEEP_GRADIENT
-                )
-            }else {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        gradColor.centerColor!!,
-                        GradientDrawable.SWEEP_GRADIENT
-                )
+            val g = CircleView(requireContext()).apply {
+                startColor = gradColor.startColor!!
+                centerColor = gradColor.centerColor
+                endColor = gradColor.endColor!!
+                gradientType = GradientDrawable.SWEEP_GRADIENT
             }
             g.setOnClickListener{
                 for (gc in gradCircleViews) {
@@ -264,18 +400,30 @@ class SlLightFragment : Fragment() {
                 btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
                 btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
                 Utils.setSeekBarColor(sbGrad, gradColor)
-                Utils.setBgColor(lightTopConstraint,
-                        gradColor,
-                        GradientDrawable.Orientation.TOP_BOTTOM)
+                lightTopConstraint.setBackgroundColor(gradColor.startColor!!)
                 currGradIndex = gradCircleViews.indexOf(g)
             }
             g.setOnLongClickListener {
-                TODO("long click to remove color")
+                if (gradCircleViews.size > 1) {
+                    val removeIndex = gradCircleViews.indexOf(g)
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setMessage("Delete this color?")
+                    builder.setPositiveButton("Yes") { dialog, which ->
+                        gradColorList.removeAt(removeIndex)
+                        gradCircleGroup.removeViewAt(removeIndex)
+                        gradCircleViews.removeAt(removeIndex)
+                        if (removeIndex == currGradIndex) {
+                            gradCircleGroup[0].callOnClick()
+                        }
+                    }
+                    builder.setNegativeButton("Cancel") { dialog, which -> }
+                    builder.show()
+                }
+                true
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)
         }
-
         currGradIndex = 0
         Utils.setSeekBarColor(sbGrad, gradColorList[currGradIndex])
         gradCircleViews[currGradIndex].isCheck = true

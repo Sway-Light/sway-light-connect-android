@@ -1,5 +1,6 @@
 package com.swaylight
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +10,9 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.custom_ui.EqualizerView
@@ -23,6 +26,7 @@ class SlMusicFragment : Fragment() {
     // UI
     private lateinit var v: View
     private lateinit var lightTopConstraint: ViewGroup
+    private lateinit var topBgView: FrameLayout
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
     private lateinit var equalizerView: EqualizerView
@@ -43,6 +47,7 @@ class SlMusicFragment : Fragment() {
 
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -73,12 +78,15 @@ class SlMusicFragment : Fragment() {
             Utils.setBgColor(lightTopConstraint,
                     gradColorList[currIndex],
                     GradientDrawable.Orientation.TOP_BOTTOM)
+            topBgView.setBackgroundResource(R.drawable.bg_top_music_view)
             setEqualizerColor(gradColorList[currIndex])
         }
     }
 
+    @SuppressLint("UseRequireInsteadOfGet")
     private fun initUi() {
         lightTopConstraint = activity!!.findViewById(R.id.lightTopConstraint)
+        topBgView = activity!!.findViewById(R.id.light_bg_view)
         gradControlCard = v.findViewById(R.id.grad_control_card)
         gradCircleGroup = v.findViewById(R.id.grad_circle_group)
         equalizerView = v.findViewById(R.id.equalizer_view)
@@ -92,19 +100,11 @@ class SlMusicFragment : Fragment() {
 
     private fun generateGradCircles() {
         for(gradColor in gradColorList) {
-            val g = if (gradColor.centerColor == null) {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        GradientDrawable.LINEAR_GRADIENT
-                )
-            }else {
-                CircleView(context!!, null,
-                        gradColor.startColor!!,
-                        gradColor.endColor!!,
-                        gradColor.centerColor!!,
-                        GradientDrawable.LINEAR_GRADIENT
-                )
+            val g = CircleView(requireContext()).apply {
+                startColor = gradColor.startColor!!
+                centerColor = gradColor.centerColor
+                endColor = gradColor.endColor!!
+                gradientType = GradientDrawable.LINEAR_GRADIENT
             }
             g.setOnClickListener{
                 for (gc in gradCircleViews) {
@@ -112,12 +112,6 @@ class SlMusicFragment : Fragment() {
                 }
                 g.isCheck = true
                 currIndex = gradCircleViews.indexOf(g)
-//                btStartColor.drawable.colorFilter = PorterDuffColorFilter(g.startColor, PorterDuff.Mode.SRC)
-//                btEndColor.drawable.colorFilter = PorterDuffColorFilter(g.endColor, PorterDuff.Mode.SRC)
-//                Utils.setSeekBarColor(sbGrad, gradColor)
-//                Utils.setBgColor(lightTopConstraint,
-//                        gradColor,
-//                        GradientDrawable.Orientation.TOP_BOTTOM)
 
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,
@@ -126,7 +120,22 @@ class SlMusicFragment : Fragment() {
                 setCirclesColor(gradColor)
             }
             g.setOnLongClickListener {
-                TODO("long click to remove color")
+                if (gradCircleViews.size > 1) {
+                    val removeIndex = gradCircleViews.indexOf(g)
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setMessage("Delete this color?")
+                    builder.setPositiveButton("Yes") { dialog, which ->
+                        gradColorList.removeAt(removeIndex)
+                        gradCircleGroup.removeViewAt(removeIndex)
+                        gradCircleViews.removeAt(removeIndex)
+                        if (removeIndex == currIndex) {
+                            gradCircleGroup[0].callOnClick()
+                        }
+                    }
+                    builder.setNegativeButton("Cancel") { dialog, which -> }
+                    builder.show()
+                }
+                true
             }
             gradCircleViews.add(g)
             gradCircleGroup.addView(g)

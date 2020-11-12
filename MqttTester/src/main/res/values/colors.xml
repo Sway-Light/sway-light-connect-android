@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
 
+    <color name="top_black_bg">#202C2C2C</color>
+
     <color name="red">#FF0000</color>
     <color name="yellow">#FFFF00</color>
     <color name="green">#00FF00</color>
@@ -16,6 +18,7 @@
     <color name="light_card_bg">#BBBBBB</color>
     <color name="light_tab_bg">#E7E7E7</color>
     <color name="light_control_bg">@android:color/white</color>
+    <color name="progress_bg">#FFFFFFFF</color>
 
     <color name="music_card_title_bg">#DADADA</color>
     <color name="music_card_bg">#BBBBBB</color>
@@ -44,4 +47,8 @@
         <item>#8296FF</item>
         <item>#84FF90</item>
     </array>
+    <color name="light_blue_400">#FF29B6F6</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
 </resources>
