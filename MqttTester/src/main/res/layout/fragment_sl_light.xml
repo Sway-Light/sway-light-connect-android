@@ -61,6 +61,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5px"
+                        android:background="@android:color/white" />
+
                     <HorizontalScrollView
                         android:id="@+id/grad_circle_scrollview"
                         android:layout_width="match_parent"
@@ -198,6 +203,11 @@
                     android:id="@+id/rgb_control_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5px"
+                        android:background="@android:color/white" />
 
                     <HorizontalScrollView
                         android:id="@+id/rgb_circle_scrollview"
