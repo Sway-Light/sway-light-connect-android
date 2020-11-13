@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -44,6 +45,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var ivRing: TopLightView
     private lateinit var tvZoom: TextView
     private lateinit var tvBrightness: TextView
+    private lateinit var btPower: ImageButton
     private lateinit var btDebug: View
     private lateinit var btLight: Button
     private lateinit var btMusic: Button
@@ -61,6 +63,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var deviceName: String
     private var clientId: String? = null
 
+    var powerOn = true
     var mode = SLMode.LIGHT
     var ringCenterX = 0
     var ringCenterY = 0
@@ -120,6 +123,15 @@ class SwayLightMainActivity : AppCompatActivity() {
             builder.setNegativeButton("Cancel") { dialog, which -> }
             builder.show()
             false
+        }
+
+        btPower.setOnClickListener {
+            powerOn = !powerOn
+            if (powerOn) {
+                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_ON)
+            }else {
+                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_OFF)
+            }
         }
 
         btDebug.setOnLongClickListener {
@@ -369,15 +381,11 @@ class SwayLightMainActivity : AppCompatActivity() {
         client?.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 try {
-                    Log.d(MQTT_TAG, "client: $client")
-                    val topic = SLTopic.ROOT + deviceName + "/#"
-                    client?.subscribe(topic, 0)
                     if (reconnect) {
                         appendLog("Reconnect complete")
                     } else {
                         appendLog("Connect complete")
                     }
-                    appendLog("subscribe: $topic")
                     runOnUiThread {
                         progressView.visibility = View.INVISIBLE
                     }
@@ -410,6 +418,10 @@ class SwayLightMainActivity : AppCompatActivity() {
                 appendLog("長按右上角開關debug畫面")
                 appendLog("Connect to $broker success")
                 Log.d(MQTT_TAG, "Connect to $broker success")
+                Log.d(MQTT_TAG, "client: $client")
+                val topic = SLTopic.ROOT + deviceName + "/#"
+                client?.subscribe(topic, 2)
+                appendLog("subscribe: $topic")
             }
 
             override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
@@ -427,6 +439,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         logView = findViewById(R.id.log_view)
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
+        btPower = findViewById(R.id.bt_power)
         btDebug = findViewById(R.id.debug_view)
         ivRing = findViewById(R.id.iv_ring)
         tvZoom = findViewById(R.id.tv_zoom)

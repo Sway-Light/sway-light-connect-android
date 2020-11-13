@@ -43,37 +43,46 @@
             app:stroke_width="20dp"
             app:zoom_value="4" />
 
+        <ImageButton
+            android:id="@+id/bt_power"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@android:drawable/ic_lock_power_off"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="@+id/light_bg_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/light_bg_view"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/tv_zoom"
             android:layout_width="60dp"
             android:layout_height="30dp"
-            android:layout_marginStart="16dp"
             android:background="@drawable/bg_text"
             android:fontFamily="@font/pt_sans_narrow"
             android:gravity="center"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible" />
+            app:layout_constraintTop_toBottomOf="@+id/iv_ring" />
 
         <TextView
             android:id="@+id/tv_brightness"
             android:layout_width="60dp"
             android:layout_height="30dp"
-            android:layout_marginEnd="16dp"
             android:background="@drawable/bg_text"
             android:fontFamily="@font/pt_sans_narrow"
             android:gravity="center"
+            android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="invisible" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_ring" />
 
         <View
             android:id="@+id/debug_view"

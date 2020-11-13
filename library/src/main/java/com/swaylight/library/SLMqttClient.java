@@ -43,6 +43,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObject.toString().getBytes());
+        msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
             Log.d(tag, "pub " + topic + ":" + jsonObject.toString());
@@ -65,6 +66,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
+        msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
             Log.d(tag, "pub " + topic + ":" + payload);
@@ -87,6 +89,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
+        msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
             if(SLMqttManager.getInstance().isConnected()){
