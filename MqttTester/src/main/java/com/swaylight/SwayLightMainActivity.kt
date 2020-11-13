@@ -68,7 +68,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     var ringPrevRotate = 0f
 
     var controlZoomFlag = true
-    var prevZoom = 4
+    var prevZoom = 6
     var prevBrightness = 100
     var lightSlideStartY = 0f
 
@@ -78,11 +78,11 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var musicAnimation: TranslateAnimation
 
     // MQTT Objects
-    var displayObj = SLDisplay(4, 0)
+    var displayObj = SLDisplay(6, 0, 100)
 
     // const
     val MAX_ZOOM = 32
-    val MIN_ZOOM = 4
+    val MIN_ZOOM = 6
     val MAX_BRIGHTNESS = 100
 
     @SuppressLint("ClickableViewAccessibility")
@@ -273,6 +273,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
                         tvBrightness.text = v.toString()
+                        if (displayObj.brightness != v) {
+                            displayObj.brightness = v
+                            client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                            client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                        }
                     }
                 }
             }

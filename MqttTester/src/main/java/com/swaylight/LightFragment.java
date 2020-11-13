@@ -59,7 +59,7 @@ public class LightFragment extends Fragment {
         tvModeName = v.findViewById(R.id.textview_mode);
 
         colorObj = new SLLightColor();
-        displayObj = new SLDisplay(0 ,0);
+        displayObj = new SLDisplay(0 ,0, 100);
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
 

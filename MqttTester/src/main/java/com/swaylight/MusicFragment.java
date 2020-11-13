@@ -62,7 +62,7 @@ public class MusicFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_music, container, false);
 
         colorObj = new SLMusicColor();
-        displayObj = new SLDisplay(0,0);
+        displayObj = new SLDisplay(0,0, 100);
 
         this.client = SLMqttManager.getInstance();
         this.deviceName = SLMqttManager.getDeviceName();
