@@ -4,6 +4,9 @@ import org.json.JSONException;
 
 public class SLMusicColor extends SLColor{
     public static final String LEVEL = "level";
+    public static final int HIGH = 1;
+    public static final int MEDIUM = 2;
+    public static final int LOW = 3;
     private int level;
 
     public SLMusicColor() {

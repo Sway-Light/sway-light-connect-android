@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -44,6 +45,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var ivRing: TopLightView
     private lateinit var tvZoom: TextView
     private lateinit var tvBrightness: TextView
+    private lateinit var btPower: ImageButton
     private lateinit var btDebug: View
     private lateinit var btLight: Button
     private lateinit var btMusic: Button
@@ -61,6 +63,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var deviceName: String
     private var clientId: String? = null
 
+    var powerOn = true
     var mode = SLMode.LIGHT
     var ringCenterX = 0
     var ringCenterY = 0
@@ -68,7 +71,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     var ringPrevRotate = 0f
 
     var controlZoomFlag = true
-    var prevZoom = 4
+    var prevZoom = 6
     var prevBrightness = 100
     var lightSlideStartY = 0f
 
@@ -78,19 +81,21 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var musicAnimation: TranslateAnimation
 
     // MQTT Objects
-    var displayObj = SLDisplay(4, 0)
+    var displayObj = SLDisplay(6, 0, 100)
 
     // const
     val MAX_ZOOM = 32
-    val MIN_ZOOM = 4
+    val MIN_ZOOM = 6
     val MAX_BRIGHTNESS = 100
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sway_light_main)
+
         this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
+        initMqtt()
         initUi()
 
         // Block control view and show progress view.
@@ -118,6 +123,15 @@ class SwayLightMainActivity : AppCompatActivity() {
             builder.setNegativeButton("Cancel") { dialog, which -> }
             builder.show()
             false
+        }
+
+        btPower.setOnClickListener {
+            powerOn = !powerOn
+            if (powerOn) {
+                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_ON)
+            }else {
+                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_OFF)
+            }
         }
 
         btDebug.setOnLongClickListener {
@@ -271,6 +285,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
                         tvBrightness.text = v.toString()
+                        if (displayObj.brightness != v) {
+                            displayObj.brightness = v
+                            client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+                            client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                        }
                     }
                 }
             }
@@ -330,6 +349,30 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        try {
+            manager!!.connect()
+        } catch (ex: MqttException) {
+            ex.printStackTrace()
+        }
+
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (client != null) {
+            try {
+                // 先移除callback，callback裡有處理UI，finish後會找不到UI
+                client!!.setCallback(null)
+                client!!.disconnect()
+            } catch (e: MqttException) {
+                e.printStackTrace()
+            }
+            client = null
+        }
+        finish()
+    }
+
+    private fun initMqtt() {
         broker = "tcp://" + intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
         deviceName = intent.getStringExtra(getString(R.string.DEVICE_NAME))
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
@@ -338,14 +381,11 @@ class SwayLightMainActivity : AppCompatActivity() {
         client?.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 try {
-                    val topic = SLTopic.ROOT + deviceName + "/#"
-                    client?.subscribe(topic, 0)
                     if (reconnect) {
                         appendLog("Reconnect complete")
                     } else {
                         appendLog("Connect complete")
                     }
-                    appendLog("subscribe: $topic")
                     runOnUiThread {
                         progressView.visibility = View.INVISIBLE
                     }
@@ -378,6 +418,10 @@ class SwayLightMainActivity : AppCompatActivity() {
                 appendLog("長按右上角開關debug畫面")
                 appendLog("Connect to $broker success")
                 Log.d(MQTT_TAG, "Connect to $broker success")
+                Log.d(MQTT_TAG, "client: $client")
+                val topic = SLTopic.ROOT + deviceName + "/#"
+                client?.subscribe(topic, 2)
+                appendLog("subscribe: $topic")
             }
 
             override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
@@ -386,27 +430,6 @@ class SwayLightMainActivity : AppCompatActivity() {
                 Log.d(MQTT_TAG, "Connect to $broker fail")
             }
         })
-        try {
-            manager!!.connect()
-        } catch (ex: MqttException) {
-            ex.printStackTrace()
-        }
-
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (client != null) {
-            try {
-                // 先移除callback，callback裡有處理UI，finish後會找不到UI
-                client!!.setCallback(null)
-                client!!.disconnect()
-            } catch (e: MqttException) {
-                e.printStackTrace()
-            }
-            client = null
-        }
-        finish()
     }
 
     private fun initUi() {
@@ -416,6 +439,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         logView = findViewById(R.id.log_view)
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
+        btPower = findViewById(R.id.bt_power)
         btDebug = findViewById(R.id.debug_view)
         ivRing = findViewById(R.id.iv_ring)
         tvZoom = findViewById(R.id.tv_zoom)

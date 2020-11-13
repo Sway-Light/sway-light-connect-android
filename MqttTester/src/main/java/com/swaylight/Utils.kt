@@ -65,6 +65,13 @@ class Utils {
             view.background = gradDrawable
         }
 
+        fun getColorFromRgbSeekBar(sbRed: SeekBar, sbGreen: SeekBar, sbBlue: SeekBar): Int {
+            return sbRed.progress.shl(16)
+                    .plus(sbGreen.progress.shl(8))
+                    .plus(sbBlue.progress.shl(0))
+                    .plus(255.shl(24))
+        }
+
         fun getColorFromGradient(startColor: Int, endColor: Int, progress: Int, maxProgress: Int): Int {
             val weight = progress.div(maxProgress.toFloat())
             val deltaR = endColor.shr(16).and(0xFF).minus(startColor.shr(16).and(0xFF))

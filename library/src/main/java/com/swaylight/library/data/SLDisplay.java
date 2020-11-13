@@ -6,22 +6,26 @@ import org.json.JSONObject;
 public class SLDisplay {
     public static final String ZOOM = "zoom";
     public static final String OFFSET = "offset";
+    public static final String BRIGHT = "brightness";
 
     private int zoom;
     private int offset;
+    private int brightness;
 
     protected JSONObject jsonObj;
 
-    public SLDisplay(int zoom, int offset) {
+    public SLDisplay(int zoom, int offset, int brightness) {
         jsonObj = new JSONObject();
         try {
-            jsonObj.put(ZOOM, 0);
-            jsonObj.put(OFFSET, 0);
+            jsonObj.put(ZOOM, zoom);
+            jsonObj.put(OFFSET, offset);
+            jsonObj.put(BRIGHT, brightness);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         this.zoom = zoom;
         this.offset = offset;
+        this.brightness = brightness;
     }
 
     public JSONObject getInstance() {
@@ -52,5 +56,18 @@ public class SLDisplay {
             e.printStackTrace();
         }
         this.offset = offset;
+    }
+
+    public int getBrightness() {
+        return brightness;
+    }
+
+    public void setBrightness(int brightness) {
+        try {
+            jsonObj.put(BRIGHT, brightness);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        this.brightness = brightness;
     }
 }

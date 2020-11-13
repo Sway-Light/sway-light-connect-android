@@ -147,21 +147,6 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
             color = 0x80FFFFFF.toInt()
         }
 
-        for (i in 0 until freqSize) {
-            canvas?.drawRect(
-                    width * (i.toFloat() / freqSize),
-                    startValue[i].plus(deltaValue[i]*currentValue).div(100f).times(height),
-                    width * ((i.toFloat() + 1) / freqSize),
-                    height,
-                    fillPaint)
-            canvas?.drawRect(
-                    width * (i.toFloat() / freqSize),
-                    startValue[i].plus(deltaValue[i]*currentValue).div(100f).times(height),
-                    width * ((i.toFloat() + 1) / freqSize),
-                    height,
-                    strokePaint)
-        }
-
         for (i in 0..freqSize) {
             canvas?.drawLine(
                     width * (i.div(freqSize.toFloat())),
@@ -179,6 +164,21 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
                     height * (i.div(levelSize.toFloat())),
                     linePaint
             )
+        }
+
+        for (i in 0 until freqSize) {
+            canvas?.drawRect(
+                    width * (i.toFloat() / freqSize),
+                    startValue[i].plus(deltaValue[i]*currentValue).div(100f).times(height),
+                    width * ((i.toFloat() + 1) / freqSize),
+                    height,
+                    fillPaint)
+            canvas?.drawRect(
+                    width * (i.toFloat() / freqSize),
+                    startValue[i].plus(deltaValue[i]*currentValue).div(100f).times(height),
+                    width * ((i.toFloat() + 1) / freqSize),
+                    height,
+                    strokePaint)
         }
     }
 }

@@ -10,8 +10,8 @@
         android:width="300dp"
         app:ringColor="@android:color/white"
         android:type="linear"
-        android:startColor="@color/warm"
-        android:endColor="@color/cold"
+        android:startColor="@color/light_grad_default_end"
+        android:endColor="@color/light_grad_default_start"
         android:centerColor="@color/green"
         app:isCheck="true" />
 

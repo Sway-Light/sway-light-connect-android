@@ -1,6 +1,9 @@
 package com.swaylight
 
 import android.annotation.SuppressLint
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -14,9 +17,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.flag.BubbleFlag
+import com.skydoves.colorpickerview.flag.FlagMode
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.custom_ui.EqualizerView
 import com.swaylight.data.GradientColor
+import com.swaylight.library.SLMqttClient
+import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.SLColor
+import com.swaylight.library.data.SLMusicColor
+import com.swaylight.library.data.SLTopic
 
 
 class SlMusicFragment : Fragment() {
@@ -29,6 +41,7 @@ class SlMusicFragment : Fragment() {
     private lateinit var topBgView: FrameLayout
     private lateinit var gradCircleGroup: LinearLayout
     private lateinit var gradControlCard: RelativeLayout
+    private lateinit var btAddGrad: ImageButton
     private lateinit var equalizerView: EqualizerView
     private lateinit var highCircleView: CircleView
     private lateinit var mediumCircleView: CircleView
@@ -38,9 +51,12 @@ class SlMusicFragment : Fragment() {
     private lateinit var sbBlue: SeekBar
 
     // values
+    private var client: SLMqttClient? = null
+    private var deviceName: String? = null
     private var currIndex = 0
     var gradCircleViews: ArrayList<CircleView> = arrayListOf()
     private lateinit var gradColorList: ArrayList<GradientColor>
+    private var mqttMusicColorObj = SLMusicColor(0, 0, 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +68,8 @@ class SlMusicFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         v = inflater.inflate(R.layout.fragment_sl_music, container, false)
+        client = SLMqttManager.getInstance()
+        deviceName = SLMqttManager.getDeviceName()
         gradColorList = arrayListOf(
                 GradientColor(
                         ContextCompat.getColor(context!!, R.color.red),
@@ -68,7 +86,71 @@ class SlMusicFragment : Fragment() {
         )
         initUi()
         generateGradCircles()
-//        v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_selected)
+        btAddGrad.setOnClickListener {
+            val newGradColor = GradientColor(
+                    Color.RED,
+                    Color.YELLOW,
+                    Color.GREEN
+            )
+            gradColorList.add(newGradColor)
+            generateGradCircles()
+        }
+        highCircleView.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker HIGH color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                gradCircleViews[currIndex].startColor = envelope.color
+                                gradColorList[currIndex].startColor = envelope.color
+                                generateGradCircles()
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
+        mediumCircleView.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker MIDDLE color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                gradCircleViews[currIndex].centerColor = envelope.color
+                                gradColorList[currIndex].centerColor = envelope.color
+                                generateGradCircles()
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
+
+        lowCircleView.setOnClickListener {
+            val builder = ColorPickerDialog.Builder(context)
+                    .setTitle("ColorPicker LOW color")
+                    .setPreferenceName("Test")
+                    .setPositiveButton(
+                            getString(android.R.string.ok),
+                            ColorEnvelopeListener { envelope, _ ->
+                                gradCircleViews[currIndex].endColor = envelope.color
+                                gradColorList[currIndex].endColor = envelope.color
+                                generateGradCircles()
+                            }
+                    )
+                    .setNegativeButton(
+                            getString(android.R.string.cancel)
+                    ) { dialogInterface, i -> dialogInterface.dismiss() }
+            builder.colorPickerView.flagView = BubbleFlag(context).apply { flagMode = FlagMode.FADE }
+            builder.show()
+        }
         return v
     }
 
@@ -80,6 +162,7 @@ class SlMusicFragment : Fragment() {
                     GradientDrawable.Orientation.TOP_BOTTOM)
             topBgView.setBackgroundResource(R.drawable.bg_top_music_view)
             setEqualizerColor(gradColorList[currIndex])
+            generateGradCircles()
         }
     }
 
@@ -89,6 +172,7 @@ class SlMusicFragment : Fragment() {
         topBgView = activity!!.findViewById(R.id.light_bg_view)
         gradControlCard = v.findViewById(R.id.grad_control_card)
         gradCircleGroup = v.findViewById(R.id.grad_circle_group)
+        btAddGrad = v.findViewById(R.id.bt_add_grad)
         equalizerView = v.findViewById(R.id.equalizer_view)
         highCircleView = v.findViewById(R.id.music_high_circle)
         mediumCircleView = v.findViewById(R.id.music_medium_circle)
@@ -99,29 +183,59 @@ class SlMusicFragment : Fragment() {
     }
 
     private fun generateGradCircles() {
+        gradCircleViews.clear()
+        gradCircleGroup.removeAllViews()
         for(gradColor in gradColorList) {
-            val g = CircleView(requireContext()).apply {
+            val circleView = CircleView(requireContext()).apply {
                 startColor = gradColor.startColor!!
                 centerColor = gradColor.centerColor
                 endColor = gradColor.endColor!!
+                setColor(
+                        gradColor.endColor!!,
+                        gradColor.centerColor,
+                        gradColor.startColor!!)
                 gradientType = GradientDrawable.LINEAR_GRADIENT
             }
-            g.setOnClickListener{
+            circleView.setOnClickListener{
                 for (gc in gradCircleViews) {
                     gc.isCheck = false
                 }
-                g.isCheck = true
-                currIndex = gradCircleViews.indexOf(g)
+                circleView.isCheck = true
+                currIndex = gradCircleViews.indexOf(circleView)
 
                 Utils.setBgColor(lightTopConstraint,
                         gradColor,
                         GradientDrawable.Orientation.TOP_BOTTOM)
                 setEqualizerColor(gradColor)
                 setCirclesColor(gradColor)
+                mqttMusicColorObj.setColor(gradColor.startColor!!)
+                mqttMusicColorObj.level = SLMusicColor.HIGH
+                client?.publish(
+                        SLTopic.MUSIC_MODE_COLOR,
+                        deviceName,
+                        mqttMusicColorObj.instance
+                )
+                Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
+                mqttMusicColorObj.setColor(gradColor.centerColor!!)
+                mqttMusicColorObj.level = SLMusicColor.MEDIUM
+                client?.publish(
+                        SLTopic.MUSIC_MODE_COLOR,
+                        deviceName,
+                        mqttMusicColorObj.instance
+                )
+                Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
+                mqttMusicColorObj.setColor(gradColor.endColor!!)
+                mqttMusicColorObj.level = SLMusicColor.LOW
+                client?.publish(
+                        SLTopic.MUSIC_MODE_COLOR,
+                        deviceName,
+                        mqttMusicColorObj.instance
+                )
+                Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
             }
-            g.setOnLongClickListener {
+            circleView.setOnLongClickListener {
                 if (gradCircleViews.size > 1) {
-                    val removeIndex = gradCircleViews.indexOf(g)
+                    val removeIndex = gradCircleViews.indexOf(circleView)
                     val builder = AlertDialog.Builder(requireContext())
                     builder.setMessage("Delete this color?")
                     builder.setPositiveButton("Yes") { dialog, which ->
@@ -137,16 +251,10 @@ class SlMusicFragment : Fragment() {
                 }
                 true
             }
-            gradCircleViews.add(g)
-            gradCircleGroup.addView(g)
+            gradCircleViews.add(circleView)
+            gradCircleGroup.addView(circleView)
         }
-        currIndex = 0
-        gradCircleViews[currIndex].isCheck = true
-        Utils.setBgColor(lightTopConstraint,
-                gradColorList[currIndex],
-                GradientDrawable.Orientation.TOP_BOTTOM)
-        setEqualizerColor(gradColorList[currIndex])
-        setCirclesColor(gradColorList[currIndex])
+        gradCircleGroup[currIndex].callOnClick()
     }
 
     private fun setEqualizerColor(g: GradientColor) {

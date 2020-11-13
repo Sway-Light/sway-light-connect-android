@@ -113,7 +113,8 @@
             android:id="@+id/connect_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connect" />
+            android:text="Connect"
+            android:visibility="invisible"/>
 
         <Button
             android:id="@+id/connect_to_main_button"

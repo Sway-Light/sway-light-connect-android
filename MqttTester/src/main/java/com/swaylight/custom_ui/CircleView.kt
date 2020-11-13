@@ -70,7 +70,6 @@ class CircleView : View {
         get() = _isCheck
         set(value) {
             _isCheck = value
-            Log.d(tag, "set isClick")
             invalidatePaintAndMeasurements()
         }
 
@@ -91,6 +90,12 @@ class CircleView : View {
         this.startColor = color
         this.centerColor = color
         this.endColor = color
+    }
+
+    fun setColor(start: Int, center: Int?, end: Int) {
+        this.startColor = start
+        this.centerColor = center
+        this.endColor = end
     }
 
     constructor(context: Context) : super(context) {

@@ -58,6 +58,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="5px"
+                        android:background="@android:color/white" />
+
                     <HorizontalScrollView
                         android:id="@+id/grad_circle_scrollview"
                         android:layout_width="match_parent"
@@ -85,6 +90,7 @@
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
                                 android:layout_gravity="center_vertical"
+                                android:layout_marginLeft="10dp"
                                 android:background="@android:color/transparent"
                                 android:padding="5dp"
                                 android:src="@drawable/ic_plus" />
@@ -126,6 +132,7 @@
                             android:weightSum="3" >
 
                             <LinearLayout
+                                android:id="@+id/music_high_view"
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1">
@@ -151,6 +158,7 @@
                             </LinearLayout>
 
                             <LinearLayout
+                                android:id="@+id/music_medium_view"
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1">
@@ -176,6 +184,7 @@
                             </LinearLayout>
 
                             <LinearLayout
+                                android:id="@+id/music_low_view"
                                 android:layout_width="match_parent"
                                 android:layout_height="0dp"
                                 android:layout_weight="1">
