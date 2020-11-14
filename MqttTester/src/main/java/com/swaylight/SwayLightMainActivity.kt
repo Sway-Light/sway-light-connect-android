@@ -10,6 +10,8 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.Button
@@ -27,6 +29,7 @@ import com.swaylight.library.data.SLDisplay
 import com.swaylight.library.data.SLMode
 import com.swaylight.library.data.SLTopic
 import org.eclipse.paho.client.mqttv3.*
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.atan2
@@ -38,6 +41,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     // UI
     private lateinit var progressView: ConstraintLayout
+    private lateinit var tvConnectMessage: TextView
     private lateinit var btNetworkConfig: Button
     private lateinit var rootConstraint: ConstraintLayout
     private lateinit var lightTopConstraint: ConstraintLayout
@@ -53,35 +57,36 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var logView: ConstraintLayout
 
     // values
-    var manager: SLMqttManager? = null
-    var client: SLMqttClient? = null
     var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
     private val MAX_LOG_SIZE = 3000
-    private val MQTT_TAG = "mqtt"
-    private val qos = 0
-    private lateinit var broker: String
-    private lateinit var deviceName: String
-    private var clientId: String? = null
+    var powerOn = SLMode.POWER_ON
 
-    var powerOn = true
     var mode = SLMode.LIGHT
     var ringCenterX = 0
     var ringCenterY = 0
     var ringStartRotate = 0f
     var ringPrevRotate = 0f
-
     var controlZoomFlag = true
+
     var prevZoom = 6
     var prevBrightness = 100
     var lightSlideStartY = 0f
-
     private val lightRectF = Rect()
+
     private val musicRectF = Rect()
     private lateinit var lightAnimation: TranslateAnimation
     private lateinit var musicAnimation: TranslateAnimation
 
     // MQTT Objects
+    var manager: SLMqttManager? = null
+    var client: SLMqttClient? = null
     var displayObj = SLDisplay(6, 0, 100)
+    private val MQTT_TAG = "mqtt"
+    private val qos = 0
+    private lateinit var broker: String
+    private lateinit var deviceName: String
+    private var clientId: String? = null
+    private var isRetainedDataSynced: Boolean = false
 
     // const
     val MAX_ZOOM = 32
@@ -125,12 +130,16 @@ class SwayLightMainActivity : AppCompatActivity() {
             false
         }
 
-        btPower.setOnClickListener {
-            powerOn = !powerOn
-            if (powerOn) {
-                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_ON)
+        btPower.setOnClickListener {v ->
+            if (powerOn == SLMode.POWER_ON) {
+                powerOn = SLMode.POWER_OFF
+            }else if (powerOn == SLMode.POWER_OFF) {
+                powerOn = SLMode.POWER_ON
+            }
+            if(v.isClickable) {
+                client?.publish(SLTopic.POWER, deviceName, powerOn)
             }else {
-                client?.publish(SLTopic.POWER, deviceName, SLMode.POWER_OFF)
+                v.isClickable = true
             }
         }
 
@@ -146,7 +155,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             override fun onGlobalLayout() {
                 val params: ConstraintLayout.LayoutParams = lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams
 
-                params.height = (rootConstraint.width * 0.9).toInt()
+                params.height = (rootConstraint.width * 0.7).toInt()
                 params.width = (rootConstraint.width)
                 lightTopConstraint.layoutParams = params
                 val location = intArrayOf(0, 0)
@@ -235,7 +244,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     if (event.rawX <= lightTopConstraint.width / 2) {
                         controlZoomFlag = true
                         tvZoom.visibility = View.VISIBLE
-                    }else {
+                    } else {
                         controlZoomFlag = false
                         tvBrightness.visibility = View.VISIBLE
                     }
@@ -249,7 +258,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = 0
                         }
                         prevZoom = v
-                        tvZoom.visibility = View.INVISIBLE
+                        startFadeOutAnim(tvZoom, 500, 500)
                     } else {
                         v = prevBrightness + delta
                         if (v > MAX_BRIGHTNESS) {
@@ -258,7 +267,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                             v = 0
                         }
                         prevBrightness = v
-                        tvBrightness.visibility = View.INVISIBLE
+                        startFadeOutAnim(tvBrightness, 500, 500)
                     }
                 }
                 else -> {
@@ -306,7 +315,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
         }
 
-        modeGroup.setOnClickListener {
+        modeGroup.setOnClickListener {v ->
             when(mode) {
                 SLMode.MUSIC -> {
                     mode = SLMode.LIGHT
@@ -337,7 +346,14 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .commit()
                 }
             }
-            client?.publish(SLTopic.CURR_MODE, deviceName, mode)
+            // 為了區分是使用者點擊or程式透過callOnClick()呼叫的:
+            // isClickable == true -> 使用者點擊，才publish
+            // isClickable == false -> 是從callOnClick()呼叫的，並set isClickable flag
+            if(v.isClickable) {
+                client?.publish(SLTopic.CURR_MODE, deviceName, mode)
+            }else {
+                v.isClickable = true
+            }
         }
     }
 
@@ -345,12 +361,54 @@ class SwayLightMainActivity : AppCompatActivity() {
         super.onPause()
         client?.setCallback(null)
         client?.disconnect()
+        isRetainedDataSynced = false
     }
 
     override fun onResume() {
         super.onResume()
         try {
             manager!!.connect()
+            client?.setCallback(object : MqttCallbackExtended {
+                override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                    try {
+                        if (reconnect) {
+                            appendLog("Reconnect complete")
+                        } else {
+                            appendLog("Connect complete")
+                        }
+                        runOnUiThread {
+                            tvConnectMessage.setText(R.string.syncing)
+                        }
+                        startFadeOutAnim(progressView, 1000, 0)
+                        // 等app把來自自己的訊息也收完，再把flag關閉
+                        Handler().postDelayed({
+                            isRetainedDataSynced = true
+                            progressView.visibility = View.INVISIBLE
+                        }, 1000)
+
+                    } catch (e: MqttException) {
+                        e.printStackTrace()
+                    }
+                    Log.d(MQTT_TAG, "Connected to $broker")
+                }
+
+                override fun connectionLost(cause: Throwable) {
+                    runOnUiThread {
+                        progressView.visibility = View.VISIBLE
+                        tvConnectMessage.setText(R.string.connecting)
+                    }
+                    appendLog("Connection LOST")
+                    Log.d(MQTT_TAG, "Disconnect to $broker")
+                }
+
+                @Throws(Exception::class)
+                override fun messageArrived(topic: String, message: MqttMessage) {
+                    appendLog("$topic:$message")
+                    updateSubUi(topic, message)
+                }
+
+                override fun deliveryComplete(token: IMqttDeliveryToken) {}
+            })
         } catch (ex: MqttException) {
             ex.printStackTrace()
         }
@@ -378,43 +436,8 @@ class SwayLightMainActivity : AppCompatActivity() {
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
         manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
         client = SLMqttManager.getInstance()
-        client?.setCallback(object : MqttCallbackExtended {
-            override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                try {
-                    if (reconnect) {
-                        appendLog("Reconnect complete")
-                    } else {
-                        appendLog("Connect complete")
-                    }
-                    runOnUiThread {
-                        progressView.visibility = View.INVISIBLE
-                    }
-                } catch (e: MqttException) {
-                    e.printStackTrace()
-                }
-                Log.d(MQTT_TAG, "Connected to $broker")
-            }
-
-            override fun connectionLost(cause: Throwable) {
-                runOnUiThread {
-                    progressView.visibility = View.VISIBLE
-                }
-                appendLog("Connection LOST")
-                Log.d(MQTT_TAG, "Disconnect to $broker")
-            }
-
-            @Throws(Exception::class)
-            override fun messageArrived(topic: String, message: MqttMessage) {
-                appendLog("$topic:\n$message")
-            }
-
-            override fun deliveryComplete(token: IMqttDeliveryToken) {}
-        })
         manager!!.setMqttActionListener(object : IMqttActionListener {
             override fun onSuccess(asyncActionToken: IMqttToken) {
-                runOnUiThread {
-                    progressView.visibility = View.INVISIBLE
-                }
                 appendLog("長按右上角開關debug畫面")
                 appendLog("Connect to $broker success")
                 Log.d(MQTT_TAG, "Connect to $broker success")
@@ -434,6 +457,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     private fun initUi() {
         progressView = findViewById(R.id.progress_view)
+        tvConnectMessage = findViewById(R.id.tv_cnt_msg)
         btNetworkConfig = findViewById(R.id.bt_network_config)
         tvLog = findViewById(R.id.tv_log)
         logView = findViewById(R.id.log_view)
@@ -447,6 +471,107 @@ class SwayLightMainActivity : AppCompatActivity() {
         btLight = findViewById(R.id.bt_light)
         btMusic = findViewById(R.id.bt_music)
         modeGroup = findViewById(R.id.mode_group)
+    }
+
+    private fun startFadeOutAnim(view: View, duration: Long, startOffset: Long) {
+        val anim = AlphaAnimation(1f, 0f).apply {
+            interpolator = AccelerateInterpolator()
+            this.duration = duration
+            this.startOffset = startOffset
+        }
+        anim.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {
+            }
+
+            override fun onAnimationEnd(animation: Animation?) {
+                view.visibility = View.INVISIBLE
+            }
+
+            override fun onAnimationRepeat(animation: Animation?) {
+            }
+
+        })
+        view.animation?.cancel()
+        view.startAnimation(anim)
+    }
+
+    private fun updateSubUi(topic: String, message: MqttMessage) {
+        val jsonObj = JSONObject(String(message.payload))
+        val fromMyself = jsonObj["id"] == clientId
+        if (fromMyself && isRetainedDataSynced) {
+            appendLog("msg from myself")
+            return
+        }
+        when(topic) {
+            SLTopic.ROOT + deviceName + SLTopic.CURR_MODE.topic -> {
+                val newMode = when(jsonObj[SLMqttClient.VALUE]) {
+                    SLMode.LIGHT.modeNum -> {
+                        SLMode.LIGHT
+                    }
+                    SLMode.MUSIC.modeNum -> {
+                        SLMode.MUSIC
+                    }
+                    else -> {
+                        return
+                    }
+                }
+                if(newMode != mode) {
+                    modeGroup.isClickable = false
+                    modeGroup.callOnClick()
+                    appendLog("update mode to $mode")
+                }
+            }
+            SLTopic.ROOT + deviceName + SLTopic.POWER.topic -> {
+                val newPower = when (jsonObj[SLMqttClient.VALUE]) {
+                    SLMode.POWER_ON.modeNum -> {
+                        SLMode.POWER_ON
+                    }
+                    SLMode.POWER_OFF.modeNum -> {
+                        SLMode.POWER_OFF
+                    }
+                    else -> {
+                        return
+                    }
+                }
+                if(newPower != powerOn) {
+                    btPower.isClickable = false
+                    btPower.callOnClick()
+                    appendLog("update mode to $powerOn")
+                }
+            }
+            SLTopic.ROOT + deviceName + SLTopic.LIGHT_MODE_DISPLAY.topic -> {
+                val newBright: Int = jsonObj[SLDisplay.BRIGHT] as Int
+                val newOffset: Int = jsonObj[SLDisplay.OFFSET] as Int
+                val newZoom: Int = jsonObj[SLDisplay.ZOOM] as Int
+
+                if (displayObj.brightness != newBright) {
+                    prevBrightness = newBright
+                    displayObj.brightness = newBright
+                    tvBrightness.visibility = View.VISIBLE
+                    tvBrightness.text = newBright.toString()
+                    startFadeOutAnim(tvBrightness, 500, 500)
+                }
+
+                if (displayObj.zoom != newZoom) {
+                    prevZoom = newZoom
+                    displayObj.zoom = newZoom
+                    ivRing.zoomValue = newZoom
+                    tvZoom.text = newZoom.toString()
+                    tvZoom.visibility = View.VISIBLE
+                    startFadeOutAnim(tvZoom, 500, 500)
+                }
+
+                if (displayObj.offset != newOffset) {
+                    ivRing.offsetValue = newOffset
+                    displayObj.offset = newOffset
+                }
+                appendLog("displayObj:${displayObj.instance}")
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.MUSIC_MODE_DISPLAY -> {
+
+            }
+        }
     }
 
     private fun getAngle(center_x: Float, center_y: Float, x: Float, y: Float): Float {

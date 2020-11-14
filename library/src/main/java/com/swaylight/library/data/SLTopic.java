@@ -1,6 +1,8 @@
 package com.swaylight.library.data;
 
-public enum SLTopic {
+import java.io.Serializable;
+
+public enum SLTopic implements Serializable {
     POWER("/power"),
     POWER_START_TIME("/mode/onoff/on_time"),
     POWER_END_TIME("/mode/onoff/off_time"),

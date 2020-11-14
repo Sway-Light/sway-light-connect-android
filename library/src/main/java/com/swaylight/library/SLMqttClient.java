@@ -14,10 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SLMqttClient extends MqttAndroidClient {
-    public final String CLIENT_ID = "id";
-    public final String VALUE = "value";
-    public final String OFFSET = "offset";
-    public final String ZOOM = "zoom";
+    public static final String CLIENT_ID = "id";
+    public static final String VALUE = "value";
+    public static final String OFFSET = "offset";
+    public static final String ZOOM = "zoom";
     private final String tag = getClass().getSimpleName();
 
     public SLMqttClient(Context context, String serverURI, String clientId) {
@@ -43,6 +43,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObject.toString().getBytes());
+        msg.setRetained(true);
         msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
@@ -66,6 +67,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
+        msg.setRetained(true);
         msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
@@ -89,6 +91,7 @@ public class SLMqttClient extends MqttAndroidClient {
             e.printStackTrace();
         }
         MqttMessage msg = new MqttMessage(jsonObj.toString().getBytes());
+        msg.setRetained(true);
         msg.setQos(2);
         String topic = SLTopic.ROOT + deviceName + swayLightTopic.getTopic();
         try {
