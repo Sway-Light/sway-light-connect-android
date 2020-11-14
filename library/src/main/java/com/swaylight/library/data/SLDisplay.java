@@ -3,7 +3,9 @@ package com.swaylight.library.data;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SLDisplay {
+import java.io.Serializable;
+
+public class SLDisplay implements Serializable {
     public static final String ZOOM = "zoom";
     public static final String OFFSET = "offset";
     public static final String BRIGHT = "brightness";

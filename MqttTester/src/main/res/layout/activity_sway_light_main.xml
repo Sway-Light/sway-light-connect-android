@@ -45,10 +45,9 @@
 
         <ImageButton
             android:id="@+id/bt_power"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@android:drawable/ic_lock_power_off"
-            android:background="@android:color/transparent"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@mipmap/light"
             app:layout_constraintBottom_toBottomOf="@+id/light_bg_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/light_bg_view"
@@ -65,9 +64,10 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/light_bg_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_ring" />
+            app:layout_constraintTop_toTopOf="@+id/light_bg_view" />
 
         <TextView
             android:id="@+id/tv_brightness"
@@ -80,9 +80,10 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_ring" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <View
             android:id="@+id/debug_view"
@@ -227,12 +228,13 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
+            android:id="@+id/tv_cnt_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/connecting"
             android:fontFamily="@font/pt_sans_narrow"
             android:gravity="center"
             android:letterSpacing="0.2"
-            android:text="Connecting..."
             android:textAllCaps="true"
             android:textSize="24sp"
             android:textStyle="bold"

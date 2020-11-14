@@ -1,6 +1,8 @@
 package com.swaylight.library.data;
 
-public enum SLMode {
+import java.io.Serializable;
+
+public enum SLMode implements Serializable {
     POWER_OFF(0),
     POWER_ON(1),
     LIGHT(2),

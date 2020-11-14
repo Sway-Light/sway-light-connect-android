@@ -44,6 +44,7 @@
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
     <string name="connecting">Connecting</string>
+    <string name="syncing">Syncing</string>
     <string name="reconnect">Reconnected</string>
 
     <!--  time  -->
