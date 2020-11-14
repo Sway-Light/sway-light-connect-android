@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootConstraint"
+    android:background="@drawable/light_to_music_bg_trans"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.swaylight.SwayLightMainActivity">
@@ -85,21 +86,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <View
-            android:id="@+id/debug_view"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/bt_debug_round"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/mode_group"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@drawable/mode_bg_round"
+        android:background="@drawable/light_to_music_mode_group_trans"
         android:orientation="horizontal"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
@@ -114,7 +107,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/bt_round"
+            android:background="@drawable/light_to_music_button_trans"
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.05"
             android:text="Light"
@@ -125,10 +118,11 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/bt_round"
+            android:background="@drawable/light_to_music_button_trans"
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.05"
             android:text="Music"
+            android:textColor="@android:color/white"
             android:visibility="invisible"
             android:textSize="16sp" />
     </LinearLayout>
@@ -157,29 +151,34 @@
     </com.google.android.material.tabs.TabLayout>
 
     <ScrollView
+        android:id="@+id/control_scroll_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/textView3"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/debug_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
         <FrameLayout
+            android:id="@+id/control_frame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/control_frame"/>
+            android:background="@android:color/transparent" />
     </ScrollView>
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/debug_view"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:fontFamily="@font/pt_sans_narrow"
         android:gravity="center"
         android:letterSpacing="0.2"
+        android:textColor="#9f9f9f"
         android:text="@string/sway_light"
         android:textAllCaps="true"
         android:textSize="18sp"
+        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -188,10 +187,10 @@
         android:id="@+id/log_view"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/control_scroll_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="invisible">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/tv_log"
@@ -250,7 +249,7 @@
             android:layout_marginStart="64dp"
             android:layout_marginEnd="64dp"
             android:layout_marginBottom="128dp"
-            android:background="@drawable/bt_round"
+            android:background="@drawable/light_button"
             android:fontFamily="@font/pt_sans_narrow"
             android:gravity="center"
             android:letterSpacing="0.2"

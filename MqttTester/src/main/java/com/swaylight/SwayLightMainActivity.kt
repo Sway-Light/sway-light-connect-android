@@ -1,8 +1,10 @@
 package com.swaylight
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.text.method.ScrollingMovementMethod
@@ -14,10 +16,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -50,7 +49,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var tvZoom: TextView
     private lateinit var tvBrightness: TextView
     private lateinit var btPower: ImageButton
-    private lateinit var btDebug: View
+    private lateinit var btDebug: TextView
     private lateinit var btLight: Button
     private lateinit var btMusic: Button
     private lateinit var tvLog: TextView
@@ -130,7 +129,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             false
         }
 
-        btPower.setOnClickListener {v ->
+        btPower.setOnClickListener { v ->
             if (powerOn == SLMode.POWER_ON) {
                 powerOn = SLMode.POWER_OFF
             }else if (powerOn == SLMode.POWER_OFF) {
@@ -315,10 +314,15 @@ class SwayLightMainActivity : AppCompatActivity() {
             fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
         }
 
-        modeGroup.setOnClickListener {v ->
+        modeGroup.setOnClickListener { v ->
+            val transBg: TransitionDrawable = rootConstraint.background as TransitionDrawable
+            val transModeGroup: TransitionDrawable = modeGroup.background as TransitionDrawable
+            val transBtLight: TransitionDrawable = btLight.background as TransitionDrawable
+            val transBtMusic: TransitionDrawable = btMusic.background as TransitionDrawable
             when(mode) {
                 SLMode.MUSIC -> {
                     mode = SLMode.LIGHT
+                    ivRing.strokeBgColor = 0xCCC4C4C4.toInt()
                     btLight.visibility = View.VISIBLE
                     btMusic.visibility = View.INVISIBLE
                     btLight.startAnimation(lightAnimation)
@@ -330,9 +334,15 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right)
                             .hide(musicFragment)
                             .commit()
+                    transBg.reverseTransition(400)
+                    transModeGroup.reverseTransition(400)
+                    transBtLight.reverseTransition(400)
+                    transBtMusic.reverseTransition(400)
+                    tvLog.setTextColor(Color.BLACK)
                 }
                 SLMode.LIGHT -> {
                     mode = SLMode.MUSIC
+                    ivRing.strokeBgColor = 0x805F5F5F.toInt()
                     btMusic.visibility = View.VISIBLE
                     btLight.visibility = View.INVISIBLE
                     btMusic.startAnimation(musicAnimation)
@@ -344,6 +354,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left)
                             .hide(lightFragment)
                             .commit()
+                    transBg.startTransition(400)
+                    transModeGroup.startTransition(400)
+                    transBtLight.reverseTransition(400)
+                    transBtMusic.reverseTransition(400)
+                    tvLog.setTextColor(Color.WHITE)
                 }
             }
             // 為了區分是使用者點擊or程式透過callOnClick()呼叫的:
@@ -504,7 +519,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         }
         when(topic) {
             SLTopic.ROOT + deviceName + SLTopic.CURR_MODE.topic -> {
-                val newMode = when(jsonObj[SLMqttClient.VALUE]) {
+                val newMode = when (jsonObj[SLMqttClient.VALUE]) {
                     SLMode.LIGHT.modeNum -> {
                         SLMode.LIGHT
                     }
@@ -515,7 +530,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         return
                     }
                 }
-                if(newMode != mode) {
+                if (newMode != mode) {
                     modeGroup.isClickable = false
                     modeGroup.callOnClick()
                     appendLog("update mode to $mode")
@@ -533,7 +548,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         return
                     }
                 }
-                if(newPower != powerOn) {
+                if (newPower != powerOn) {
                     btPower.isClickable = false
                     btPower.callOnClick()
                     appendLog("update mode to $powerOn")
@@ -565,7 +580,6 @@ class SwayLightMainActivity : AppCompatActivity() {
                     ivRing.offsetValue = newOffset
                     displayObj.offset = newOffset
                 }
-                appendLog("displayObj:${displayObj.instance}")
             }
 
             SLTopic.ROOT + deviceName + SLTopic.MUSIC_MODE_DISPLAY -> {
