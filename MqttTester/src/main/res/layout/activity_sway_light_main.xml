@@ -44,151 +44,92 @@
             app:stroke_width="20dp"
             app:zoom_value="4" />
 
-        <ImageButton
-            android:id="@+id/bt_power"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@mipmap/light"
-            app:layout_constraintBottom_toBottomOf="@+id/light_bg_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/light_bg_view"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_zoom"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:background="@drawable/bg_text"
-            android:fontFamily="@font/pt_sans_narrow"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/light_bg_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/light_bg_view" />
-
-        <TextView
-            android:id="@+id/tv_brightness"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:background="@drawable/bg_text"
-            android:fontFamily="@font/pt_sans_narrow"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/mode_group"
+    <com.github.mmin18.widget.RealtimeBlurView
+        android:id="@+id/realtimeBlurView"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@drawable/light_to_music_mode_group_trans"
-        android:orientation="horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:weightSum="2"
         app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint"
+        app:realtimeBlurRadius="20dp"
+        app:realtimeOverlayColor="@android:color/transparent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/power_blur"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint">
 
-        <Button
-            android:id="@+id/bt_light"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/light_to_music_button_trans"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.05"
-            android:text="Light"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/bt_music"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/light_to_music_button_trans"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.05"
-            android:text="Music"
-            android:textColor="@android:color/white"
-            android:visibility="invisible"
-            android:textSize="16sp" />
-    </LinearLayout>
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mode_group"
-        android:visibility="gone">
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/ti_light"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Light" />
-
-        <com.google.android.material.tabs.TabItem
-            android:id="@+id/ti_music"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Music" />
-
-    </com.google.android.material.tabs.TabLayout>
-
-    <ScrollView
-        android:id="@+id/control_scroll_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintBottom_toTopOf="@+id/debug_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout">
-
-        <FrameLayout
-            android:id="@+id/control_frame"
+        <LinearLayout
+            android:id="@+id/mode_group"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent" />
-    </ScrollView>
+            android:layout_height="60dp"
+            android:background="@drawable/light_to_music_mode_group_trans"
+            android:orientation="horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lightTopConstraint"
+            android:weightSum="2">
 
-    <TextView
-        android:id="@+id/debug_view"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:fontFamily="@font/pt_sans_narrow"
-        android:gravity="center"
-        android:letterSpacing="0.2"
-        android:textColor="#9f9f9f"
-        android:text="@string/sway_light"
-        android:textAllCaps="true"
-        android:textSize="18sp"
-        android:background="@android:color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            <Button
+                android:id="@+id/bt_light"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/light_to_music_button_trans"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:text="Light"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/bt_music"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/light_to_music_button_trans"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:text="Music"
+                android:textColor="@android:color/white"
+                android:visibility="invisible"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/control_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toTopOf="@+id/debug_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mode_group">
+
+            <FrameLayout
+                android:id="@+id/control_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent" />
+        </ScrollView>
+
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/log_view"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/control_scroll_view"
+        app:layout_constraintBottom_toTopOf="@+id/debug_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -201,8 +142,64 @@
             android:maxLines="30"
             android:scrollbars="vertical"
             android:textColor="#000000"
+            android:textIsSelectable="true"
             android:textSize="12sp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.github.mmin18.widget.RealtimeBlurView
+        android:id="@+id/power_blur"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:realtimeBlurRadius="20dp"
+        app:realtimeOverlayColor="#D0000000"
+        android:visibility="invisible"
+        android:clickable="true"/>
+
+    <ImageButton
+        android:id="@+id/bt_power"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@mipmap/light"
+        app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_zoom"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_text"
+        android:fontFamily="@font/pt_sans_narrow"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lightTopConstraint" />
+
+    <TextView
+        android:id="@+id/tv_brightness"
+        android:layout_width="60dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_text"
+        android:fontFamily="@font/pt_sans_narrow"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lightTopConstraint" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_view"
@@ -261,4 +258,20 @@
             app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/debug_view"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:fontFamily="@font/pt_sans_narrow"
+        android:gravity="center"
+        android:letterSpacing="0.2"
+        android:textColor="#9f9f9f"
+        android:text="@string/sway_light"
+        android:textAllCaps="true"
+        android:textSize="16sp"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

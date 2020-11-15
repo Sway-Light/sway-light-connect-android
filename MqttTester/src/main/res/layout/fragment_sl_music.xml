@@ -52,7 +52,7 @@
                         android:letterSpacing="0.05"
                         android:text="color"
                         android:textAllCaps="true"
-                        android:textSize="24sp" />
+                        android:textSize="16sp" />
 
                 </LinearLayout>
 
@@ -157,7 +157,7 @@
                                     android:text="@string/high"
                                     android:textAllCaps="true"
                                     android:textColor="@android:color/white"
-                                    android:textSize="20sp" />
+                                    android:textSize="16sp" />
 
                             </LinearLayout>
 
@@ -183,7 +183,7 @@
                                     android:text="@string/middle"
                                     android:textAllCaps="true"
                                     android:textColor="@android:color/white"
-                                    android:textSize="20sp" />
+                                    android:textSize="16sp" />
 
                             </LinearLayout>
 
@@ -209,7 +209,7 @@
                                     android:text="@string/low"
                                     android:textAllCaps="true"
                                     android:textColor="@android:color/white"
-                                    android:textSize="20sp" />
+                                    android:textSize="16sp" />
 
                             </LinearLayout>
                         </LinearLayout>

@@ -12,10 +12,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.TranslateAnimation
+import android.view.animation.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -54,6 +51,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var btMusic: Button
     private lateinit var tvLog: TextView
     private lateinit var logView: ConstraintLayout
+    private lateinit var powerOffBlur: View
 
     // values
     var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
@@ -129,17 +127,53 @@ class SwayLightMainActivity : AppCompatActivity() {
             false
         }
 
-        btPower.setOnClickListener { v ->
+        btPower.setOnLongClickListener { v ->
+            val animAlpha: Animation
+            val animTrans1: Animation
+            val animTrans2: Animation
             if (powerOn == SLMode.POWER_ON) {
+                animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in)
+                animTrans1 = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom)
+                animTrans2 = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom)
                 powerOn = SLMode.POWER_OFF
-            }else if (powerOn == SLMode.POWER_OFF) {
+            }else {
+                animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
+                animTrans1 = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom)
+                animTrans2 = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom)
                 powerOn = SLMode.POWER_ON
             }
+            animAlpha.setAnimationListener(object : Animation.AnimationListener {
+                override fun onAnimationStart(animation: Animation?) {
+                    if (powerOn == SLMode.POWER_OFF) {
+                        powerOffBlur.visibility = View.VISIBLE
+                    }else {
+                        modeGroup.visibility = View.VISIBLE
+                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.VISIBLE
+                    }
+                }
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    if (powerOn == SLMode.POWER_ON) {
+                        powerOffBlur.visibility = View.INVISIBLE
+                    }else {
+                        modeGroup.visibility = View.INVISIBLE
+                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.INVISIBLE
+                    }
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) { }
+            })
+
+            modeGroup.startAnimation(animTrans1)
+            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTrans2)
+            powerOffBlur.startAnimation(animAlpha)
+
             if(v.isClickable) {
                 client?.publish(SLTopic.POWER, deviceName, powerOn)
             }else {
                 v.isClickable = true
             }
+            true
         }
 
         btDebug.setOnLongClickListener {
@@ -279,6 +313,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         ivRing.zoomValue = v
                         tvZoom.text = v.toString()
+                        tvZoom.visibility = View.VISIBLE
+                        tvZoom.animation?.cancel()
                         if (displayObj.zoom != ivRing.zoomValue) {
                             displayObj.zoom = ivRing.zoomValue
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
@@ -293,6 +329,8 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
                         tvBrightness.text = v.toString()
+                        tvBrightness.visibility = View.VISIBLE
+                        tvBrightness.animation?.cancel()
                         if (displayObj.brightness != v) {
                             displayObj.brightness = v
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
@@ -447,7 +485,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     private fun initMqtt() {
         broker = "tcp://" + intent.getStringExtra(getString(R.string.MQTT_BROKER)) + ":1883"
-        deviceName = intent.getStringExtra(getString(R.string.DEVICE_NAME))
+        deviceName = intent.getStringExtra(getString(R.string.DEVICE_NAME)).toString()
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
         manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
         client = SLMqttManager.getInstance()
@@ -486,6 +524,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         btLight = findViewById(R.id.bt_light)
         btMusic = findViewById(R.id.bt_music)
         modeGroup = findViewById(R.id.mode_group)
+        powerOffBlur = findViewById(R.id.power_blur)
     }
 
     private fun startFadeOutAnim(view: View, duration: Long, startOffset: Long) {
@@ -550,7 +589,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 if (newPower != powerOn) {
                     btPower.isClickable = false
-                    btPower.callOnClick()
+                    btPower.performLongClick()
                     appendLog("update mode to $powerOn")
                 }
             }

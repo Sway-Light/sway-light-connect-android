@@ -21,7 +21,7 @@
     <color name="progress_bg">#FFFFFFFF</color>
 
     <color name="music_card_title_bg">@android:color/transparent</color>
-    <color name="music_card_bg">#33BBBBBB</color>
+    <color name="music_card_bg">#515151</color>
     <color name="music_tab_bg">#E7E7E7</color>
     <color name="music_control_bg">#373737</color>
 
