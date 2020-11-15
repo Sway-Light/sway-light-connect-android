@@ -1,5 +1,8 @@
 package com.swaylight
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.Point
@@ -7,6 +10,7 @@ import android.graphics.Rect
 import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Vibrator
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.MotionEvent
@@ -57,22 +61,23 @@ class SwayLightMainActivity : AppCompatActivity() {
     var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
     private val MAX_LOG_SIZE = 3000
     var powerOn = SLMode.POWER_ON
-
     var mode = SLMode.LIGHT
+
     var ringCenterX = 0
     var ringCenterY = 0
     var ringStartRotate = 0f
     var ringPrevRotate = 0f
     var controlZoomFlag = true
 
+    private var lightTopConstHeight: Int = 0
     var prevZoom = 6
     var prevBrightness = 100
     var lightSlideStartY = 0f
     private val lightRectF = Rect()
-
     private val musicRectF = Rect()
     private lateinit var lightAnimation: TranslateAnimation
     private lateinit var musicAnimation: TranslateAnimation
+    private lateinit var lightTopConstAnim: ValueAnimator
 
     // MQTT Objects
     var manager: SLMqttManager? = null
@@ -84,6 +89,8 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var deviceName: String
     private var clientId: String? = null
     private var isRetainedDataSynced: Boolean = false
+
+    private lateinit var vibrator: Vibrator
 
     // const
     val MAX_ZOOM = 32
@@ -97,6 +104,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
+        vibrator = getSystemService(android.app.Service.VIBRATOR_SERVICE) as android.os.Vibrator
         initMqtt()
         initUi()
 
@@ -129,44 +137,78 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         btPower.setOnLongClickListener { v ->
             val animAlpha: Animation
-            val animTrans1: Animation
-            val animTrans2: Animation
+            val animAlphaWithOffset: Animation
+            val animTransTopBottom: Animation
+            val animTransLeftRight: Animation
             if (powerOn == SLMode.POWER_ON) {
+                // tern power to off
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in)
-                animTrans1 = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom)
-                animTrans2 = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom)
+                animAlphaWithOffset = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in).apply {
+                    startOffset = 5000
+                }
+                animTransTopBottom = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom).apply {
+                    duration = 500
+                }
+                animTransLeftRight = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_left).apply {
+                    duration = 700
+                    startOffset = 300
+                }
+                lightTopConstAnim.apply {
+                    startDelay = 0
+                }.start()
                 powerOn = SLMode.POWER_OFF
             }else {
+                // tern power to on
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
-                animTrans1 = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom)
-                animTrans2 = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom)
+                animAlphaWithOffset = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
+                animTransTopBottom = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom).apply {
+                    duration = 500
+                }
+                animTransLeftRight = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_right).apply {
+                    duration = 500
+                }
+                lightTopConstAnim.apply {
+                    startDelay = 500
+                }.reverse()
                 powerOn = SLMode.POWER_ON
             }
             animAlpha.setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationStart(animation: Animation?) {
                     if (powerOn == SLMode.POWER_OFF) {
                         powerOffBlur.visibility = View.VISIBLE
-                    }else {
+                        findViewById<TextView>(R.id.tv_hint).visibility = View.VISIBLE
+                        findViewById<TextView>(R.id.tv_sway).visibility = View.VISIBLE
+                        findViewById<TextView>(R.id.tv_light).visibility = View.VISIBLE
+                    } else {
                         modeGroup.visibility = View.VISIBLE
-                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.VISIBLE
+                        btDebug.visibility = View.VISIBLE
+//                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.VISIBLE
                     }
                 }
 
                 override fun onAnimationEnd(animation: Animation?) {
                     if (powerOn == SLMode.POWER_ON) {
                         powerOffBlur.visibility = View.INVISIBLE
-                    }else {
+                        findViewById<TextView>(R.id.tv_hint).visibility = View.INVISIBLE
+                        findViewById<TextView>(R.id.tv_sway).visibility = View.INVISIBLE
+                        findViewById<TextView>(R.id.tv_light).visibility = View.INVISIBLE
+                    } else {
                         modeGroup.visibility = View.INVISIBLE
-                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.INVISIBLE
+                        btDebug.visibility = View.INVISIBLE
+//                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.INVISIBLE
                     }
                 }
 
-                override fun onAnimationRepeat(animation: Animation?) { }
+                override fun onAnimationRepeat(animation: Animation?) {}
             })
 
-            modeGroup.startAnimation(animTrans1)
-            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTrans2)
+            modeGroup.startAnimation(animTransTopBottom)
+//            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTransTopBottom)
             powerOffBlur.startAnimation(animAlpha)
+            btDebug.startAnimation(animTransTopBottom)
+            findViewById<TextView>(R.id.tv_hint).startAnimation(animAlphaWithOffset)
+            findViewById<TextView>(R.id.tv_sway).startAnimation(animTransLeftRight)
+            findViewById<TextView>(R.id.tv_light).startAnimation(animTransLeftRight)
 
             if(v.isClickable) {
                 client?.publish(SLTopic.POWER, deviceName, powerOn)
@@ -187,10 +229,10 @@ class SwayLightMainActivity : AppCompatActivity() {
         rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 val params: ConstraintLayout.LayoutParams = lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams
-
                 params.height = (rootConstraint.width * 0.7).toInt()
                 params.width = (rootConstraint.width)
                 lightTopConstraint.layoutParams = params
+                lightTopConstHeight = params.height
                 val location = intArrayOf(0, 0)
                 ivRing.getLocationOnScreen(location)
                 ringCenterX = location[0] + ivRing.width / 2
@@ -224,8 +266,19 @@ class SwayLightMainActivity : AppCompatActivity() {
                             Animation.ABSOLUTE,
                             0f,
                     )
-                    lightAnimation.duration = 400
-                    musicAnimation.duration = 400
+                    lightTopConstAnim = ValueAnimator.ofInt(params.height, rootConstraint.height).apply {
+                        duration = 500
+                        interpolator = AccelerateDecelerateInterpolator()
+                        addUpdateListener { valueAnimator ->
+                            val newParams: ConstraintLayout.LayoutParams =
+                                    (lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams).apply {
+                                        height = valueAnimator.animatedValue as Int
+                                    }
+                            lightTopConstraint.layoutParams = newParams
+                        }
+                    }
+                    lightAnimation.duration = 500
+                    musicAnimation.duration = 500
                     rootConstraint.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }, 100)
             }
@@ -261,6 +314,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         displayObj.offset = ivRing.offsetValue
                         client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                         client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+                        vibrator.vibrate(5)
                     }
                 }
             }
@@ -268,7 +322,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         }
 
         lightTopConstraint.setOnTouchListener{ v, event ->
-            val delta = ((lightSlideStartY - event.rawY) / 20).toInt()
+            val delta = ((lightSlideStartY - event.rawY) / 50).toInt()
             var v: Int = 0
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -281,6 +335,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         controlZoomFlag = false
                         tvBrightness.visibility = View.VISIBLE
                     }
+                    vibrator.vibrate(5)
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
@@ -302,6 +357,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         prevBrightness = v
                         startFadeOutAnim(tvBrightness, 500, 500)
                     }
+                    vibrator.vibrate(5)
                 }
                 else -> {
                     if(controlZoomFlag) {
@@ -316,6 +372,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         tvZoom.visibility = View.VISIBLE
                         tvZoom.animation?.cancel()
                         if (displayObj.zoom != ivRing.zoomValue) {
+                            vibrator.vibrate(5)
                             displayObj.zoom = ivRing.zoomValue
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
@@ -332,6 +389,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         tvBrightness.visibility = View.VISIBLE
                         tvBrightness.animation?.cancel()
                         if (displayObj.brightness != v) {
+                            vibrator.vibrate(5)
                             displayObj.brightness = v
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
@@ -372,10 +430,10 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .setCustomAnimations(R.anim.enter_from_left, R.anim.exit_to_right)
                             .hide(musicFragment)
                             .commit()
-                    transBg.reverseTransition(400)
-                    transModeGroup.reverseTransition(400)
-                    transBtLight.reverseTransition(400)
-                    transBtMusic.reverseTransition(400)
+                    transBg.reverseTransition(500)
+                    transModeGroup.reverseTransition(500)
+                    transBtLight.reverseTransition(500)
+                    transBtMusic.reverseTransition(500)
                     tvLog.setTextColor(Color.BLACK)
                 }
                 SLMode.LIGHT -> {
@@ -392,10 +450,10 @@ class SwayLightMainActivity : AppCompatActivity() {
                             .setCustomAnimations(R.anim.enter_from_right, R.anim.exit_to_left)
                             .hide(lightFragment)
                             .commit()
-                    transBg.startTransition(400)
-                    transModeGroup.startTransition(400)
-                    transBtLight.reverseTransition(400)
-                    transBtMusic.reverseTransition(400)
+                    transBg.startTransition(500)
+                    transModeGroup.startTransition(500)
+                    transBtLight.reverseTransition(500)
+                    transBtMusic.reverseTransition(500)
                     tvLog.setTextColor(Color.WHITE)
                 }
             }
@@ -442,6 +500,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     } catch (e: MqttException) {
                         e.printStackTrace()
                     }
+                    vibrator.vibrate(20)
                     Log.d(MQTT_TAG, "Connected to $broker")
                 }
 
@@ -450,6 +509,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         progressView.visibility = View.VISIBLE
                         tvConnectMessage.setText(R.string.connecting)
                     }
+                    vibrator.vibrate(20)
                     appendLog("Connection LOST")
                     Log.d(MQTT_TAG, "Disconnect to $broker")
                 }
@@ -497,12 +557,14 @@ class SwayLightMainActivity : AppCompatActivity() {
                 Log.d(MQTT_TAG, "client: $client")
                 val topic = SLTopic.ROOT + deviceName + "/#"
                 client?.subscribe(topic, 2)
+                vibrator.vibrate(20)
                 appendLog("subscribe: $topic")
             }
 
             override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
                 progressView.visibility = View.VISIBLE
                 appendLog("Connect to $broker fail")
+                vibrator.vibrate(20)
                 Log.d(MQTT_TAG, "Connect to $broker fail")
             }
         })
@@ -571,7 +633,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 if (newMode != mode) {
                     modeGroup.isClickable = false
-                    modeGroup.callOnClick()
+                    modeGroup.performClick()
                     appendLog("update mode to $mode")
                 }
             }
