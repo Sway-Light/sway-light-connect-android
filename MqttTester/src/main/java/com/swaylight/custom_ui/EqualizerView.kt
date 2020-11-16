@@ -168,9 +168,9 @@ class EqualizerView(context: Context, attrs: AttributeSet?): View(context, attrs
 
         for (i in 0 until freqSize) {
             canvas?.drawRect(
-                    width * (i.toFloat() / freqSize),
+                    (width * (i.toFloat() / freqSize)).plus(1f),
                     startValue[i].plus(deltaValue[i]*currentValue).div(100f).times(height),
-                    width * ((i.toFloat() + 1) / freqSize),
+                    (width * ((i.toFloat() + 1) / freqSize)).minus(1f),
                     height,
                     fillPaint)
             canvas?.drawRect(

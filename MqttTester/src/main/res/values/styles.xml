@@ -39,4 +39,12 @@
         <item name="android:shadowRadius">0</item>
     </style>
 
+    <style name="tv_sway_light">
+        <item name="fontFamily">@font/pt_sans_narrow</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">#9f9f9f</item>
+        <item name="textAllCaps">true</item>
+        <item name="backgroundColor">@android:color/transparent</item>
+    </style>
+
 </resources>
