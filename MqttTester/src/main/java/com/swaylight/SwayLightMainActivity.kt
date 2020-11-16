@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.Vibrator
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -23,6 +24,7 @@ import androidx.core.content.ContextCompat
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.SLClockSetting
 import com.swaylight.library.data.SLDisplay
 import com.swaylight.library.data.SLMode
 import com.swaylight.library.data.SLTopic
@@ -47,6 +49,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var ivRing: TopLightView
     private lateinit var tvZoom: TextView
     private lateinit var tvBrightness: TextView
+    private lateinit var btClockSetting: ImageButton
     private lateinit var btPower: ImageButton
     private lateinit var btDebug: TextView
     private lateinit var btLight: Button
@@ -54,6 +57,12 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var tvLog: TextView
     private lateinit var logView: ConstraintLayout
     private lateinit var powerOffBlur: View
+
+    // fragment
+    val fragmentManager = supportFragmentManager
+    val musicFragment = SlMusicFragment()
+    val lightFragment = SlLightFragment()
+    val clockSettingFragment = SlClockSettingFragment()
 
     // values
     var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
@@ -110,7 +119,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         // Block control view and show progress view.
         // Delay 3 secs to show config button.
         progressView.visibility = View.VISIBLE
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             btNetworkConfig.visibility = View.VISIBLE
         }, 3000)
         btNetworkConfig.setOnClickListener {
@@ -125,11 +134,11 @@ class SwayLightMainActivity : AppCompatActivity() {
         tvLog.setOnLongClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("Clear log?")
-            builder.setPositiveButton("Yes") { dialog, which ->
+            builder.setPositiveButton("Yes") { _, _ ->
                 tvLog.scrollTo(0, 0)
                 tvLog.text = ""
             }
-            builder.setNegativeButton("Cancel") { dialog, which -> }
+            builder.setNegativeButton("Cancel") { _, _ -> }
             builder.show()
             false
         }
@@ -241,7 +250,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 //                Log.d(tag, "x:${ringCenterX}, y:${ringCenterY}")
 
                 // 延後一下在remove listener
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     // set btLight, btMusic animation
                     val offset = Point()
                     btLight.getGlobalVisibleRect(lightRectF, offset)
@@ -296,7 +305,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             }
         })
 
-        ivRing.setOnTouchListener { v, event ->
+        ivRing.setOnTouchListener { _, event ->
             val degree = getAngle(
                     ringCenterX.toFloat(),
                     ringCenterY.toFloat(),
@@ -333,7 +342,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             true
         }
 
-        lightTopConstraint.setOnTouchListener{ v, event ->
+        lightTopConstraint.setOnTouchListener{ _, event ->
             val delta = ((lightSlideStartY - event.rawY) / 50).toInt()
             var v: Int = 0
             when (event.action) {
@@ -412,14 +421,21 @@ class SwayLightMainActivity : AppCompatActivity() {
             true
         }
 
-        val fragmentManager = supportFragmentManager
-        val musicFragment = SlMusicFragment()
-        val lightFragment = SlLightFragment()
         if(!musicFragment.isAdded) {
             fragmentManager.beginTransaction().add(R.id.control_frame, musicFragment).hide(musicFragment).commit()
         }
         if(!lightFragment.isAdded) {
             fragmentManager.beginTransaction().add(R.id.control_frame, lightFragment).commit()
+        }
+        if(!clockSettingFragment.isAdded) {
+            fragmentManager.beginTransaction().add(R.id.full_frame, clockSettingFragment).hide(clockSettingFragment).commit()
+        }
+
+        btClockSetting.setOnClickListener {
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_close_exit)
+                    .show(clockSettingFragment)
+                    .commit()
         }
 
         modeGroup.setOnClickListener { v ->
@@ -468,6 +484,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     transBtMusic.reverseTransition(500)
                     tvLog.setTextColor(Color.WHITE)
                 }
+                else -> { }
             }
             // 為了區分是使用者點擊or程式透過callOnClick()呼叫的:
             // isClickable == true -> 使用者點擊，才publish
@@ -504,7 +521,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }
                         startFadeOutAnim(progressView, 1000, 0)
                         // 等app把來自自己的訊息也收完，再把flag關閉
-                        Handler().postDelayed({
+                        Handler(Looper.getMainLooper()).postDelayed({
                             isRetainedDataSynced = true
                             progressView.visibility = View.INVISIBLE
                         }, 1000)
@@ -541,18 +558,26 @@ class SwayLightMainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        if (client != null) {
-            try {
-                // 先移除callback，callback裡有處理UI，finish後會找不到UI
-                client!!.setCallback(null)
-                client!!.disconnect()
-            } catch (e: MqttException) {
-                e.printStackTrace()
+        if(!clockSettingFragment.isHidden) {
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_close_exit)
+                    .hide(clockSettingFragment)
+                    .commit()
+            return
+        }else {
+            if (client != null) {
+                try {
+                    // 先移除callback，callback裡有處理UI，finish後會找不到UI
+                    client!!.setCallback(null)
+                    client!!.disconnect()
+                } catch (e: MqttException) {
+                    e.printStackTrace()
+                }
+                client = null
             }
-            client = null
+            finish()
+            super.onBackPressed()
         }
-        finish()
     }
 
     private fun initMqtt() {
@@ -590,6 +615,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         logView = findViewById(R.id.log_view)
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
+        btClockSetting = findViewById(R.id.bt_clock_setting)
         btPower = findViewById(R.id.bt_power)
         btDebug = findViewById(R.id.debug_view)
         ivRing = findViewById(R.id.iv_ring)
@@ -696,7 +722,41 @@ class SwayLightMainActivity : AppCompatActivity() {
             }
 
             SLTopic.ROOT + deviceName + SLTopic.MUSIC_MODE_DISPLAY -> {
+                val newBright: Int = jsonObj[SLDisplay.BRIGHT] as Int
+                val newOffset: Int = jsonObj[SLDisplay.OFFSET] as Int
+                val newZoom: Int = jsonObj[SLDisplay.ZOOM] as Int
 
+                if (displayObj.brightness != newBright) {
+                    prevBrightness = newBright
+                    displayObj.brightness = newBright
+                    tvBrightness.visibility = View.VISIBLE
+                    tvBrightness.text = newBright.toString()
+                    startFadeOutAnim(tvBrightness, 500, 500)
+                }
+
+                if (displayObj.zoom != newZoom) {
+                    prevZoom = newZoom
+                    displayObj.zoom = newZoom
+                    ivRing.zoomValue = newZoom
+                    tvZoom.text = newZoom.toString()
+                    tvZoom.visibility = View.VISIBLE
+                    startFadeOutAnim(tvZoom, 500, 500)
+                }
+
+                if (displayObj.offset != newOffset) {
+                    ivRing.offsetValue = newOffset
+                    displayObj.offset = newOffset
+                }
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.POWER_START_TIME.topic -> {
+                clockSettingFragment.onHour = jsonObj[SLClockSetting.HOUR] as Int
+                clockSettingFragment.onMinute = jsonObj[SLClockSetting.MIN] as Int
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.POWER_END_TIME.topic -> {
+                clockSettingFragment.offHour = jsonObj[SLClockSetting.HOUR] as Int
+                clockSettingFragment.offMinute = jsonObj[SLClockSetting.MIN] as Int
             }
         }
     }

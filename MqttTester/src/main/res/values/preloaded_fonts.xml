@@ -2,5 +2,6 @@
 <resources>
     <array name="preloaded_fonts" translatable="false">
         <item>@font/pt_sans_narrow</item>
+        <item>@font/roboto_medium</item>
     </array>
 </resources>
