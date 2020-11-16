@@ -1,7 +1,5 @@
 package com.swaylight
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -78,6 +76,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var lightAnimation: TranslateAnimation
     private lateinit var musicAnimation: TranslateAnimation
     private lateinit var lightTopConstAnim: ValueAnimator
+    private lateinit var lightTopConstAnimRev: ValueAnimator
 
     // MQTT Objects
     var manager: SLMqttManager? = null
@@ -137,14 +136,18 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         btPower.setOnLongClickListener { v ->
             val animAlpha: Animation
-            val animAlphaWithOffset: Animation
+            val animAlphaRepeat: Animation
             val animTransTopBottom: Animation
             val animTransLeftRight: Animation
             if (powerOn == SLMode.POWER_ON) {
                 // tern power to off
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in)
-                animAlphaWithOffset = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in).apply {
+                animAlphaRepeat = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in).apply {
                     startOffset = 5000
+                    repeatMode = Animation.RESTART
+                    repeatCount = 100
+                    isFillEnabled = true
+//                    fillAfter = true
                 }
                 animTransTopBottom = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_bottom).apply {
                     duration = 500
@@ -153,23 +156,20 @@ class SwayLightMainActivity : AppCompatActivity() {
                     duration = 700
                     startOffset = 300
                 }
-                lightTopConstAnim.apply {
-                    startDelay = 0
-                }.start()
+                lightTopConstAnim.start()
                 powerOn = SLMode.POWER_OFF
             }else {
                 // tern power to on
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
-                animAlphaWithOffset = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
+                animAlphaRepeat = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
                 animTransTopBottom = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom).apply {
-                    duration = 500
+                    duration = 700
+                    startOffset = 300
                 }
                 animTransLeftRight = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_right).apply {
-                    duration = 500
+                    duration = 700
                 }
-                lightTopConstAnim.apply {
-                    startDelay = 500
-                }.reverse()
+                lightTopConstAnimRev.start()
                 powerOn = SLMode.POWER_ON
             }
             animAlpha.setAnimationListener(object : Animation.AnimationListener {
@@ -206,7 +206,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 //            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTransTopBottom)
             powerOffBlur.startAnimation(animAlpha)
             btDebug.startAnimation(animTransTopBottom)
-            findViewById<TextView>(R.id.tv_hint).startAnimation(animAlphaWithOffset)
+            findViewById<TextView>(R.id.tv_hint).startAnimation(animAlphaRepeat)
             findViewById<TextView>(R.id.tv_sway).startAnimation(animTransLeftRight)
             findViewById<TextView>(R.id.tv_light).startAnimation(animTransLeftRight)
 
@@ -229,7 +229,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         rootConstraint.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 val params: ConstraintLayout.LayoutParams = lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams
-                params.height = (rootConstraint.width * 0.7).toInt()
+                params.height = (rootConstraint.width * 0.9).toInt()
                 params.width = (rootConstraint.width)
                 lightTopConstraint.layoutParams = params
                 lightTopConstHeight = params.height
@@ -268,6 +268,18 @@ class SwayLightMainActivity : AppCompatActivity() {
                     )
                     lightTopConstAnim = ValueAnimator.ofInt(params.height, rootConstraint.height).apply {
                         duration = 500
+                        interpolator = AccelerateDecelerateInterpolator()
+                        addUpdateListener { valueAnimator ->
+                            val newParams: ConstraintLayout.LayoutParams =
+                                    (lightTopConstraint.layoutParams as ConstraintLayout.LayoutParams).apply {
+                                        height = valueAnimator.animatedValue as Int
+                                    }
+                            lightTopConstraint.layoutParams = newParams
+                        }
+                    }
+                    lightTopConstAnimRev = ValueAnimator.ofInt(rootConstraint.height, params.height).apply {
+                        duration = 500
+                        startDelay = 500
                         interpolator = AccelerateDecelerateInterpolator()
                         addUpdateListener { valueAnimator ->
                             val newParams: ConstraintLayout.LayoutParams =
