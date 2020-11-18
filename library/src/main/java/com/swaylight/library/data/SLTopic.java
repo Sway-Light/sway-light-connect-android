@@ -18,6 +18,8 @@ public enum SLTopic implements Serializable {
     MUSIC_MODE_OFFSET("/mode/music/offset"),
     MUSIC_MODE_STYLE("/mode/music/style"),
     MUSIC_MODE_DISPLAY("/mode/music/display"),
+
+    OPTION_CONFIG("/option_config"),
     ;
 
     static public final String ROOT = "feeds/";

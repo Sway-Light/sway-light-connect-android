@@ -128,23 +128,55 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/log_view"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="300dp"
         android:visibility="invisible"
+        android:background="#32000000"
         app:layout_constraintBottom_toTopOf="@+id/debug_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="fft_mag:"/>
+
+            <TextView
+                android:id="@+id/tv_fft_mag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <SeekBar
+                android:id="@+id/sb_fft_mag"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="255" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tv_log"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:background="@android:color/transparent"
             android:gravity="top"
             android:maxLines="30"
             android:scrollbars="vertical"
             android:textColor="#000000"
             android:textIsSelectable="true"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
@@ -155,7 +187,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#D0000000"
+        android:background="#B0000000"
         android:visibility="invisible"
         android:clickable="true"/>
 

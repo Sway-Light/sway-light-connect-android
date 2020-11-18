@@ -25,10 +25,7 @@ import androidx.core.content.ContextCompat
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
-import com.swaylight.library.data.SLClockSetting
-import com.swaylight.library.data.SLDisplay
-import com.swaylight.library.data.SLMode
-import com.swaylight.library.data.SLTopic
+import com.swaylight.library.data.*
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -60,6 +57,7 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var logView: ConstraintLayout
     private lateinit var powerOffBlur: View
     private lateinit var ivLogo: ImageView
+    private lateinit var sbFftMag: SeekBar
 
     // fragment
     val fragmentManager = supportFragmentManager
@@ -516,6 +514,20 @@ class SwayLightMainActivity : AppCompatActivity() {
                 v.isClickable = true
             }
         }
+
+        sbFftMag.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                runOnUiThread { findViewById<TextView>(R.id.tv_fft_mag).text = progress.toString() }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                client?.publish(
+                        SLTopic.OPTION_CONFIG,
+                        deviceName,
+                        SLOptionConfig(sbFftMag.progress).instance
+                )
+            }
+        })
     }
 
     override fun onPause() {
@@ -566,7 +578,6 @@ class SwayLightMainActivity : AppCompatActivity() {
 
                 @Throws(Exception::class)
                 override fun messageArrived(topic: String, message: MqttMessage) {
-                    appendLog("$topic:$message")
                     updateSubUi(topic, message)
                 }
 
@@ -652,6 +663,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         modeGroup = findViewById(R.id.mode_group)
         powerOffBlur = findViewById(R.id.power_blur)
         ivLogo = findViewById(R.id.iv_logo)
+        sbFftMag = findViewById(R.id.sb_fft_mag)
     }
 
     private fun startFadeOutAnim(view: View, duration: Long, startOffset: Long) {
@@ -680,8 +692,10 @@ class SwayLightMainActivity : AppCompatActivity() {
         val jsonObj = JSONObject(String(message.payload))
         val fromMyself = jsonObj["id"] == clientId
         if (fromMyself && isRetainedDataSynced) {
-            appendLog("msg from myself")
+            appendLog("/////$topic:$message")
             return
+        }else {
+            appendLog("$topic:$message")
         }
         when(topic) {
             SLTopic.ROOT + deviceName + SLTopic.CURR_MODE.topic -> {
@@ -786,6 +800,10 @@ class SwayLightMainActivity : AppCompatActivity() {
             SLTopic.ROOT + deviceName + SLTopic.POWER_END_TIME.topic -> {
                 clockSettingFragment.offHour = jsonObj[SLClockSetting.HOUR] as Int
                 clockSettingFragment.offMinute = jsonObj[SLClockSetting.MIN] as Int
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.OPTION_CONFIG.topic -> {
+                sbFftMag.progress = jsonObj[SLOptionConfig.FFT_MAG] as Int
             }
         }
     }
