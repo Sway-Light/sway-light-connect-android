@@ -12,7 +12,7 @@
         android:id="@+id/lightTopConstraint"
         android:layout_width="0dp"
         android:layout_height="300dp"
-        android:background="@color/david_green"
+        android:background="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -40,9 +40,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:offset_value="29"
             app:stroke_bg_color="#40000000"
-            app:stroke_color="@android:color/white"
+            app:stroke_color="#66FFFFFF"
             app:stroke_width="20dp"
-            app:zoom_value="4" />
+            app:zoom_value="30" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -128,23 +128,55 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/log_view"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="300dp"
         android:visibility="invisible"
+        android:background="#32000000"
         app:layout_constraintBottom_toTopOf="@+id/debug_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="fft_mag:"/>
+
+            <TextView
+                android:id="@+id/tv_fft_mag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <SeekBar
+                android:id="@+id/sb_fft_mag"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="255" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tv_log"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:background="@android:color/transparent"
             android:gravity="top"
             android:maxLines="30"
             android:scrollbars="vertical"
             android:textColor="#000000"
             android:textIsSelectable="true"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
@@ -155,7 +187,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#D0000000"
+        android:background="#B0000000"
         android:visibility="invisible"
         android:clickable="true"/>
 
@@ -175,7 +207,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:letterSpacing="0.2"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="100dp"
         android:text="@string/power_hint"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -192,11 +224,10 @@
         android:text="sway"
         android:textSize="40sp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintBottom_toTopOf="@+id/iv_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hint"
-        app:layout_constraintVertical_bias="0.1" />
+        app:layout_constraintTop_toTopOf="@+id/lightTopConstraint" />
 
     <TextView
         android:id="@+id/tv_light"
@@ -221,6 +252,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_logo"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="@+id/bt_power"
+        app:layout_constraintEnd_toEndOf="@+id/bt_power"
+        app:layout_constraintStart_toStartOf="@+id/bt_power"
+        app:layout_constraintTop_toTopOf="@+id/bt_power" />
 
     <TextView
         android:id="@+id/tv_zoom"
@@ -266,7 +306,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/iv_progress_logo"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/logo_anim" />
+
         <ProgressBar
+            android:visibility="invisible"
             android:id="@+id/progressBar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -280,10 +331,10 @@
             android:id="@+id/tv_cnt_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/connecting"
             android:fontFamily="@font/pt_sans_narrow"
             android:gravity="center"
             android:letterSpacing="0.2"
+            android:text="@string/connecting"
             android:textAllCaps="true"
             android:textSize="24sp"
             android:textStyle="bold"

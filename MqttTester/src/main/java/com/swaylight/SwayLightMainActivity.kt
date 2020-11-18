@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
+import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.TransitionDrawable
 import android.os.Bundle
 import android.os.Handler
@@ -24,10 +25,7 @@ import androidx.core.content.ContextCompat
 import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
-import com.swaylight.library.data.SLClockSetting
-import com.swaylight.library.data.SLDisplay
-import com.swaylight.library.data.SLMode
-import com.swaylight.library.data.SLTopic
+import com.swaylight.library.data.*
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -41,6 +39,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     // UI
     private lateinit var progressView: ConstraintLayout
+    private lateinit var ivProgressLogo: ImageView
     private lateinit var tvConnectMessage: TextView
     private lateinit var btNetworkConfig: Button
     private lateinit var rootConstraint: ConstraintLayout
@@ -57,6 +56,8 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var tvLog: TextView
     private lateinit var logView: ConstraintLayout
     private lateinit var powerOffBlur: View
+    private lateinit var ivLogo: ImageView
+    private lateinit var sbFftMag: SeekBar
 
     // fragment
     val fragmentManager = supportFragmentManager
@@ -86,6 +87,8 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var musicAnimation: TranslateAnimation
     private lateinit var lightTopConstAnim: ValueAnimator
     private lateinit var lightTopConstAnimRev: ValueAnimator
+    private lateinit var logoAnim: AnimationDrawable
+    private lateinit var logoProgressAnim: AnimationDrawable
 
     // MQTT Objects
     var manager: SLMqttManager? = null
@@ -145,12 +148,14 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         btPower.setOnLongClickListener { v ->
             val animAlpha: Animation
+            val animAlphaRev: Animation
             val animAlphaRepeat: Animation
             val animTransTopBottom: Animation
             val animTransLeftRight: Animation
             if (powerOn == SLMode.POWER_ON) {
-                // tern power to off
+                // turn power to off
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in)
+                animAlphaRev = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
                 animAlphaRepeat = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in).apply {
                     startOffset = 5000
                     repeatMode = Animation.RESTART
@@ -165,11 +170,13 @@ class SwayLightMainActivity : AppCompatActivity() {
                     duration = 700
                     startOffset = 300
                 }
+                ivLogo.setBackgroundResource(R.drawable.logo_anim)
                 lightTopConstAnim.start()
                 powerOn = SLMode.POWER_OFF
             }else {
-                // tern power to on
+                // turn power to on
                 animAlpha = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
+                animAlphaRev = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_in)
                 animAlphaRepeat = AnimationUtils.loadAnimation(applicationContext, R.anim.fade_out)
                 animTransTopBottom = AnimationUtils.loadAnimation(applicationContext, R.anim.enter_from_bottom).apply {
                     duration = 700
@@ -178,6 +185,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 animTransLeftRight = AnimationUtils.loadAnimation(applicationContext, R.anim.exit_to_right).apply {
                     duration = 700
                 }
+                ivLogo.setBackgroundResource(R.drawable.logo_anim_reverse)
                 lightTopConstAnimRev.start()
                 powerOn = SLMode.POWER_ON
             }
@@ -188,9 +196,13 @@ class SwayLightMainActivity : AppCompatActivity() {
                         findViewById<TextView>(R.id.tv_hint).visibility = View.VISIBLE
                         findViewById<TextView>(R.id.tv_sway).visibility = View.VISIBLE
                         findViewById<TextView>(R.id.tv_light).visibility = View.VISIBLE
+                        ivLogo.visibility = View.VISIBLE
                     } else {
                         modeGroup.visibility = View.VISIBLE
                         btDebug.visibility = View.VISIBLE
+                        btPower.alpha = 1f
+                        ivRing.visibility = View.VISIBLE
+                        ivLogo.startAnimation(animAlpha)
 //                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.VISIBLE
                     }
                 }
@@ -198,12 +210,15 @@ class SwayLightMainActivity : AppCompatActivity() {
                 override fun onAnimationEnd(animation: Animation?) {
                     if (powerOn == SLMode.POWER_ON) {
                         powerOffBlur.visibility = View.INVISIBLE
+                        ivLogo.visibility = View.INVISIBLE
                         findViewById<TextView>(R.id.tv_hint).visibility = View.INVISIBLE
                         findViewById<TextView>(R.id.tv_sway).visibility = View.INVISIBLE
                         findViewById<TextView>(R.id.tv_light).visibility = View.INVISIBLE
                     } else {
                         modeGroup.visibility = View.INVISIBLE
                         btDebug.visibility = View.INVISIBLE
+                        btPower.alpha = 0f
+                        ivRing.visibility = View.INVISIBLE
 //                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.INVISIBLE
                     }
                 }
@@ -215,6 +230,10 @@ class SwayLightMainActivity : AppCompatActivity() {
 //            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTransTopBottom)
             powerOffBlur.startAnimation(animAlpha)
             btDebug.startAnimation(animTransTopBottom)
+            btPower.startAnimation(animAlphaRev)
+            ivRing.startAnimation(animAlphaRev)
+            logoAnim = ivLogo.background as AnimationDrawable
+            logoAnim.start()
             findViewById<TextView>(R.id.tv_hint).startAnimation(animAlphaRepeat)
             findViewById<TextView>(R.id.tv_sway).startAnimation(animTransLeftRight)
             findViewById<TextView>(R.id.tv_light).startAnimation(animTransLeftRight)
@@ -405,7 +424,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         }else if(v <= 0) {
                             v = 0
                         }
-                        ivRing.strokeColor = ivRing.strokeColor.and(0xFFFFFF).plus((155 + v).shl(24))
+                        ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(v.div(100f)).toInt()).shl(24))
                         tvBrightness.text = v.toString()
                         tvBrightness.visibility = View.VISIBLE
                         tvBrightness.animation?.cancel()
@@ -495,6 +514,20 @@ class SwayLightMainActivity : AppCompatActivity() {
                 v.isClickable = true
             }
         }
+
+        sbFftMag.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                runOnUiThread { findViewById<TextView>(R.id.tv_fft_mag).text = progress.toString() }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                client?.publish(
+                        SLTopic.OPTION_CONFIG,
+                        deviceName,
+                        SLOptionConfig(sbFftMag.progress).instance
+                )
+            }
+        })
     }
 
     override fun onPause() {
@@ -545,7 +578,6 @@ class SwayLightMainActivity : AppCompatActivity() {
 
                 @Throws(Exception::class)
                 override fun messageArrived(topic: String, message: MqttMessage) {
-                    appendLog("$topic:$message")
                     updateSubUi(topic, message)
                 }
 
@@ -609,6 +641,11 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     private fun initUi() {
         progressView = findViewById(R.id.progress_view)
+        ivProgressLogo = findViewById(R.id.iv_progress_logo)
+        ivProgressLogo.setBackgroundResource(R.drawable.logo_anim_repeat)
+        logoProgressAnim = ivProgressLogo.background as AnimationDrawable
+        logoProgressAnim.isOneShot = false
+        logoProgressAnim.start()
         tvConnectMessage = findViewById(R.id.tv_cnt_msg)
         btNetworkConfig = findViewById(R.id.bt_network_config)
         tvLog = findViewById(R.id.tv_log)
@@ -625,6 +662,8 @@ class SwayLightMainActivity : AppCompatActivity() {
         btMusic = findViewById(R.id.bt_music)
         modeGroup = findViewById(R.id.mode_group)
         powerOffBlur = findViewById(R.id.power_blur)
+        ivLogo = findViewById(R.id.iv_logo)
+        sbFftMag = findViewById(R.id.sb_fft_mag)
     }
 
     private fun startFadeOutAnim(view: View, duration: Long, startOffset: Long) {
@@ -653,8 +692,10 @@ class SwayLightMainActivity : AppCompatActivity() {
         val jsonObj = JSONObject(String(message.payload))
         val fromMyself = jsonObj["id"] == clientId
         if (fromMyself && isRetainedDataSynced) {
-            appendLog("msg from myself")
+            appendLog("/////$topic:$message")
             return
+        }else {
+            appendLog("$topic:$message")
         }
         when(topic) {
             SLTopic.ROOT + deviceName + SLTopic.CURR_MODE.topic -> {
@@ -703,6 +744,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     displayObj.brightness = newBright
                     tvBrightness.visibility = View.VISIBLE
                     tvBrightness.text = newBright.toString()
+                    ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
                     startFadeOutAnim(tvBrightness, 500, 500)
                 }
 
@@ -731,6 +773,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     displayObj.brightness = newBright
                     tvBrightness.visibility = View.VISIBLE
                     tvBrightness.text = newBright.toString()
+                    ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
                     startFadeOutAnim(tvBrightness, 500, 500)
                 }
 
@@ -757,6 +800,10 @@ class SwayLightMainActivity : AppCompatActivity() {
             SLTopic.ROOT + deviceName + SLTopic.POWER_END_TIME.topic -> {
                 clockSettingFragment.offHour = jsonObj[SLClockSetting.HOUR] as Int
                 clockSettingFragment.offMinute = jsonObj[SLClockSetting.MIN] as Int
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.OPTION_CONFIG.topic -> {
+                sbFftMag.progress = jsonObj[SLOptionConfig.FFT_MAG] as Int
             }
         }
     }

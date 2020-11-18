@@ -2,12 +2,12 @@ package com.swaylight.custom_ui
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.LinearLayout
 import com.swaylight.R
@@ -160,6 +160,7 @@ class TopLightView : View {
             this.strokeWidth = _strokeWidth
             this.color = _strokeColor
             strokeCap = Paint.Cap.ROUND
+            maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.INNER)
         }
         fillPaint.apply {
             isAntiAlias = true

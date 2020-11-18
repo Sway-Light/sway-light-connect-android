@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "1.3.2"
+        versionName "1.3.3"
         renderscriptTargetApi 19
         renderscriptSupportModeEnabled true    // Enable RS support
 
@@ -22,6 +22,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "SwayLightConnect_v${variant.versionName}.apk"
+                }
+            }
         }
     }
 
