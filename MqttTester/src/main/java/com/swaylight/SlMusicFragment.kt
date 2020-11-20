@@ -2,8 +2,6 @@ package com.swaylight
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -26,7 +24,6 @@ import com.swaylight.custom_ui.EqualizerView
 import com.swaylight.data.GradientColor
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
-import com.swaylight.library.data.SLColor
 import com.swaylight.library.data.SLMusicColor
 import com.swaylight.library.data.SLTopic
 
@@ -56,7 +53,7 @@ class SlMusicFragment : Fragment() {
     private var currIndex = 0
     var gradCircleViews: ArrayList<CircleView> = arrayListOf()
     private lateinit var gradColorList: ArrayList<GradientColor>
-    private var mqttMusicColorObj = SLMusicColor(0, 0, 0)
+    private var mqttMusicColorObj = SLMusicColor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -208,24 +205,9 @@ class SlMusicFragment : Fragment() {
                         GradientDrawable.Orientation.TOP_BOTTOM)
                 setEqualizerColor(gradColor)
                 setCirclesColor(gradColor)
-                mqttMusicColorObj.setColor(gradColor.startColor!!)
-                mqttMusicColorObj.level = SLMusicColor.HIGH
-                client?.publish(
-                        SLTopic.MUSIC_MODE_COLOR,
-                        deviceName,
-                        mqttMusicColorObj.instance
-                )
-                Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
-                mqttMusicColorObj.setColor(gradColor.centerColor!!)
-                mqttMusicColorObj.level = SLMusicColor.MEDIUM
-                client?.publish(
-                        SLTopic.MUSIC_MODE_COLOR,
-                        deviceName,
-                        mqttMusicColorObj.instance
-                )
-                Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
-                mqttMusicColorObj.setColor(gradColor.endColor!!)
-                mqttMusicColorObj.level = SLMusicColor.LOW
+                mqttMusicColorObj.setColor(gradColor.startColor!!, SLMusicColor.HIGH)
+                mqttMusicColorObj.setColor(gradColor.centerColor!!, SLMusicColor.MEDIUM)
+                mqttMusicColorObj.setColor(gradColor.endColor!!, SLMusicColor.LOW)
                 client?.publish(
                         SLTopic.MUSIC_MODE_COLOR,
                         deviceName,

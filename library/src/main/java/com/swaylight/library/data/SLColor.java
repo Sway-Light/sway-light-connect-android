@@ -7,9 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SLColor {
-    public static final String RED = "red";
-    public static final String GREEN = "green";
-    public static final String BLUE = "blue";
+    public static final String RED = "r";
+    public static final String GREEN = "g";
+    public static final String BLUE = "b";
 
     protected int red;
     protected int green;
