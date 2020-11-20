@@ -7,22 +7,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SLColor {
-    public static final String RED = "red";
-    public static final String GREEN = "green";
-    public static final String BLUE = "blue";
+    public static final String RED = "r";
+    public static final String GREEN = "g";
+    public static final String BLUE = "b";
+    public static final String COLOR = "color";
 
     protected int red;
     protected int green;
     protected int blue;
+    protected int color;
 
     protected JSONObject jsonObj;
 
     public SLColor() {
         jsonObj = new JSONObject();
         try {
-            jsonObj.put(RED, 0);
-            jsonObj.put(GREEN, 0);
-            jsonObj.put(BLUE, 0);
+            jsonObj.put(COLOR, 0);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -34,16 +34,15 @@ public class SLColor {
     }
 
     public void setColor(int red, int green, int blue) {
-        try {
-            jsonObj.put(RED, red);
-            jsonObj.put(GREEN, green);
-            jsonObj.put(BLUE, blue);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         this.red = red;
         this.green = green;
         this.blue = blue;
+        try {
+            color = (red << 16) + (green << 8) + blue;
+            jsonObj.put(COLOR, color);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setColor(int color) {

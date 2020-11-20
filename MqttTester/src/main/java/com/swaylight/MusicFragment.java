@@ -47,6 +47,7 @@ public class MusicFragment extends Fragment {
     private CheckBox cbReleasePublish;
     private SLMusicColor colorObj;
     private SLDisplay displayObj;
+    private String currLevel;
 
     public MusicFragment() {
     }
@@ -90,8 +91,20 @@ public class MusicFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 level = Integer.valueOf((String) parent.getItemAtPosition(position));
+                switch (level) {
+                    case 1:
+                        currLevel = SLMusicColor.HIGH;
+                        break;
+                    case 2:
+                        currLevel = SLMusicColor.MEDIUM;
+                        break;
+                    case 3:
+                        currLevel = SLMusicColor.LOW;
+                        break;
+                    default:
+                        break;
+                }
                 Log.d(tag, "select " + level);
-                colorObj.setLevel(level);
             }
 
             @Override
@@ -104,7 +117,7 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvRed.setText(getString(R.string.r) + ": " + progress);
-                colorObj.setRed(progress);
+                colorObj.setColor(sbRed.getProgress(), sbGreen.getProgress(), sbBlue.getProgress(), currLevel);
                 if(!cbReleasePublish.isChecked()) {
                     client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
@@ -125,7 +138,7 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvGreen.setText(getString(R.string.g) + ": " + progress);
-                colorObj.setGreen(progress);
+                colorObj.setColor(sbRed.getProgress(), sbGreen.getProgress(), sbBlue.getProgress(), currLevel);
                 if(!cbReleasePublish.isChecked()) {
                     client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
@@ -146,7 +159,7 @@ public class MusicFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvBlue.setText(getString(R.string.b) + ": " + progress);
-                colorObj.setBlue(progress);
+                colorObj.setColor(sbRed.getProgress(), sbGreen.getProgress(), sbBlue.getProgress(), currLevel);
                 if(!cbReleasePublish.isChecked()) {
                     client.publish(SLTopic.MUSIC_MODE_COLOR, deviceName, colorObj.getInstance());
                 }
