@@ -248,7 +248,7 @@ class SwayLightMainActivity : AppCompatActivity() {
 
         btDebug.setOnLongClickListener {
             logView.visibility = if (logView.visibility == View.VISIBLE) {
-                View.INVISIBLE
+                View.GONE
             } else {
                 View.VISIBLE
             }
@@ -650,6 +650,7 @@ class SwayLightMainActivity : AppCompatActivity() {
         btNetworkConfig = findViewById(R.id.bt_network_config)
         tvLog = findViewById(R.id.tv_log)
         logView = findViewById(R.id.log_view)
+        logView.visibility = View.GONE
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
         btClockSetting = findViewById(R.id.bt_clock_setting)
@@ -710,10 +711,12 @@ class SwayLightMainActivity : AppCompatActivity() {
                         return
                     }
                 }
-                if (newMode != mode) {
-                    modeGroup.isClickable = false
-                    modeGroup.performClick()
-                    appendLog("update mode to $mode")
+                runOnUiThread {
+                    if (newMode != mode) {
+                        modeGroup.isClickable = false
+                        modeGroup.performClick()
+                        appendLog("update mode to $mode")
+                    }
                 }
             }
             SLTopic.ROOT + deviceName + SLTopic.POWER.topic -> {
@@ -728,10 +731,12 @@ class SwayLightMainActivity : AppCompatActivity() {
                         return
                     }
                 }
-                if (newPower != powerOn) {
-                    btPower.isClickable = false
-                    btPower.performLongClick()
-                    appendLog("update mode to $powerOn")
+                runOnUiThread {
+                    if (newPower != powerOn) {
+                        btPower.isClickable = false
+                        btPower.performLongClick()
+                        appendLog("update mode to $powerOn")
+                    }
                 }
             }
             SLTopic.ROOT + deviceName + SLTopic.LIGHT_MODE_DISPLAY.topic -> {
@@ -739,27 +744,30 @@ class SwayLightMainActivity : AppCompatActivity() {
                 val newOffset: Int = jsonObj[SLDisplay.OFFSET] as Int
                 val newZoom: Int = jsonObj[SLDisplay.ZOOM] as Int
 
-                if (displayObj.brightness != newBright) {
-                    prevBrightness = newBright
-                    displayObj.brightness = newBright
-                    tvBrightness.visibility = View.VISIBLE
-                    tvBrightness.text = newBright.toString()
-                    ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
-                    startFadeOutAnim(tvBrightness, 500, 500)
-                }
+                runOnUiThread {
+                    if (displayObj.brightness != newBright) {
+                        prevBrightness = newBright
+                        displayObj.brightness = newBright
+                        tvBrightness.visibility = View.VISIBLE
+                        tvBrightness.text = newBright.toString()
+                        ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
+                        startFadeOutAnim(tvBrightness, 500, 500)
+                    }
 
-                if (displayObj.zoom != newZoom) {
-                    prevZoom = newZoom
-                    displayObj.zoom = newZoom
-                    ivRing.zoomValue = newZoom
-                    tvZoom.text = newZoom.toString()
-                    tvZoom.visibility = View.VISIBLE
-                    startFadeOutAnim(tvZoom, 500, 500)
-                }
+                    if (displayObj.zoom != newZoom) {
+                        prevZoom = newZoom
+                        displayObj.zoom = newZoom
+                        ivRing.zoomValue = newZoom
+                        tvZoom.text = newZoom.toString()
+                        tvZoom.visibility = View.VISIBLE
+                        startFadeOutAnim(tvZoom, 500, 500)
+                    }
 
-                if (displayObj.offset != newOffset) {
-                    ivRing.offsetValue = newOffset
-                    displayObj.offset = newOffset
+                    if (displayObj.offset != newOffset) {
+                        ivRing.offsetValue = newOffset
+                        displayObj.offset = newOffset
+                        ringPrevRotate = 360f.times(newOffset.div(32))
+                    }
                 }
             }
 
@@ -768,27 +776,30 @@ class SwayLightMainActivity : AppCompatActivity() {
                 val newOffset: Int = jsonObj[SLDisplay.OFFSET] as Int
                 val newZoom: Int = jsonObj[SLDisplay.ZOOM] as Int
 
-                if (displayObj.brightness != newBright) {
-                    prevBrightness = newBright
-                    displayObj.brightness = newBright
-                    tvBrightness.visibility = View.VISIBLE
-                    tvBrightness.text = newBright.toString()
-                    ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
-                    startFadeOutAnim(tvBrightness, 500, 500)
-                }
+                runOnUiThread {
+                    if (displayObj.brightness != newBright) {
+                        prevBrightness = newBright
+                        displayObj.brightness = newBright
+                        tvBrightness.visibility = View.VISIBLE
+                        tvBrightness.text = newBright.toString()
+                        ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
+                        startFadeOutAnim(tvBrightness, 500, 500)
+                    }
 
-                if (displayObj.zoom != newZoom) {
-                    prevZoom = newZoom
-                    displayObj.zoom = newZoom
-                    ivRing.zoomValue = newZoom
-                    tvZoom.text = newZoom.toString()
-                    tvZoom.visibility = View.VISIBLE
-                    startFadeOutAnim(tvZoom, 500, 500)
-                }
+                    if (displayObj.zoom != newZoom) {
+                        prevZoom = newZoom
+                        displayObj.zoom = newZoom
+                        ivRing.zoomValue = newZoom
+                        tvZoom.text = newZoom.toString()
+                        tvZoom.visibility = View.VISIBLE
+                        startFadeOutAnim(tvZoom, 500, 500)
+                    }
 
-                if (displayObj.offset != newOffset) {
-                    ivRing.offsetValue = newOffset
-                    displayObj.offset = newOffset
+                    if (displayObj.offset != newOffset) {
+                        ivRing.offsetValue = newOffset
+                        displayObj.offset = newOffset
+                        ringPrevRotate = 360f.times(newOffset.div(32))
+                    }
                 }
             }
 
