@@ -344,6 +344,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree
+                    ringPrevRotate = ivRing.offsetAngle
                 }
                 MotionEvent.ACTION_UP -> {
                     ringPrevRotate = ivRing.offsetAngle
