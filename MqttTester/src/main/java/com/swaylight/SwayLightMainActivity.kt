@@ -47,6 +47,8 @@ class SwayLightMainActivity : AppCompatActivity() {
     private lateinit var modeGroup: LinearLayout
     private lateinit var ivRing: TopLightView
     private lateinit var tvZoom: TextView
+    private lateinit var vBrightness: LinearLayout
+    private lateinit var ivBrightness: ImageView
     private lateinit var tvBrightness: TextView
     private lateinit var btClockSetting: ImageButton
     private lateinit var btPower: ImageButton
@@ -362,53 +364,58 @@ class SwayLightMainActivity : AppCompatActivity() {
         }
 
         lightTopConstraint.setOnTouchListener{ _, event ->
-            val delta = ((lightSlideStartY - event.rawY) / 50).toInt()
-            var v: Int = 0
+            val delta = if (controlZoomFlag) {
+                ((lightSlideStartY - event.rawY) / 50).toInt()
+            }else {
+                ((lightSlideStartY - event.rawY) / 18).toInt()
+            }
+            var value: Int
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     // 右半邊控制亮度/左半邊控制縮放
                     lightSlideStartY = event.rawY
                     if (event.rawX <= lightTopConstraint.width / 2) {
                         controlZoomFlag = true
+
                         tvZoom.visibility = View.VISIBLE
                     } else {
                         controlZoomFlag = false
-                        tvBrightness.visibility = View.VISIBLE
+                        vBrightness.visibility = View.VISIBLE
                     }
                     vibrator.vibrate(5)
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
-                        v = prevZoom + delta
-                        if (v > MAX_ZOOM) {
-                            v = MAX_ZOOM
-                        } else if (v <= 0) {
-                            v = 0
+                        value = prevZoom + delta
+                        if (value > MAX_ZOOM) {
+                            value = MAX_ZOOM
+                        } else if (value <= 0) {
+                            value = 0
                         }
-                        prevZoom = v
+                        prevZoom = value
                         startFadeOutAnim(tvZoom, 500, 500)
                     } else {
-                        v = prevBrightness + delta
-                        if (v > MAX_BRIGHTNESS) {
-                            v = MAX_BRIGHTNESS
-                        } else if (v <= 0) {
-                            v = 0
+                        value = prevBrightness + delta
+                        if (value > MAX_BRIGHTNESS) {
+                            value = MAX_BRIGHTNESS
+                        } else if (value <= 0) {
+                            value = 0
                         }
-                        prevBrightness = v
-                        startFadeOutAnim(tvBrightness, 500, 500)
+                        prevBrightness = value
+                        startFadeOutAnim(vBrightness, 500, 500)
                     }
                     vibrator.vibrate(5)
                 }
                 else -> {
                     if(controlZoomFlag) {
-                        v = prevZoom + delta
-                        if(v > MAX_ZOOM) {
-                            v = MAX_ZOOM
-                        }else if(v < MIN_ZOOM) {
-                            v = MIN_ZOOM
+                        value = prevZoom + delta
+                        if(value > MAX_ZOOM) {
+                            value = MAX_ZOOM
+                        }else if(value < MIN_ZOOM) {
+                            value = MIN_ZOOM
                         }
-                        ivRing.zoomValue = v
-                        tvZoom.text = v.toString()
+                        ivRing.zoomValue = value
+                        Utils.setTextInPercentage(tvZoom, value, MAX_ZOOM)
                         tvZoom.visibility = View.VISIBLE
                         tvZoom.animation?.cancel()
                         if (displayObj.zoom != ivRing.zoomValue) {
@@ -418,19 +425,30 @@ class SwayLightMainActivity : AppCompatActivity() {
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
                         }
                     }else {
-                        v = prevBrightness + delta
-                        if(v > MAX_BRIGHTNESS) {
-                            v = MAX_BRIGHTNESS
-                        }else if(v <= 0) {
-                            v = 0
+                        value = prevBrightness + delta
+                        if(value > MAX_BRIGHTNESS) {
+                            value = MAX_BRIGHTNESS
+                        }else if(value <= 0) {
+                            value = 0
                         }
-                        ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(v.div(100f)).toInt()).shl(24))
-                        tvBrightness.text = v.toString()
-                        tvBrightness.visibility = View.VISIBLE
-                        tvBrightness.animation?.cancel()
-                        if (displayObj.brightness != v) {
+                        when(value) {
+                            in 100 downTo 65 -> {
+                                ivBrightness.background = ContextCompat.getDrawable(applicationContext, R.mipmap.ic_brightness_high)
+                            }
+                            in 64 downTo 33 -> {
+                                ivBrightness.background = ContextCompat.getDrawable(applicationContext, R.mipmap.ic_brightness_medium)
+                            }
+                            else -> {
+                                ivBrightness.background = ContextCompat.getDrawable(applicationContext, R.mipmap.ic_brightness_low)
+                            }
+                        }
+                        ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(value.div(100f)).toInt()).shl(24))
+                        tvBrightness.text = value.toString()
+                        vBrightness.visibility = View.VISIBLE
+                        vBrightness.animation?.cancel()
+                        if (displayObj.brightness != value) {
                             vibrator.vibrate(5)
-                            displayObj.brightness = v
+                            displayObj.brightness = value
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
                         }
@@ -658,6 +676,8 @@ class SwayLightMainActivity : AppCompatActivity() {
         btDebug = findViewById(R.id.debug_view)
         ivRing = findViewById(R.id.iv_ring)
         tvZoom = findViewById(R.id.tv_zoom)
+        vBrightness = findViewById(R.id.brightness_view)
+        ivBrightness = findViewById(R.id.iv_brightness)
         tvBrightness = findViewById(R.id.tv_brightness)
         btLight = findViewById(R.id.bt_light)
         btMusic = findViewById(R.id.bt_music)
@@ -748,18 +768,18 @@ class SwayLightMainActivity : AppCompatActivity() {
                     if (displayObj.brightness != newBright) {
                         prevBrightness = newBright
                         displayObj.brightness = newBright
-                        tvBrightness.visibility = View.VISIBLE
+                        vBrightness.visibility = View.VISIBLE
                         tvBrightness.text = newBright.toString()
                         ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
-                        startFadeOutAnim(tvBrightness, 500, 500)
+                        startFadeOutAnim(vBrightness, 500, 500)
                     }
 
                     if (displayObj.zoom != newZoom) {
                         prevZoom = newZoom
                         displayObj.zoom = newZoom
                         ivRing.zoomValue = newZoom
-                        tvZoom.text = newZoom.toString()
                         tvZoom.visibility = View.VISIBLE
+                        Utils.setTextInPercentage(tvZoom, newZoom, MAX_ZOOM)
                         startFadeOutAnim(tvZoom, 500, 500)
                     }
 
@@ -780,17 +800,17 @@ class SwayLightMainActivity : AppCompatActivity() {
                     if (displayObj.brightness != newBright) {
                         prevBrightness = newBright
                         displayObj.brightness = newBright
-                        tvBrightness.visibility = View.VISIBLE
+                        vBrightness.visibility = View.VISIBLE
                         tvBrightness.text = newBright.toString()
                         ivRing.strokeColor = 0xFFFFFF.plus((102 + 153.times(newBright.div(100f)).toInt()).shl(24))
-                        startFadeOutAnim(tvBrightness, 500, 500)
+                        startFadeOutAnim(vBrightness, 500, 500)
                     }
 
                     if (displayObj.zoom != newZoom) {
                         prevZoom = newZoom
                         displayObj.zoom = newZoom
                         ivRing.zoomValue = newZoom
-                        tvZoom.text = newZoom.toString()
+                        Utils.setTextInPercentage(tvZoom, newZoom, MAX_ZOOM)
                         tvZoom.visibility = View.VISIBLE
                         startFadeOutAnim(tvZoom, 500, 500)
                     }

@@ -1,11 +1,13 @@
 package com.swaylight
 
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import android.widget.TextView
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
 import kotlin.math.absoluteValue
@@ -63,6 +65,11 @@ class Utils {
                 this.orientation = orientation
             }
             view.background = gradDrawable
+        }
+        
+        @SuppressLint("SetTextI18n")
+        fun setTextInPercentage(tv: TextView, value: Int, maxValue: Int) {
+            tv.text = value.times(100).div(maxValue).toString() + "%"
         }
 
         fun getColorFromRgbSeekBar(sbRed: SeekBar, sbGreen: SeekBar, sbBlue: SeekBar): Int {
