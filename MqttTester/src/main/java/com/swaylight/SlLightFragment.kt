@@ -20,6 +20,7 @@ import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.CircleView
+import com.swaylight.data.FilePath
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
 import com.swaylight.library.SLMqttClient
@@ -62,7 +63,7 @@ class SlLightFragment : Fragment() {
     var gradCircleViews: ArrayList<CircleView> = arrayListOf()
     var rgbCircleViews: ArrayList<CircleView> = arrayListOf()
     var gradColorList: ArrayList<GradientColor> = arrayListOf()
-    var rgbColorList: ArrayList<RgbColor>? = null
+    var rgbColorList: ArrayList<RgbColor> = arrayListOf()
     private var mqttColorObj = SLColor(0, 0, 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,27 +77,43 @@ class SlLightFragment : Fragment() {
         v = inflater.inflate(R.layout.fragment_sl_light, container, false)
         client = SLMqttManager.getInstance()
         deviceName = SLMqttManager.getDeviceName()
-        rgbColorList = arrayListOf(
-                RgbColor(ContextCompat.getColor(requireContext(), R.color.david_green)),
-                RgbColor(Color.BLACK),
-                RgbColor(Color.BLUE),
-                RgbColor(Color.WHITE),
-                RgbColor(Color.GREEN))
+
+        // file is empty, add init color.
+        gradColorList = Utils.readFromFile(
+                context?.filesDir.toString(),
+                FilePath.LIGHT_GRA_COLOR
+        ) as ArrayList<GradientColor>
+        rgbColorList = Utils.readFromFile(
+                context?.filesDir.toString(),
+                FilePath.LIGHT_RGB_COLOR
+        ) as ArrayList<RgbColor>
+        if (gradColorList.isEmpty()) {
+            gradColorList.addAll(
+                    arrayOf(
+                            GradientColor(
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad_default_start),
+                                    Color.WHITE,
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad_default_end)),
+                            GradientColor(
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad1_start),
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad1_end)),
+                            GradientColor(
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad2_start),
+                                    ContextCompat.getColor(requireContext(), R.color.light_grad2_end))
+                    )
+            )
+            updateGradColorAndFile()
+        }
+        if (rgbColorList.isEmpty()) {
+            rgbColorList = arrayListOf(
+                    RgbColor(ContextCompat.getColor(requireContext(), R.color.david_green)),
+                    RgbColor(ContextCompat.getColor(requireContext(), R.color.rgb_color_1)),
+                    RgbColor(ContextCompat.getColor(requireContext(), R.color.rgb_color_2))
+                    )
+            updateRGBColorAndFile()
+        }
         initUi()
-        gradColorList.addAll(
-                arrayOf(
-                        GradientColor(
-                                ContextCompat.getColor(requireContext(), R.color.light_grad_default_start),
-                                Color.WHITE,
-                                ContextCompat.getColor(requireContext(), R.color.light_grad_default_end)),
-                        GradientColor(
-                                ContextCompat.getColor(requireContext(), R.color.light_grad1_start),
-                                ContextCompat.getColor(requireContext(), R.color.light_grad1_end)),
-                        GradientColor(
-                                ContextCompat.getColor(requireContext(), R.color.light_grad2_start),
-                                ContextCompat.getColor(requireContext(), R.color.light_grad2_end))
-                )
-        )
+
         generateGradCircles()
         generateRgbCircles()
         v.findViewById<TextView>(R.id.tv_grad).setTextAppearance(R.style.tv_mode_selected)
@@ -161,6 +178,7 @@ class SlLightFragment : Fragment() {
                                                 sbGrad.progress,
                                                 sbGrad.max)
                                 )
+                                updateGradColorAndFile()
                             }
                     )
                     .setNegativeButton(
@@ -188,6 +206,7 @@ class SlLightFragment : Fragment() {
                                                 sbGrad.progress,
                                                 sbGrad.max)
                                 )
+                                updateGradColorAndFile()
                             }
                     )
                     .setNegativeButton(
@@ -200,12 +219,14 @@ class SlLightFragment : Fragment() {
         btAddGrad.setOnClickListener {
             val newGradColor = GradientColor(Color.BLACK, null, Color.WHITE)
             gradColorList.add(newGradColor)
+            updateGradColorAndFile()
             generateGradCircles()
         }
 
         btAddRgb.setOnClickListener {
             val newRgbColor = RgbColor(Color.BLACK)
-            rgbColorList!!.add(newRgbColor)
+            rgbColorList.add(newRgbColor)
+            updateRGBColorAndFile()
             generateRgbCircles()
         }
 
@@ -215,7 +236,7 @@ class SlLightFragment : Fragment() {
 
                 if (fromUser) {
                     rgbCircleViews[currRgbIndex].setColor(color)
-                    rgbColorList!![currRgbIndex].color = color
+                    rgbColorList[currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                     mqttColorObj.setColor(color)
@@ -223,12 +244,10 @@ class SlLightFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
+                updateRGBColorAndFile()
             }
         })
 
@@ -237,7 +256,7 @@ class SlLightFragment : Fragment() {
                 val color = Utils.getColorFromRgbSeekBar(sbRed, sbGreen, sbBlue)
                 if (fromUser) {
                     rgbCircleViews[currRgbIndex].setColor(color)
-                    rgbColorList!![currRgbIndex].color = color
+                    rgbColorList[currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                     mqttColorObj.setColor(color)
@@ -245,12 +264,10 @@ class SlLightFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
+                updateRGBColorAndFile()
             }
         })
 
@@ -259,7 +276,7 @@ class SlLightFragment : Fragment() {
                 val color = Utils.getColorFromRgbSeekBar(sbRed, sbGreen, sbBlue)
                 if (fromUser) {
                     rgbCircleViews[currRgbIndex].setColor(color)
-                    rgbColorList!![currRgbIndex].color = color
+                    rgbColorList[currRgbIndex].color = color
                     lightTopConstraint.setBackgroundColor(color)
                     btRgbColor.drawable.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC)
                     mqttColorObj.setColor(color)
@@ -267,12 +284,10 @@ class SlLightFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
+                updateRGBColorAndFile()
             }
         })
         setControlType(ControlType.GRADIENT_COLOR)
@@ -365,14 +380,15 @@ class SlLightFragment : Fragment() {
                 currRgbIndex = rgbCircleViews.indexOf(circleView)
             }
             circleView.setOnLongClickListener {
-                if (rgbCircleViews.size > 1) {
+                if (rgbCircleViews.size > 0) {
                     val removeIndex = rgbCircleViews.indexOf(circleView)
                     val builder = AlertDialog.Builder(requireContext())
                     builder.setMessage("Delete this color?")
                     builder.setPositiveButton("Yes") { dialog, which ->
-                        rgbColorList!!.removeAt(removeIndex)
+                        rgbColorList.removeAt(removeIndex)
                         rgbCircleGroup.removeViewAt(removeIndex)
                         rgbCircleViews.removeAt(removeIndex)
+                        updateRGBColorAndFile()
                         if (removeIndex == currRgbIndex) {
                             rgbCircleGroup[0].callOnClick()
                         }
@@ -411,7 +427,7 @@ class SlLightFragment : Fragment() {
                 currGradIndex = gradCircleViews.indexOf(circleView)
             }
             circleView.setOnLongClickListener {
-                if (gradCircleViews.size > 1) {
+                if (gradCircleViews.size > 0) {
                     val removeIndex = gradCircleViews.indexOf(circleView)
                     val builder = AlertDialog.Builder(requireContext())
                     builder.setMessage("Delete this color?")
@@ -419,6 +435,7 @@ class SlLightFragment : Fragment() {
                         gradColorList.removeAt(removeIndex)
                         gradCircleGroup.removeViewAt(removeIndex)
                         gradCircleViews.removeAt(removeIndex)
+                        updateGradColorAndFile()
                         if (removeIndex == currGradIndex) {
                             gradCircleGroup[0].callOnClick()
                         }
@@ -492,5 +509,23 @@ class SlLightFragment : Fragment() {
         }
         a.duration = (v.layoutParams.height + 300).toLong()
         v.startAnimation(a)
+    }
+
+    private fun updateGradColorAndFile() {
+        Utils.writeToFile(context?.filesDir.toString(), FilePath.LIGHT_GRA_COLOR, gradColorList)
+        gradColorList.clear()
+        gradColorList = Utils.readFromFile(
+                context?.filesDir.toString(),
+                FilePath.LIGHT_GRA_COLOR
+        ) as ArrayList<GradientColor>
+    }
+
+    private fun updateRGBColorAndFile() {
+        Utils.writeToFile(context?.filesDir.toString(), FilePath.LIGHT_RGB_COLOR, rgbColorList)
+        rgbColorList.clear()
+        rgbColorList = Utils.readFromFile(
+                context?.filesDir.toString(),
+                FilePath.LIGHT_RGB_COLOR
+        ) as ArrayList<RgbColor>
     }
 }

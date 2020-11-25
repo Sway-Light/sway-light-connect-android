@@ -278,21 +278,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/lightTopConstraint" />
 
-    <TextView
-        android:id="@+id/tv_brightness"
-        android:layout_width="60dp"
-        android:layout_height="30dp"
+    <LinearLayout
+        android:id="@+id/brightness_view"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_text"
-        android:fontFamily="@font/pt_sans_narrow"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/lightTopConstraint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/lightTopConstraint" />
+        app:layout_constraintTop_toTopOf="@+id/lightTopConstraint">
+
+        <ImageView
+            android:id="@+id/iv_brightness"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@mipmap/ic_brightness_high"/>
+
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_brightness"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:fontFamily="@font/pt_sans_narrow"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:text="0"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_view"

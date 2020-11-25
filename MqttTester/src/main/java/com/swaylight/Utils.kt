@@ -1,14 +1,21 @@
 package com.swaylight
 
 
+import android.annotation.SuppressLint
+import android.app.Application
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import android.widget.TextView
+import com.swaylight.data.FilePath
 import com.swaylight.data.GradientColor
 import com.swaylight.data.RgbColor
-import kotlin.math.absoluteValue
+import java.io.*
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.coroutines.coroutineContext
 
 class Utils {
     companion object {
@@ -64,6 +71,11 @@ class Utils {
             }
             view.background = gradDrawable
         }
+        
+        @SuppressLint("SetTextI18n")
+        fun setTextInPercentage(tv: TextView, value: Int, maxValue: Int) {
+            tv.text = value.times(100).div(maxValue).toString() + "%"
+        }
 
         fun getColorFromRgbSeekBar(sbRed: SeekBar, sbGreen: SeekBar, sbBlue: SeekBar): Int {
             return sbRed.progress.shl(16)
@@ -85,7 +97,7 @@ class Utils {
             val green = if(deltaG > 0){
                 startColor.shr(8).and(0xFF).plus(deltaG.times(weight).toInt())
             }else {
-                endColor.shr(8).and(0xFF).minus(deltaG.times(1f- weight).toInt())
+                endColor.shr(8).and(0xFF).minus(deltaG.times(1f - weight).toInt())
             }
 
             val blue = if(deltaB > 0) {
@@ -97,6 +109,47 @@ class Utils {
                     .plus(red.shl(16))
                     .plus(green.shl(8))
                     .plus(blue.shl(0)).toInt()
+        }
+
+        fun writeToFile(root: String, path: FilePath, arrayList: ArrayList<*>) {
+            try {
+                val writeStream: FileOutputStream = FileOutputStream(root + "/" + path.file)
+                val oos = ObjectOutputStream(writeStream)
+                for (detail in arrayList) {
+                    Log.d("Utils", "write:\n" + path.file + detail.toString())
+                    oos.writeObject(detail)
+                }
+                writeStream.flush()
+                writeStream.close()
+            } catch (e: IOException) {
+                Log.e("Exception", "File write failed: $e")
+            }
+        }
+
+        fun readFromFile(root: String, path: FilePath): ArrayList<*>? {
+            val rtn: ArrayList<Any> = ArrayList()
+            try {
+                val inputStream: FileInputStream = FileInputStream(root + "/" + path.file)
+                val ois = ObjectInputStream(inputStream)
+                var hasNext = true
+                while (hasNext) {
+                    val temp = ois.readObject()
+                    if (temp == null) {
+                        hasNext = false
+                    } else {
+                        rtn.add(temp)
+                    }
+                }
+                inputStream.close()
+            } catch (e: FileNotFoundException) {
+                Log.e("login activity", "File not found: $e")
+            } catch (e: IOException) {
+                Log.e("login activity", "Can not read file: $e")
+            } catch (e: ClassNotFoundException) {
+                e.printStackTrace()
+            }
+            Log.d("Utils", "readFromFile:${path.file}\n$rtn".trimIndent())
+            return rtn
         }
     }
 }

@@ -32,6 +32,8 @@
     <color name="light_grad2_start">#BEFF8A</color>
     <color name="light_grad2_end">#2DB4FF</color>
     <color name="david_green">#AFFFF1</color>
+    <color name="rgb_color_1">#8AA4FF</color>
+    <color name="rgb_color_2">#572DFF</color>
 
     <color name="music_grad1_h">#FFBABA</color>
     <color name="music_grad1_m">#B730FF</color>
