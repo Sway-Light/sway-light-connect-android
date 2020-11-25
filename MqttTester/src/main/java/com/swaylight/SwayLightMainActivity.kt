@@ -357,6 +357,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                         displayObj.offset = ivRing.offsetValue
                         client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                         client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                        if (mode == SLMode.MUSIC) {
+//                            client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+//                        }else {
+//                            client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                        }
                         vibrator.vibrate(5)
                     }
                 }
@@ -424,6 +429,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                             displayObj.zoom = ivRing.zoomValue
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            if (mode == SLMode.MUSIC) {
+//                                client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            }else {
+//                                client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            }
                         }
                     }else {
                         value = prevBrightness + delta
@@ -452,6 +462,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                             displayObj.brightness = value
                             client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
                             client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            if (mode == SLMode.MUSIC) {
+//                                client?.publish(SLTopic.MUSIC_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            }else {
+//                                client?.publish(SLTopic.LIGHT_MODE_DISPLAY, deviceName, displayObj.instance)
+//                            }
                         }
                     }
                 }

@@ -80,7 +80,7 @@ public class ConnectActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mqttList.remove(detail);
-                        writeToFile(FilePath.MQTT_LIST, mqttList);
+                        Utils.Companion.writeToFile(getFilesDir().toString(), FilePath.MQTT_LIST, mqttList);
                         Log.d(tag, "mqttList:" + mqttList.toString());
                         updateList();
                     }
@@ -96,7 +96,8 @@ public class ConnectActivity extends AppCompatActivity {
             }
         });
 
-        readFromFile(FilePath.MQTT_LIST);
+        mqttList.clear();
+        mqttList = (ArrayList<SLMqttDetail>) Utils.Companion.readFromFile(getFilesDir().toString(), FilePath.MQTT_LIST);
         updateList();
 
         btConnect.setOnClickListener(new View.OnClickListener() {
@@ -148,8 +149,9 @@ public class ConnectActivity extends AppCompatActivity {
             if(!contain) {
                 mqttList.add(newDetail);
             }
-            writeToFile(FilePath.MQTT_LIST, mqttList);
-            readFromFile(FilePath.MQTT_LIST);
+            Utils.Companion.writeToFile(getFilesDir().toString(), FilePath.MQTT_LIST, mqttList);
+            mqttList.clear();
+            mqttList = (ArrayList<SLMqttDetail>) Utils.Companion.readFromFile(getFilesDir().toString(), FilePath.MQTT_LIST);
             updateList();
             Intent i = new Intent(ConnectActivity.this, cls);
             Bundle bundle = new Bundle();
@@ -158,48 +160,6 @@ public class ConnectActivity extends AppCompatActivity {
             bundle.putString(getString(R.string.MQTT_CLIENT_ID), String.valueOf(etClientId.getText()));
             i.putExtras(bundle);
             startActivity(i);
-        }
-    }
-
-    private void writeToFile(FilePath path, ArrayList<SLMqttDetail> arrayList) {
-        try {
-            FileOutputStream writeStream = new FileOutputStream(getFilesDir() + "/" + path.getFile());
-            ObjectOutputStream oos = new ObjectOutputStream(writeStream);
-            for(SLMqttDetail detail: arrayList) {
-                Log.d(tag, "write:" + detail.toString());
-                oos.writeObject(detail);
-            }
-            writeStream.flush();
-            writeStream.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    private void readFromFile(FilePath path) {
-        mqttList.clear();
-        try {
-            FileInputStream inputStream = new FileInputStream(getFilesDir() + "/" + path.getFile());
-            ObjectInputStream ois = new ObjectInputStream(inputStream);
-            boolean hasNext = true;
-            while (hasNext) {
-                SLMqttDetail temp = (SLMqttDetail) ois.readObject();
-                if (temp == null) {
-                    hasNext = false;
-                }else {
-                    mqttList.add(temp);
-                    Log.d(tag, "readFromFile:" + mqttList.toString());
-                }
-            }
-            inputStream.close();
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
 

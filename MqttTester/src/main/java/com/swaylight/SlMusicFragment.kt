@@ -21,6 +21,7 @@ import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import com.swaylight.custom_ui.CircleView
 import com.swaylight.custom_ui.EqualizerView
+import com.swaylight.data.FilePath
 import com.swaylight.data.GradientColor
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
@@ -52,7 +53,7 @@ class SlMusicFragment : Fragment() {
     private var deviceName: String? = null
     private var currIndex = 0
     var gradCircleViews: ArrayList<CircleView> = arrayListOf()
-    private lateinit var gradColorList: ArrayList<GradientColor>
+    private var gradColorList: ArrayList<GradientColor> = arrayListOf()
     private var mqttMusicColorObj = SLMusicColor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,20 +68,26 @@ class SlMusicFragment : Fragment() {
         v = inflater.inflate(R.layout.fragment_sl_music, container, false)
         client = SLMqttManager.getInstance()
         deviceName = SLMqttManager.getDeviceName()
-        gradColorList = arrayListOf(
-                GradientColor(
-                        ContextCompat.getColor(context!!, R.color.red),
-                        ContextCompat.getColor(context!!, R.color.yellow),
-                        ContextCompat.getColor(context!!, R.color.green)),
-                GradientColor(
-                        ContextCompat.getColor(context!!, R.color.music_grad1_h),
-                        ContextCompat.getColor(context!!, R.color.music_grad1_m),
-                        ContextCompat.getColor(context!!, R.color.music_grad1_l)),
-                GradientColor(
-                        ContextCompat.getColor(context!!, R.color.music_grad2_h),
-                        ContextCompat.getColor(context!!, R.color.music_grad2_m),
-                        ContextCompat.getColor(context!!, R.color.music_grad2_l))
-        )
+
+        // file is empty, add init color.
+        gradColorList = Utils.readFromFile(context?.filesDir.toString(), FilePath.MUSIC_RGB_COLOR) as ArrayList<GradientColor>
+        if(gradColorList.isEmpty()) {
+            gradColorList = arrayListOf(
+                    GradientColor(
+                            ContextCompat.getColor(context!!, R.color.red),
+                            ContextCompat.getColor(context!!, R.color.yellow),
+                            ContextCompat.getColor(context!!, R.color.green)),
+                    GradientColor(
+                            ContextCompat.getColor(context!!, R.color.music_grad1_h),
+                            ContextCompat.getColor(context!!, R.color.music_grad1_m),
+                            ContextCompat.getColor(context!!, R.color.music_grad1_l)),
+                    GradientColor(
+                            ContextCompat.getColor(context!!, R.color.music_grad2_h),
+                            ContextCompat.getColor(context!!, R.color.music_grad2_m),
+                            ContextCompat.getColor(context!!, R.color.music_grad2_l))
+            )
+            updateColorAndFile()
+        }
         initUi()
         generateGradCircles()
         btAddGrad.setOnClickListener {
@@ -90,6 +97,7 @@ class SlMusicFragment : Fragment() {
                     Color.GREEN
             )
             gradColorList.add(newGradColor)
+            updateColorAndFile()
             generateGradCircles()
         }
         highCircleView.setOnClickListener {
@@ -101,6 +109,7 @@ class SlMusicFragment : Fragment() {
                             ColorEnvelopeListener { envelope, _ ->
                                 gradCircleViews[currIndex].startColor = envelope.color
                                 gradColorList[currIndex].startColor = envelope.color
+                                updateColorAndFile()
                                 generateGradCircles()
                             }
                     )
@@ -120,6 +129,7 @@ class SlMusicFragment : Fragment() {
                             ColorEnvelopeListener { envelope, _ ->
                                 gradCircleViews[currIndex].centerColor = envelope.color
                                 gradColorList[currIndex].centerColor = envelope.color
+                                updateColorAndFile()
                                 generateGradCircles()
                             }
                     )
@@ -139,6 +149,7 @@ class SlMusicFragment : Fragment() {
                             ColorEnvelopeListener { envelope, _ ->
                                 gradCircleViews[currIndex].endColor = envelope.color
                                 gradColorList[currIndex].endColor = envelope.color
+                                updateColorAndFile()
                                 generateGradCircles()
                             }
                     )
@@ -216,7 +227,7 @@ class SlMusicFragment : Fragment() {
                 Log.d(TAG, "color:${mqttMusicColorObj.instance.toString()}")
             }
             circleView.setOnLongClickListener {
-                if (gradCircleViews.size > 1) {
+                if (gradCircleViews.size > 0) {
                     val removeIndex = gradCircleViews.indexOf(circleView)
                     val builder = AlertDialog.Builder(requireContext())
                     builder.setMessage("Delete this color?")
@@ -224,6 +235,7 @@ class SlMusicFragment : Fragment() {
                         gradColorList.removeAt(removeIndex)
                         gradCircleGroup.removeViewAt(removeIndex)
                         gradCircleViews.removeAt(removeIndex)
+                        updateColorAndFile()
                         if (removeIndex == currIndex) {
                             gradCircleGroup[0].callOnClick()
                         }
@@ -235,6 +247,13 @@ class SlMusicFragment : Fragment() {
             }
             gradCircleViews.add(circleView)
             gradCircleGroup.addView(circleView)
+        }
+        for(i in 0..2) {
+            try {
+                gradCircleViews[i].setOnLongClickListener(null)
+            }catch (e: Exception) {
+                Log.e(e.toString(), e.message.toString())
+            }
         }
         gradCircleGroup[currIndex].callOnClick()
     }
@@ -309,5 +328,11 @@ class SlMusicFragment : Fragment() {
         }
         a.duration = (v.layoutParams.height + 300).toLong()
         v.startAnimation(a)
+    }
+
+    private fun updateColorAndFile() {
+        Utils.writeToFile(context?.filesDir.toString(), FilePath.MUSIC_RGB_COLOR, gradColorList)
+        gradColorList.clear()
+        gradColorList = Utils.readFromFile(context?.filesDir.toString(), FilePath.MUSIC_RGB_COLOR) as ArrayList<GradientColor>
     }
 }
