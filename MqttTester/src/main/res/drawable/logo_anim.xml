@@ -2,138 +2,138 @@
 <animation-list xmlns:android="http://schemas.android.com/apk/res/android"
     android:oneshot="true">
     <item
-        android:drawable="@drawable/logo_00000"
+        android:drawable="@mipmap/logo_00000"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00001"
+        android:drawable="@mipmap/logo_00001"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00002"
+        android:drawable="@mipmap/logo_00002"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00003"
+        android:drawable="@mipmap/logo_00003"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00004"
+        android:drawable="@mipmap/logo_00004"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00005"
+        android:drawable="@mipmap/logo_00005"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00006"
+        android:drawable="@mipmap/logo_00006"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00007"
+        android:drawable="@mipmap/logo_00007"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00008"
+        android:drawable="@mipmap/logo_00008"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00009"
+        android:drawable="@mipmap/logo_00009"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00010"
+        android:drawable="@mipmap/logo_00010"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00011"
+        android:drawable="@mipmap/logo_00011"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00012"
+        android:drawable="@mipmap/logo_00012"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00013"
+        android:drawable="@mipmap/logo_00013"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00014"
+        android:drawable="@mipmap/logo_00014"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00015"
+        android:drawable="@mipmap/logo_00015"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00016"
+        android:drawable="@mipmap/logo_00016"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00017"
+        android:drawable="@mipmap/logo_00017"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00018"
+        android:drawable="@mipmap/logo_00018"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00019"
+        android:drawable="@mipmap/logo_00019"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00020"
+        android:drawable="@mipmap/logo_00020"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00021"
+        android:drawable="@mipmap/logo_00021"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00022"
+        android:drawable="@mipmap/logo_00022"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00023"
+        android:drawable="@mipmap/logo_00023"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00024"
+        android:drawable="@mipmap/logo_00024"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00025"
+        android:drawable="@mipmap/logo_00025"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00026"
+        android:drawable="@mipmap/logo_00026"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00027"
+        android:drawable="@mipmap/logo_00027"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00028"
+        android:drawable="@mipmap/logo_00028"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00029"
+        android:drawable="@mipmap/logo_00029"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00030"
+        android:drawable="@mipmap/logo_00030"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00031"
+        android:drawable="@mipmap/logo_00031"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00032"
+        android:drawable="@mipmap/logo_00032"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00033"
+        android:drawable="@mipmap/logo_00033"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00034"
+        android:drawable="@mipmap/logo_00034"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00035"
+        android:drawable="@mipmap/logo_00035"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00036"
+        android:drawable="@mipmap/logo_00036"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00037"
+        android:drawable="@mipmap/logo_00037"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00038"
+        android:drawable="@mipmap/logo_00038"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00039"
+        android:drawable="@mipmap/logo_00039"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00040"
+        android:drawable="@mipmap/logo_00040"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00041"
+        android:drawable="@mipmap/logo_00041"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00042"
+        android:drawable="@mipmap/logo_00042"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00043"
+        android:drawable="@mipmap/logo_00043"
         android:duration="@integer/logo_duration"/>
     <item
-        android:drawable="@drawable/logo_00044"
+        android:drawable="@mipmap/logo_00044"
         android:duration="@integer/logo_duration"/>
 </animation-list>
