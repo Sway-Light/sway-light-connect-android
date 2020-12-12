@@ -33,7 +33,7 @@ import java.util.*
 import kotlin.math.atan2
 
 
-class SwayLightMainActivity : AppCompatActivity() {
+class   SwayLightMainActivity : AppCompatActivity() {
 
     val tag = SwayLightMainActivity::class.java.simpleName
 
@@ -133,6 +133,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             this.onBackPressed()
         }
         btNetworkConfig.setOnLongClickListener {
+            isRetainedDataSynced = true
             progressView.visibility = View.INVISIBLE
             true
         }
@@ -347,9 +348,11 @@ class SwayLightMainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree
                     ringPrevRotate = ivRing.offsetAngle
+                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.VISIBLE
                 }
                 MotionEvent.ACTION_UP -> {
                     ringPrevRotate = ivRing.offsetAngle
+                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.GONE
                 }
                 else -> {
                     val offset = (ringPrevRotate + degree - ringStartRotate).div(TopLightView.ANGLE_UNIT)
@@ -391,6 +394,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         vBrightness.visibility = View.VISIBLE
                     }
                     vibrator.vibrate(5)
+                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.VISIBLE
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
@@ -413,6 +417,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         startFadeOutAnim(vBrightness, 500, 500)
                     }
                     vibrator.vibrate(5)
+                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.GONE
                 }
                 else -> {
                     if(controlZoomFlag) {
@@ -586,7 +591,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 if(client == null) {
                     handler.removeCallbacks(this)
                 }else {
-                    handler.postDelayed(this, 1000)
+//                    handler.postDelayed(this, 1000)
                 }
                 Log.v(MQTT_TAG, "now$now, last$lastHeartBeatFromDevice, diff${now-lastHeartBeatFromDevice}")
                 if (now - lastHeartBeatFromDevice > 15) {
