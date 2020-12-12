@@ -45,6 +45,8 @@
     <string name="disconnected">Disconnected</string>
     <string name="connecting">Connecting</string>
     <string name="syncing">Syncing</string>
+    <string name="offline">Sway Light is offline</string>
+    <string name="online">Sway Light is online</string>
     <string name="reconnect">Reconnected</string>
 
     <!--  time  -->
@@ -63,4 +65,6 @@
     <string name="rgb">RGB</string>
 
     <string name="power_hint">長按開啟Sway Light</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

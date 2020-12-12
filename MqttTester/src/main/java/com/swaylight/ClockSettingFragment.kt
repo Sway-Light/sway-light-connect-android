@@ -1,5 +1,6 @@
 package com.swaylight
 
+
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
@@ -13,10 +14,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
+import com.swaylight.library.data.BtModule.SLBtModuleOperation
+import com.swaylight.library.data.BtModule.SLBtModuleStatus
 import com.swaylight.library.data.SLClockSetting
 import com.swaylight.library.data.SLTopic
-
-
 import java.util.*
 
 class ClockSettingFragment : Fragment() {
@@ -25,6 +26,7 @@ class ClockSettingFragment : Fragment() {
     private var deviceName: String? = null
     private var onTimeObj = SLClockSetting()
     private var offTimeObj = SLClockSetting()
+    private var btModuleOperation = SLBtModuleOperation()
 
     var on = true
     private val options = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
@@ -85,6 +87,40 @@ class ClockSettingFragment : Fragment() {
             client!!.publish(SLTopic.POWER_END_TIME, deviceName, offTimeObj.instance)
         }
 
+        v.findViewById<Button>(R.id.bt_play).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.PLAY)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_pause).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.PAUSE)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_stop).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.STOP)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_forward).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.FORWARD)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_backward).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.BACKWARD)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_vol_up).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.VOL_UP)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
+
+        v.findViewById<Button>(R.id.bt_vol_down).setOnClickListener {
+            btModuleOperation.setOpCode(SLBtModuleOperation.Code.VOL_DOWN)
+            client!!.publish(SLTopic.BT_MODULE_OPERATION, deviceName, btModuleOperation.instance)
+        }
         return v
     }
 }

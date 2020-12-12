@@ -8,6 +8,7 @@ public enum SLTopic implements Serializable {
     POWER_END_TIME("/mode/onoff/off_time"),
 
     CURR_MODE("/status"),
+    INFO("/info"),
 
     LIGHT_MODE_COLOR("/mode/light/color"),
     LIGHT_MODE_OFFSET("/mode/light/offset"),
@@ -18,6 +19,9 @@ public enum SLTopic implements Serializable {
     MUSIC_MODE_OFFSET("/mode/music/offset"),
     MUSIC_MODE_STYLE("/mode/music/style"),
     MUSIC_MODE_DISPLAY("/mode/music/display"),
+
+    BT_MODULE_STATUS("/bt_module/status"),
+    BT_MODULE_OPERATION("/bt_module/operation"),
 
     OPTION_CONFIG("/option_config"),
     ;

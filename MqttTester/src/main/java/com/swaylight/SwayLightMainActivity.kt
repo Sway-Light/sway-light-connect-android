@@ -66,12 +66,14 @@ class SwayLightMainActivity : AppCompatActivity() {
     val musicFragment = SlMusicFragment()
     val lightFragment = SlLightFragment()
     val clockSettingFragment = SlClockSettingFragment()
+    val musicControlFragment = SlMusicControlFragment()
 
     // values
     var DATE_FORMAT = SimpleDateFormat("HH:mm:ss.SSS")
     private val MAX_LOG_SIZE = 3000
     var powerOn = SLMode.POWER_ON
     var mode = SLMode.LIGHT
+    var lastHeartBeatFromDevice = Date().time.div(1000).toInt()
 
     var ringCenterX = 0
     var ringCenterY = 0
@@ -340,7 +342,7 @@ class SwayLightMainActivity : AppCompatActivity() {
             // 0        |      -179
             //          |
             //-45      -90     -135
-            Log.d(tag, "angle:$degree, rotation:${ivRing.rotation}")
+            Log.v(tag, "angle:$degree, rotation:${ivRing.rotation}")
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree
@@ -351,7 +353,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 }
                 else -> {
                     val offset = (ringPrevRotate + degree - ringStartRotate).div(TopLightView.ANGLE_UNIT)
-                    Log.d(tag, "offset:${offset.toInt()}")
+                    Log.v(tag, "offset:${offset.toInt()}")
                     ivRing.offsetValue = offset.toInt()
                     if (displayObj.offset != ivRing.offsetValue) {
                         displayObj.offset = ivRing.offsetValue
@@ -483,6 +485,9 @@ class SwayLightMainActivity : AppCompatActivity() {
         if(!clockSettingFragment.isAdded) {
             fragmentManager.beginTransaction().add(R.id.full_frame, clockSettingFragment).hide(clockSettingFragment).commit()
         }
+        if(!musicControlFragment.isAdded) {
+            fragmentManager.beginTransaction().add(R.id.music_control_frame, musicControlFragment).commit()
+        }
 
         btClockSetting.setOnClickListener {
             fragmentManager.beginTransaction()
@@ -553,7 +558,8 @@ class SwayLightMainActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 runOnUiThread { findViewById<TextView>(R.id.tv_fft_mag).text = progress.toString() }
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 client?.publish(
                         SLTopic.OPTION_CONFIG,
@@ -573,6 +579,34 @@ class SwayLightMainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val handler = Handler(Looper.getMainLooper())
+        val mRunnable: Runnable = object : Runnable {
+            override fun run() {
+                val now = System.currentTimeMillis()/1000 + 3600.times(8)
+                if(client == null) {
+                    handler.removeCallbacks(this)
+                }else {
+                    handler.postDelayed(this, 1000)
+                }
+                Log.v(MQTT_TAG, "now$now, last$lastHeartBeatFromDevice, diff${now-lastHeartBeatFromDevice}")
+                if (now - lastHeartBeatFromDevice > 15) {
+                    progressView.visibility = View.VISIBLE
+                    tvConnectMessage.setText(R.string.offline)
+                    isRetainedDataSynced = false
+                }else {
+                    if(!isRetainedDataSynced) {
+                        Log.d(MQTT_TAG, getString(R.string.online))
+                        startFadeOutAnim(progressView, 900, 100)
+                        tvConnectMessage.setText(R.string.online)
+                        // 等app把來自自己的訊息也收完，再把flag關閉
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            progressView.visibility = View.INVISIBLE
+                        }, 1000)
+                        isRetainedDataSynced = true
+                    }
+                }
+            }
+        }
         try {
             manager!!.connect()
             client?.setCallback(object : MqttCallbackExtended {
@@ -586,12 +620,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                         runOnUiThread {
                             tvConnectMessage.setText(R.string.syncing)
                         }
-                        startFadeOutAnim(progressView, 1000, 0)
-                        // 等app把來自自己的訊息也收完，再把flag關閉
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            isRetainedDataSynced = true
-                            progressView.visibility = View.INVISIBLE
-                        }, 1000)
+                        handler.post(mRunnable)
 
                     } catch (e: MqttException) {
                         e.printStackTrace()
@@ -608,6 +637,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                     vibrator.vibrate(20)
                     appendLog("Connection LOST")
                     Log.d(MQTT_TAG, "Disconnect to $broker")
+                    handler.removeCallbacks(mRunnable)
                 }
 
                 @Throws(Exception::class)
@@ -671,7 +701,7 @@ class SwayLightMainActivity : AppCompatActivity() {
                 Log.d(MQTT_TAG, "Connect to $broker fail")
             }
         })
-    }
+     }
 
     private fun initUi() {
         progressView = findViewById(R.id.progress_view)
@@ -851,6 +881,10 @@ class SwayLightMainActivity : AppCompatActivity() {
 
             SLTopic.ROOT + deviceName + SLTopic.OPTION_CONFIG.topic -> {
                 sbFftMag.progress = jsonObj[SLOptionConfig.FFT_MAG] as Int
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.INFO.topic -> {
+                lastHeartBeatFromDevice = jsonObj["update_at"] as Int
             }
         }
     }

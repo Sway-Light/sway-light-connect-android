@@ -47,11 +47,75 @@
                 android:text="TextView"
                 android:textSize="24sp" />
 
-            <Button
-                android:id="@+id/setting_button"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set time" />
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/setting_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Set time" />
+
+                    <Button
+                        android:id="@+id/bt_play"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="play" />
+
+                    <Button
+                        android:id="@+id/bt_pause"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="pause" />
+
+                    <Button
+                        android:id="@+id/bt_stop"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="stop" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/bt_forward"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="forward" />
+
+                    <Button
+                        android:id="@+id/bt_backward"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="backward" />
+
+                    <Button
+                        android:id="@+id/bt_vol_up"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="volume up" />
+
+                    <Button
+                        android:id="@+id/bt_vol_down"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="volume down" />
+                </LinearLayout>
+
+            </LinearLayout>
+
 
         </LinearLayout>
     </LinearLayout>
