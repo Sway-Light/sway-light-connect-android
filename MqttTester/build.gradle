@@ -30,6 +30,18 @@ android {
         }
     }
 
+    sourceSets {
+        main {
+            res.srcDirs = [
+                    'src/main/res/layout/mqtt_tester',
+                    'src/main/res/layout/sway_light_connect',
+                    'src/main/res/layout/sample',
+                    'src/main/res/layout',
+                    'src/main/res/'
+            ]
+        }
+    }
+
 }
 
 dependencies {

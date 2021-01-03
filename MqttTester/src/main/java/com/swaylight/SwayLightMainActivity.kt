@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Vibrator
+import android.text.method.MovementMethod
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.MotionEvent
@@ -26,6 +27,7 @@ import com.swaylight.custom_ui.TopLightView
 import com.swaylight.library.SLMqttClient
 import com.swaylight.library.SLMqttManager
 import com.swaylight.library.data.*
+import com.swaylight.library.data.BtModule.SLBtModuleStatus
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -40,6 +42,8 @@ class   SwayLightMainActivity : AppCompatActivity() {
     // UI
     private lateinit var progressView: ConstraintLayout
     private lateinit var ivProgressLogo: ImageView
+    private lateinit var ivTutorialZoom: ImageView
+    private lateinit var ivTutorialBright: ImageView
     private lateinit var tvConnectMessage: TextView
     private lateinit var btNetworkConfig: Button
     private lateinit var rootConstraint: ConstraintLayout
@@ -51,8 +55,9 @@ class   SwayLightMainActivity : AppCompatActivity() {
     private lateinit var ivBrightness: ImageView
     private lateinit var tvBrightness: TextView
     private lateinit var btClockSetting: ImageButton
+    private lateinit var btTutorial: ImageButton
     private lateinit var btPower: ImageButton
-    private lateinit var btDebug: TextView
+    private lateinit var btDebug: ImageView
     private lateinit var btLight: Button
     private lateinit var btMusic: Button
     private lateinit var tvLog: TextView
@@ -93,6 +98,8 @@ class   SwayLightMainActivity : AppCompatActivity() {
     private lateinit var lightTopConstAnimRev: ValueAnimator
     private lateinit var logoAnim: AnimationDrawable
     private lateinit var logoProgressAnim: AnimationDrawable
+    private lateinit var tutorialZoomAnim: AnimationDrawable
+    private lateinit var tutorialBrightAnim: AnimationDrawable
 
     // MQTT Objects
     var manager: SLMqttManager? = null
@@ -115,7 +122,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sway_light_main)
+        setContentView(R.layout.activity_sl_main)
 
         this.window.statusBarColor = ContextCompat.getColor(applicationContext, android.R.color.black)
         supportActionBar?.hide()
@@ -208,7 +215,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
                         btPower.alpha = 1f
                         ivRing.visibility = View.VISIBLE
                         ivLogo.startAnimation(animAlpha)
-//                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.VISIBLE
+                        findViewById<FrameLayout>(R.id.music_control_frame).visibility = View.VISIBLE
                     }
                 }
 
@@ -224,7 +231,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
                         btDebug.visibility = View.INVISIBLE
                         btPower.alpha = 0f
                         ivRing.visibility = View.INVISIBLE
-//                        findViewById<ScrollView>(R.id.control_scroll_view).visibility = View.INVISIBLE
+                        findViewById<FrameLayout>(R.id.music_control_frame).visibility = View.INVISIBLE
                     }
                 }
 
@@ -232,7 +239,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
             })
 
             modeGroup.startAnimation(animTransTopBottom)
-//            findViewById<ScrollView>(R.id.control_scroll_view).startAnimation(animTransTopBottom)
+            findViewById<FrameLayout>(R.id.music_control_frame).startAnimation(animTransTopBottom)
             powerOffBlur.startAnimation(animAlpha)
             btDebug.startAnimation(animTransTopBottom)
             btPower.startAnimation(animAlphaRev)
@@ -348,11 +355,11 @@ class   SwayLightMainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_DOWN -> {
                     ringStartRotate = degree
                     ringPrevRotate = ivRing.offsetAngle
-                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.VISIBLE
+//                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.VISIBLE
                 }
                 MotionEvent.ACTION_UP -> {
                     ringPrevRotate = ivRing.offsetAngle
-                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.GONE
+//                    findViewById<ConstraintLayout>(R.id.spin_hint_view).visibility = View.GONE
                 }
                 else -> {
                     val offset = (ringPrevRotate + degree - ringStartRotate).div(TopLightView.ANGLE_UNIT)
@@ -394,7 +401,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
                         vBrightness.visibility = View.VISIBLE
                     }
                     vibrator.vibrate(5)
-                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.VISIBLE
+//                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.VISIBLE
                 }
                 MotionEvent.ACTION_UP -> {
                     if (controlZoomFlag) {
@@ -417,7 +424,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
                         startFadeOutAnim(vBrightness, 500, 500)
                     }
                     vibrator.vibrate(5)
-                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.GONE
+//                    findViewById<ConstraintLayout>(R.id.slide_hint_view).visibility = View.GONE
                 }
                 else -> {
                     if(controlZoomFlag) {
@@ -501,6 +508,32 @@ class   SwayLightMainActivity : AppCompatActivity() {
                     .commit()
         }
 
+        btTutorial.setOnClickListener {
+//            tutorialZoomAnim.isOneShot = false
+//            tutorialBrightAnim.isOneShot = false
+//            tutorialBrightAnim.start()
+//            tutorialZoomAnim.start()
+        }
+
+        btTutorial.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    ivTutorialBright.visibility = View.VISIBLE
+                    ivTutorialZoom.visibility = View.VISIBLE
+                    tutorialBrightAnim.start()
+                    tutorialZoomAnim.start()
+                }
+                MotionEvent.ACTION_UP -> {
+                    ivTutorialBright.visibility = View.GONE
+                    ivTutorialZoom.visibility = View.GONE
+                    tutorialBrightAnim.stop()
+                    tutorialZoomAnim.stop()
+                }
+                else -> {}
+            }
+            true
+        }
+
         modeGroup.setOnClickListener { v ->
             val transBg: TransitionDrawable = rootConstraint.background as TransitionDrawable
             val transModeGroup: TransitionDrawable = modeGroup.background as TransitionDrawable
@@ -549,6 +582,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
                 }
                 else -> { }
             }
+            musicControlFragment.setMode(mode)
             // 為了區分是使用者點擊or程式透過callOnClick()呼叫的:
             // isClickable == true -> 使用者點擊，才publish
             // isClickable == false -> 是從callOnClick()呼叫的，並set isClickable flag
@@ -612,50 +646,45 @@ class   SwayLightMainActivity : AppCompatActivity() {
                 }
             }
         }
-        try {
-            manager!!.connect()
-            client?.setCallback(object : MqttCallbackExtended {
-                override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                    try {
-                        if (reconnect) {
-                            appendLog("Reconnect complete")
-                        } else {
-                            appendLog("Connect complete")
-                        }
-                        runOnUiThread {
-                            tvConnectMessage.setText(R.string.syncing)
-                        }
-                        handler.post(mRunnable)
-
-                    } catch (e: MqttException) {
-                        e.printStackTrace()
+        manager?.connect()
+        client?.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                try {
+                    if (reconnect) {
+                        appendLog("Reconnect complete")
+                    } else {
+                        appendLog("Connect complete")
                     }
-                    vibrator.vibrate(20)
-                    Log.d(MQTT_TAG, "Connected to $broker")
-                }
-
-                override fun connectionLost(cause: Throwable) {
                     runOnUiThread {
-                        progressView.visibility = View.VISIBLE
-                        tvConnectMessage.setText(R.string.connecting)
+                        tvConnectMessage.setText(R.string.syncing)
                     }
-                    vibrator.vibrate(20)
-                    appendLog("Connection LOST")
-                    Log.d(MQTT_TAG, "Disconnect to $broker")
-                    handler.removeCallbacks(mRunnable)
+                    handler.post(mRunnable)
+
+                } catch (e: MqttException) {
+                    e.printStackTrace()
                 }
+                vibrator.vibrate(20)
+                Log.d(MQTT_TAG, "Connected to $broker")
+            }
 
-                @Throws(Exception::class)
-                override fun messageArrived(topic: String, message: MqttMessage) {
-                    updateSubUi(topic, message)
+            override fun connectionLost(cause: Throwable) {
+                runOnUiThread {
+                    progressView.visibility = View.VISIBLE
+                    tvConnectMessage.setText(R.string.connecting)
                 }
+                vibrator.vibrate(20)
+                appendLog("Connection LOST")
+                Log.d(MQTT_TAG, "Disconnect to $broker")
+                handler.removeCallbacks(mRunnable)
+            }
 
-                override fun deliveryComplete(token: IMqttDeliveryToken) {}
-            })
-        } catch (ex: MqttException) {
-            ex.printStackTrace()
-        }
+            @Throws(Exception::class)
+            override fun messageArrived(topic: String, message: MqttMessage) {
+                updateSubUi(topic, message)
+            }
 
+            override fun deliveryComplete(token: IMqttDeliveryToken) {}
+        })
     }
 
     override fun onBackPressed() {
@@ -687,7 +716,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
         clientId = intent.getStringExtra(getString(R.string.MQTT_CLIENT_ID))
         manager = SLMqttManager(applicationContext, broker, deviceName, clientId)
         client = SLMqttManager.getInstance()
-        manager!!.setMqttActionListener(object : IMqttActionListener {
+        manager?.setMqttActionListener(object : IMqttActionListener {
             override fun onSuccess(asyncActionToken: IMqttToken) {
                 appendLog("長按右上角開關debug畫面")
                 appendLog("Connect to $broker success")
@@ -710,6 +739,10 @@ class   SwayLightMainActivity : AppCompatActivity() {
 
     private fun initUi() {
         progressView = findViewById(R.id.progress_view)
+        ivTutorialZoom = findViewById(R.id.iv_tutorial_zoom)
+        ivTutorialBright = findViewById(R.id.iv_tutorial_bright)
+        tutorialZoomAnim = ivTutorialZoom.drawable as AnimationDrawable
+        tutorialBrightAnim = ivTutorialBright.drawable as AnimationDrawable
         ivProgressLogo = findViewById(R.id.iv_progress_logo)
         ivProgressLogo.setBackgroundResource(R.drawable.logo_anim_repeat)
         logoProgressAnim = ivProgressLogo.background as AnimationDrawable
@@ -723,6 +756,7 @@ class   SwayLightMainActivity : AppCompatActivity() {
         rootConstraint = findViewById(R.id.rootConstraint)
         lightTopConstraint = findViewById(R.id.lightTopConstraint)
         btClockSetting = findViewById(R.id.bt_clock_setting)
+        btTutorial = findViewById(R.id.bt_tutorial)
         btPower = findViewById(R.id.bt_power)
         btDebug = findViewById(R.id.debug_view)
         ivRing = findViewById(R.id.iv_ring)
@@ -890,6 +924,21 @@ class   SwayLightMainActivity : AppCompatActivity() {
 
             SLTopic.ROOT + deviceName + SLTopic.INFO.topic -> {
                 lastHeartBeatFromDevice = jsonObj["update_at"] as Int
+            }
+
+            SLTopic.ROOT + deviceName + SLTopic.BT_MODULE_STATUS.topic -> {
+                val isBtConnect = jsonObj[SLBtModuleStatus.CONNECT] as Boolean
+                val isPlaying = jsonObj[SLBtModuleStatus.IS_PLAY] as Boolean
+                val volume = jsonObj[SLBtModuleStatus.VOLUME] as Int
+                musicControlFragment.setBtStatus(isBtConnect)
+                musicControlFragment.setIsMusicPlaying(isPlaying)
+                musicControlFragment.setVolume(volume)
+                client?.publish(SLTopic.BT_MODULE_STATUS,
+                        deviceName,
+                        SLBtModuleStatus(isBtConnect, isPlaying, volume).instance)
+                Log.d("btStatus", "cnt:${musicControlFragment.getBtStatus()}," +
+                        "isPlaying:${musicControlFragment.getIsMusicPlaying()}," +
+                        "vol:${musicControlFragment.getVolume()}")
             }
         }
     }

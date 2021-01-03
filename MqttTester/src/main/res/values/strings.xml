@@ -39,6 +39,8 @@
     <!--  Modes  -->
     <string name="musicMode">Music Mode</string>
     <string name="lightMode">Light Mode</string>
+    <string name="basic_mode">basic</string>
+    <string name="visual_music">visual music</string>
 
     <!--  Connect status  -->
     <string name="connected">Connected</string>
@@ -67,4 +69,5 @@
     <string name="power_hint">長按開啟Sway Light</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="eq_color_setting">eq color setting</string>
 </resources>

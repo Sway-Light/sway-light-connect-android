@@ -4,8 +4,8 @@
     android:useLevel="false">
 
     <size
-        android:height="10dp"
-        android:width="10dp">
+        android:height="@dimen/color_circle_radius"
+        android:width="@dimen/color_circle_radius">
     </size>
 
     <gradient

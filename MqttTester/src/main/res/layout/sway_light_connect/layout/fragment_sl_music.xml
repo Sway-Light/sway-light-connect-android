@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:background="@color/music_card_bg"
             app:cardBackgroundColor="@color/music_card_bg"
-            app:cardCornerRadius="20dp"
+            app:cardCornerRadius="15dp"
             app:cardUseCompatPadding="false">
 
             <LinearLayout
@@ -35,7 +35,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/music_card_title_bg"
                     android:orientation="horizontal"
-                    android:paddingLeft="15dp"
+                    android:paddingLeft="10dp"
                     android:paddingTop="10dp"
                     android:paddingRight="15dp"
                     android:paddingBottom="5dp"
@@ -50,7 +50,7 @@
                         android:layout_weight="9"
                         android:fontFamily="@font/pt_sans_narrow"
                         android:letterSpacing="0.05"
-                        android:text="color"
+                        android:text="@string/eq_color_setting"
                         android:textAllCaps="true"
                         android:textSize="16sp" />
 
